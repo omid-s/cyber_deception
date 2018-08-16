@@ -6,6 +6,7 @@ import java.util.*;
 import Classes.*;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
+import exceptions.QueryFormatException;
 
 /**
  * @author omido
@@ -13,7 +14,7 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
  */
 public class GraphQueryModel {
 
-	public Graph<ResourceItem, AccessCall> RunQuety(String input, Graph<ResourceItem, AccessCall> oldGraph) {
+	public Graph<ResourceItem, AccessCall> RunQuety(String input, Graph<ResourceItem, AccessCall> oldGraph) throws QueryFormatException{
 
 		BaseMemory mem = BaseMemory.getSignleton();
 
@@ -37,7 +38,7 @@ public class GraphQueryModel {
 		String types = "";
 
 		/// ----- tokenize the vertice types
-		System.out.print( whereIndex );
+		
 		if (whereIndex == -1) {
 			types = input.substring(fromIndex);
 		} else
@@ -64,6 +65,13 @@ public class GraphQueryModel {
 		ArrayList<Criteria> criterias = new ArrayList<Criteria>();
 		if (whereIndex > 0) {
 			String temp = input.substring(whereIndex);
+			/*
+			 *criterias are seperated by ",also," tokens, 
+			 * they need to be seerated before each token 
+			 * can be processed into a criteria object which 
+			 * then will be appplied to the filter
+			 * 
+			 */
 			String tokens[] = temp.split(",also,");
 
 			for (int i = 0; i < tokens.length; i++) {

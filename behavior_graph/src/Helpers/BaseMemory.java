@@ -9,10 +9,10 @@ import java.util.Map;
 
 import org.neo4j.cypherdsl.grammar.ForEach;
 
- 
 import Classes.*;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph; 
+import edu.uci.ics.jung.graph.SparseMultigraph;
+import exceptions.QueryFormatException;
 
 /**
  * @author omido
@@ -135,7 +135,7 @@ public class BaseMemory {
 	}
 
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
-			boolean isVerbose, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph) {
+			boolean isVerbose, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException{
 
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null) ? new SparseMultigraph<ResourceItem, AccessCall>()
 				: originalGraph;
@@ -198,7 +198,9 @@ public class BaseMemory {
 						break;
 					}
 					break;
-
+				default:
+					throw (new QueryFormatException("Wrong field supplied for the query " + pick.getFieldName()
+							+ " field does not exsit or can not be queried!"));
 				}
 			}
 
@@ -225,7 +227,8 @@ public class BaseMemory {
 					if (edgeType.size() == 0
 							|| (edgeType.size() != 0 && ((edgeType.contains("syscall") && isSysCall(pick.Command))
 									|| edgeType.contains(pick.Command)))) {
-						if (verticeTypes.size() == 0|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
+						if (verticeTypes.size() == 0
+								|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
 							ret.addVertex(pick.To);
 							ret.addVertex(pick.To);
 							ret.addEdge(pick, pick.From, pick.To);
@@ -238,11 +241,13 @@ public class BaseMemory {
 					tempCall.Command = "->";
 					tempCall.From = pick.From;
 					tempCall.To = pick.To;
-					tempCall.OccuranceFactor =  fromAndTosMap.get(pick.From.id.toLowerCase() + "||" + pick.To.id.toLowerCase()).size();
+					tempCall.OccuranceFactor = fromAndTosMap
+							.get(pick.From.id.toLowerCase() + "||" + pick.To.id.toLowerCase()).size();
 					if (edgeType.size() == 0
 							|| (edgeType.size() != 0 && ((edgeType.contains("syscall") && isSysCall(pick.Command))
 									|| edgeType.contains(pick.Command)))) {
-						if (verticeTypes.size() ==0 || (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
+						if (verticeTypes.size() == 0
+								|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
 							ret.addVertex(pick.To);
 							ret.addEdge(tempCall, tempCall.From, tempCall.To);
 						}
