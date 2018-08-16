@@ -54,6 +54,10 @@ public class SysdigObjectDAL
 
 	}
 
+	/**
+	 * Insets the record into the Database 
+	 * @param inp the object to be inseted
+	 */
 	public void Insert(SysdigRecordObject inp)
 	{
 		String Query = "";
@@ -85,11 +89,20 @@ public class SysdigObjectDAL
 		}
 	}
 
+	
+	/**
+	 * Reads the line of input and tryes to create a sysdig reciord based on the input text. number of fields in the row should match
+	 * @param inp
+	 * @return
+	 * @throws NumberFormatException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	public SysdigRecordObject GetObjectFromTextLine(String inp) throws NumberFormatException, IllegalArgumentException, IllegalAccessException
 	{
 		SysdigRecordObject ret = new SysdigRecordObject();
 
-		String tokens[] = inp.split("&sam");
+		String tokens[] = inp.split("=&amin&=");
 
 		if (tokens.length != ClassFields.length)
 		{

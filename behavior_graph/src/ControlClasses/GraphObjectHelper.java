@@ -381,7 +381,7 @@ public class GraphObjectHelper
 				theCall.To = receiverProc;
 				theCall.Command = "binder";
 				theCall.DateTime = pick.evt_time;
-				theCall.Description = pick.arg1;
+				theCall.Description = pick.evt_args;
 				theCall.Info = pick.evt_args;
 
 				if ((receiverProc.Number.equals (pid) || senderProc.Number.equals (pid) || vectorPid.contains (receiverProc.Number) || vectorPid.contains (senderProc.Number)))

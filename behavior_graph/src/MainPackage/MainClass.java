@@ -83,7 +83,7 @@ public class MainClass {
 		}
 
 		ArrayList<SysdigRecordObject> items = new ArrayList<SysdigRecordObject>();
-		SysdigObjectDAL temp = new SysdigObjectDAL(false, true);
+		SysdigObjectDAL temp = new SysdigObjectDAL(false, false);
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
