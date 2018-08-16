@@ -59,8 +59,8 @@ public class GraphObjectHelper {
 	 * Based on process and file descriptor fields create nodes and vertices
 	 * that correspond to the call record then add them to the graph supplied
 	 * 
-	 * @param theGraph
-	 * @param pick
+	 * @param theGraph the graph to add nodes and edges to 
+	 * @param pick the row object to be processed 
 	 */
 	public void AddRowToGraph(Graph<ResourceItem, AccessCall> theGraph, SysdigRecordObject pick) {
 		ResourceItem FromItem = null;
@@ -161,6 +161,13 @@ public class GraphObjectHelper {
 			// create the link item :
 			final ResourceItem FF = FromItem;
 			final ResourceItem TT = ToItem;
+			
+			/*
+			 * if there already is an instance of this edge, 
+			 * look to VERBOSE flag, if verbose flag is set, 
+			 * create a new edge anyways, other wise check if
+			 * it exists raise the occirance factor otherwisde insert it
+			 */
 			if (!isInVerboseMode && theGraph.getEdges().stream()
 					.anyMatch(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))) {
 				theGraph.getEdges().stream()
@@ -168,7 +175,7 @@ public class GraphObjectHelper {
 						.findFirst().get().OccuranceFactor++;
 
 			} else {
-				// create the edge between resopurecs of start and end
+				// create the edge between resources of start and end
 				AccessCall theCall = new AccessCall();
 				theCall.From = FromItem;
 				theCall.To = ToItem;
