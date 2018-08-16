@@ -3,9 +3,6 @@ package DataBaseStuff;
 import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.ArrayList;
-
-import com.sun.media.sound.InvalidFormatException;
-
 import Classes.*;
 
 public class SysdigObjectDAL
@@ -88,7 +85,7 @@ public class SysdigObjectDAL
 		}
 	}
 
-	public SysdigRecordObject GetObjectFromTextLine(String inp) throws InvalidFormatException, IllegalArgumentException, IllegalAccessException
+	public SysdigRecordObject GetObjectFromTextLine(String inp) throws NumberFormatException, IllegalArgumentException, IllegalAccessException
 	{
 		SysdigRecordObject ret = new SysdigRecordObject();
 
@@ -96,7 +93,7 @@ public class SysdigObjectDAL
 
 		if (tokens.length != ClassFields.length)
 		{
-			throw new InvalidFormatException("Error! number of fields do not match!" + tokens.length + " instead of " + ClassFields.length + " : " + inp);
+			throw new NumberFormatException("Error! number of fields do not match!" + tokens.length + " instead of " + ClassFields.length + " : " + inp);
 			// System.out.println("Error! number of fields do not match!" +
 			// tokens.length + " instead of "+ ClassFields.length);
 		}

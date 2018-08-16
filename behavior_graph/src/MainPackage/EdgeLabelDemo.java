@@ -58,7 +58,7 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.iterators.ArrayListIterator;
 
-import com.sun.javafx.tk.Toolkit;
+
 
 import Classes.AccessCall;
 import Classes.ResourceItem;
@@ -83,7 +83,8 @@ import edu.uci.ics.jung.visualization.decorators.PickableVertexPaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.EdgeLabelRenderer;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
-import javafx.stage.Screen;
+
+
 
 /**
  * Demonstrates jung support for drawing edge labels that can be positioned at

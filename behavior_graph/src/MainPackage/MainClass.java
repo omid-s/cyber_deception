@@ -38,7 +38,7 @@ import javax.swing.JOptionPane;
 import org.jfree.ui.RefineryUtilities;
 import org.omg.DynamicAny.DynAnyFactoryPackage.InconsistentTypeCodeHelper;
 
-import com.sun.media.sound.InvalidFormatException;
+ 
 
 public class MainClass {
 	private static final boolean IsVerbose = false;
@@ -142,7 +142,7 @@ public class MainClass {
 						Thread.currentThread().getId()));
 				System.out.flush();
 
-			} catch (InvalidFormatException ex) {
+			} catch (NumberFormatException ex) {
 				inError++;
 			} catch (Exception e) {
 				// e.printStackTrace();

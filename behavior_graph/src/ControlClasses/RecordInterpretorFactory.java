@@ -6,8 +6,7 @@ import java.util.Collections;
 
 import javax.annotation.Resources;
 
-import com.mysql.jdbc.Connection;
-import com.sun.org.apache.xml.internal.resolver.helpers.PublicId;
+import com.mysql.jdbc.Connection; 
 
 import Classes.*;
 

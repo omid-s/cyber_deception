@@ -9,13 +9,10 @@ import java.util.Map;
 
 import org.neo4j.cypherdsl.grammar.ForEach;
 
-import com.sun.accessibility.internal.resources.accessibility;
-import com.sun.xml.internal.ws.wsdl.writer.document.Types;
-
+ 
 import Classes.*;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
-import sun.misc.JavaSecurityProtectionDomainAccess.ProtectionDomainCache;
+import edu.uci.ics.jung.graph.SparseMultigraph; 
 
 /**
  * @author omido
