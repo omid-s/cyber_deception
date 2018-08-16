@@ -38,13 +38,13 @@ public class SysdigObjectDAL
 		// endregion
 
 		// region create insert template
-		String Keys = " Insert into `SysDigData`.`SysdigOutPut` ( ";
+		String Keys = " Insert into SysdigOutPut ( ";
 		String Values = "";
 		int FirstLen = Keys.length();
 		for (Field pick : ClassFields)
 		{
 			if (Keys.length() != FirstLen)
-				Keys += " , ";
+				Keys += ",";
 
 			Keys += pick.getName();
 		}
@@ -63,7 +63,6 @@ public class SysdigObjectDAL
 		String Query = "";
 		try
 		{
-
 			String PickString = "";
 			for (Field pick : ClassFields)
 			{

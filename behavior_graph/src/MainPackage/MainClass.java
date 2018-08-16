@@ -66,7 +66,7 @@ public class MainClass {
 				ShowVerbose = true;
 			if (pick.equals("g"))
 				ShowGraph = true;
-			if (pick.equals("smsql"))
+			if (pick.equals("ssql"))
 				SaveToDB = true;
 			if (pick.equals("sneo4j"))
 				SaveToGraph = true;
