@@ -135,6 +135,9 @@ public class GraphObjectHelper {
 			case "t":
 				ItemType = ResourceType.TimerFDs;
 				break;
+			case "p":
+				ItemType = ResourceType.Pipe;
+				break;
 			}
 
 			// /end of find type
