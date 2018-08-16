@@ -74,7 +74,7 @@ public class SysdigObjectDAL
 				if (PickString.length() != 0)
 					PickString += " , ";
 
-				PickString += "\"" + temp.toString() + "\"";
+				PickString += "'" + temp.toString().replace("'","''") + "'";
 				// PickString +="\""+ temp.toString().replace("\"",
 				// "\\\"")+"\"";
 			}

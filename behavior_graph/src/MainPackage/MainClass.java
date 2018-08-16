@@ -183,10 +183,11 @@ public class MainClass {
 					// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
 					// tempObj);
 					// VerboseGraphWindow.vv.repaint();
-					// if (counter % 10000 == 0) {
-					// System.out.println(counter);
-					// break;
-					// }
+					if (counter % 1000 == 0) {
+						System.out.println(counter);
+						break;
+					}
+					
 				}
 				db.closeConnections();
 			} catch (Exception ex) {
