@@ -60,7 +60,7 @@ public class GraphVisualsHelper {
 	Transformer<ResourceItem, String> VertexLabeler = new Transformer<ResourceItem, String>() {
 		public String transform(ResourceItem e) {
 			String ret = "";
-			ret +=e.id+ "|"  + e.Type.toString() + " | " + e.Number + " (" + ((e.Type.equals(ResourceType.Process ) )? e.Title : e.Path)+")";
+			ret +=e.id+ "|"  + e.Type.toString() + " | " + e.Number + " (" + ((e.Type.equals(ResourceType.Process ) )? e.Title : e.Title)+")";
 
 			return ret;
 		}

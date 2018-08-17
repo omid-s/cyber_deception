@@ -34,7 +34,7 @@ public class BaseMemory {
 
 	private Map<String, ResourceItem> ProcessMap = new HashMap<String, ResourceItem>();
 	private Map<String, ArrayList<ResourceItem>> ThreadMap = new HashMap<String, ArrayList<ResourceItem>>();
-	private Map<String, ArrayList<ResourceItem>> ActivityMap = new HashMap<String, ArrayList<ResourceItem>>();
+	private Map<String, ArrayList<ResourceItem>> FDMap = new HashMap<String, ArrayList<ResourceItem>>();
 
 	public static BaseMemory getSignleton() {
 		if (bmem == null) {
@@ -60,16 +60,20 @@ public class BaseMemory {
 		V.put(inp.id.toLowerCase(), inp);
 		if (inp.Type == ResourceType.Process) {
 			ProcessMap.put(inp.Number.toLowerCase(), inp);
+			
+			if (!FDMap.containsKey(inp.Title.toLowerCase()))
+				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
+			FDMap.get(inp.Title.toLowerCase()).add(inp);
 		}
 		if (inp.Type == ResourceType.Thread) {
 			if (!ThreadMap.containsKey(inp.Number.toLowerCase()))
 				ThreadMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
 			ThreadMap.get(inp.Number.toLowerCase()).add(inp);
 		}
-		if (inp.Type == ResourceType.Activity) {
-			if (!ActivityMap.containsKey(inp.Number.toLowerCase()))
-				ActivityMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
-			ActivityMap.get(inp.Number.toLowerCase()).add(inp);
+		if (  inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4|| inp.Type == ResourceType.NetworkIPV6|| inp.Type == ResourceType.Unix  ) {
+			if (!FDMap.containsKey(inp.Title.toLowerCase()))
+				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
+			FDMap.get(inp.Title.toLowerCase()).add(inp);
 		}
 	}
 
@@ -162,18 +166,18 @@ public class BaseMemory {
 						break;
 					}
 					break;
-				case "activity.name":
+				case "name":
 					switch (pick.getOp()) {
 					case "is":
-						if (ActivityMap.containsKey(pick.getValue()))
-							for (ResourceItem x : ActivityMap.get(pick.getValue())) {
+						if (FDMap.containsKey(pick.getValue()))
+							for (ResourceItem x : FDMap.get(pick.getValue())) {
 								temp.add(x);
 							}
 						break;
 					case "has":
-						for (String x : ActivityMap.keySet()) {
+						for (String x : FDMap.keySet()) {
 							if (x.contains(pick.getValue()))
-								for (ResourceItem y : ActivityMap.get(pick.getValue())) {
+								for (ResourceItem y : FDMap.get(x)) {
 									temp.add(y);
 								}
 						}
@@ -191,7 +195,7 @@ public class BaseMemory {
 					case "has":
 						for (String x : ThreadMap.keySet()) {
 							if (x.contains(pick.getValue()))
-								for (ResourceItem y : ThreadMap.get(pick.getValue())) {
+								for (ResourceItem y : ThreadMap.get(x)) {
 									temp.add(y);
 								}
 						}
