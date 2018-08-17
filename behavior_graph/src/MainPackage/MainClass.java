@@ -39,8 +39,6 @@ import javax.swing.JOptionPane;
 import org.jfree.ui.RefineryUtilities;
 import org.omg.DynamicAny.DynAnyFactoryPackage.InconsistentTypeCodeHelper;
 
- 
-
 public class MainClass {
 	private static final boolean IsVerbose = false;
 
@@ -63,8 +61,11 @@ public class MainClass {
 				System.out.println("pid = " + pid);
 			}
 
-			if (pick.equals("gv"))
+			if (pick.equals("gv")) {
 				ShowVerbose = true;
+				ShowGraph = true;
+			}
+
 			if (pick.equals("g"))
 				ShowGraph = true;
 			if (pick.equals("ssql"))
@@ -188,7 +189,7 @@ public class MainClass {
 						System.out.println(counter);
 						break;
 					}
-					
+
 				}
 				db.closeConnections();
 			} catch (Exception ex) {
@@ -213,11 +214,11 @@ public class MainClass {
 		}
 
 		theGraph = null;
- 
+
 		GraphQueryModel qt = new GraphQueryModel();
 
 		Graph<ResourceItem, AccessCall> theGraph2 = null;
-		EdgeLabelDemo theGraphWindow =null;
+		EdgeLabelDemo theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 
 		Scanner reader = new Scanner(System.in);
@@ -231,12 +232,12 @@ public class MainClass {
 				theGraph = qt.RunQuety(command, theGraph);
 
 				theGraphWindow = new EdgeLabelDemo(theGraph);
-				
+
 				if (frame1.isVisible()) {
 					frame1.setVisible(false);
 					frame1.dispose();
 				}
-				
+
 				frame1 = new JFrame();
 				frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				frame1.setSize(400, 400);
@@ -252,13 +253,14 @@ public class MainClass {
 
 				System.out.flush();
 			} catch (Exception ex) {
-				throw(ex);
-//				ColorHelpers.PrintRed("query Problem!please try agin... \r\n");
+				throw (ex);
+				// ColorHelpers.PrintRed("query Problem!please try agin...
+				// \r\n");
 			}
 		}
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from DroidForensics Team!\r\n");
-		
+
 	}
 }

@@ -97,7 +97,7 @@ public class GraphObjectHelper {
 				AccessCall tempCallItem = new AccessCall();
 				tempCallItem.From = parentP;
 				tempCallItem.To = TheProc;
-				tempCallItem.Command = "";
+				tempCallItem.Command = "exec";
 
 				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 			}
@@ -190,6 +190,5 @@ public class GraphObjectHelper {
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 			}
 		}
-
 	}
 }

@@ -86,7 +86,7 @@ public class RecordInterpretorFactory
 				AccessCall tempCallItem = new AccessCall ();
 				tempCallItem.From = TempProcItem;
 				tempCallItem.To = tempItem;
-				tempCallItem.Command = "";
+				tempCallItem.Command = "exec";
 
 				Connections.add (tempCallItem);
 			}
