@@ -10,6 +10,7 @@ import java.util.Map;
 import org.neo4j.cypherdsl.grammar.ForEach;
 
 import Classes.*;
+import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
@@ -141,7 +142,7 @@ public class BaseMemory {
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
 			boolean isVerbose, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException{
 
-		Graph<ResourceItem, AccessCall> ret = (originalGraph == null) ? new SparseMultigraph<ResourceItem, AccessCall>()
+		Graph<ResourceItem, AccessCall> ret = (originalGraph == null) ? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>()
 				: originalGraph;
 
 		ArrayList<ResourceItem> temp = new ArrayList<ResourceItem>();

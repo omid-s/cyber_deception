@@ -13,6 +13,7 @@ import DataBaseStuff.SysdigObjectDAL;
 import Helpers.BaseMemory;
 import Helpers.ColorHelpers;
 import Helpers.GraphQueryModel;
+import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 
@@ -44,7 +45,7 @@ public class MainClass {
 	private static final boolean IsVerbose = false;
 
 	public static void main(String args[]) throws Exception {
-		Graph<ResourceItem, AccessCall> theGraph = new SparseMultigraph<ResourceItem, AccessCall>();
+		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
 		String pid = "";
 

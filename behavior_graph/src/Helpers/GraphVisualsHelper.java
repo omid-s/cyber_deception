@@ -173,7 +173,8 @@ public class GraphVisualsHelper {
 		public Stroke transform(AccessCall Item) {
 			int theNumber =1 + (Item.OccuranceFactor / (tempGraph.getEdgeCount() != 0 ? tempGraph
 					.getEdgeCount() * 10 : 1));
-			if (theNumber> 8 )theNumber=8;
+			if (theNumber > 8)
+				theNumber=8;
 			return new BasicStroke(theNumber						);
 			// 1 + (Item.OccuranceFactor / (Calls.size() * 10)));
 		}

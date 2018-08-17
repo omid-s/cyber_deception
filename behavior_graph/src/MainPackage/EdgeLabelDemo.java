@@ -208,7 +208,7 @@ public class EdgeLabelDemo extends JPanel {
 		System.out.println("Number of Edges: " + graph.getEdgeCount());
 		System.out.println("Number of Vertices: " + graph.getVertices().size());
 
-		Layout<ResourceItem, AccessCall> layout = new FRLayout2<ResourceItem, AccessCall>(graph);
+		Layout<ResourceItem, AccessCall> layout = new FRLayout<ResourceItem, AccessCall>(graph);
 		java.awt.Toolkit tk = java.awt.Toolkit.getDefaultToolkit();
 		vv = new VisualizationViewer<ResourceItem, AccessCall>(layout,
 				new Dimension((int) tk.getScreenSize().getWidth() - 80, (int) tk.getScreenSize().getHeight() - 80));
