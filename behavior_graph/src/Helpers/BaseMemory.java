@@ -144,7 +144,7 @@ public class BaseMemory {
 	}
 
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
-			boolean isVerbose, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph)
+			boolean isVerbose, boolean isBackTracked, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph)
 			throws QueryFormatException {
 
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
@@ -251,83 +251,158 @@ public class BaseMemory {
 			temp.remove(0);
 			done.add(v);
 
-			/// if the node is not goiing anywhere then ignore it!
-			if (!fromsMap.containsKey(v.id.toLowerCase()))
-				continue;
+			/// if the node is not going anywhere then ignore it!
+			// if (!fromsMap.containsKey(v.id.toLowerCase()))
+			// continue;
 
 			/// iterate over all the edges that go out of the picked node and
 			/// add them as apropriate
-			for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
+			if (fromsMap.containsKey(v.id.toLowerCase()))
+				for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
 
-				/**
-				 * check if there is any criteria for user names and ids, apply
-				 * it. ( if there is no user based criteria, add the edge,
-				 * otherwise apply the cirterai )
-				 */
-				if ((edge_criteria.size() > 0 && edge_criteria.stream()
-						.anyMatch(x -> ((x.getOp().equalsIgnoreCase("has") && pick.user_name.contains(x.getValue())
-								&& x.getFieldName().equalsIgnoreCase("user_name"))
-								|| (x.getOp().equalsIgnoreCase("is") && pick.user_name.equals(x.getValue())
-										&& x.getFieldName().equalsIgnoreCase("user_name"))
-								|| (x.getOp().equalsIgnoreCase("has") && pick.user_id.contains(x.getValue())
-										&& x.getFieldName().equalsIgnoreCase("user_id"))
-								|| (x.getOp().equalsIgnoreCase("is") && pick.user_id.equals(x.getValue())
-										&& x.getFieldName().equalsIgnoreCase("user_id")))))
-						|| edge_criteria.size() == 0) {
+					/**
+					 * check if there is any criteria for user names and ids,
+					 * apply it. ( if there is no user based criteria, add the
+					 * edge, otherwise apply the cirterai )
+					 */
+					if ((edge_criteria.size() > 0 && edge_criteria.stream()
+							.anyMatch(x -> ((x.getOp().equalsIgnoreCase("has") && pick.user_name.contains(x.getValue())
+									&& x.getFieldName().equalsIgnoreCase("user_name"))
+									|| (x.getOp().equalsIgnoreCase("is") && pick.user_name.equals(x.getValue())
+											&& x.getFieldName().equalsIgnoreCase("user_name"))
+									|| (x.getOp().equalsIgnoreCase("has") && pick.user_id.contains(x.getValue())
+											&& x.getFieldName().equalsIgnoreCase("user_id"))
+									|| (x.getOp().equalsIgnoreCase("is") && pick.user_id.equals(x.getValue())
+											&& x.getFieldName().equalsIgnoreCase("user_id")))))
+							|| edge_criteria.size() == 0) {
 
-					if (isVerbose) {
-						if (!temp.contains(pick.To) && !done.contains(pick.To))
-							temp.add(pick.To);
+						if (isVerbose) {
+							if (!temp.contains(pick.To) && !done.contains(pick.To))
+								temp.add(pick.To);
 
-						if (edgeType.size() == 0
-								|| (edgeType.size() != 0 && ((edgeType.contains("syscall") && isSysCall(pick.Command))
-										|| edgeType.contains(pick.Command)))) {
-							if (verticeTypes.size() == 0
-									|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
-								// ret.addVertex(pick.From);
-								ret.addVertex(pick.To);
-								ret.addEdge(pick, pick.From, pick.To);
-							}
-						}
-
-					} else {
-						boolean edge_added_flag = false;
-						for (AccessCall x : ret.getEdges()) {
-							if (x.Command.equals(pick.Command) && x.From.id.equals(pick.From.id)
-									&& x.To.id.equals(pick.To.id)) {
-								x.OccuranceFactor++;
-								edge_added_flag = true;
-								break;
-							}
-						}
-						if (!edge_added_flag) {
-
-							AccessCall tempCall = new AccessCall();
-							tempCall.Command = pick.Command;
-							tempCall.Info = pick.Info;
-							tempCall.Description = pick.Description;
-							tempCall.From = pick.From;
-							tempCall.To = pick.To;
-							tempCall.user_id = pick.user_id;
-							tempCall.user_name = pick.user_name;
-							tempCall.OccuranceFactor = 1; // fromAndTosMap.get(pick.From.id.toLowerCase()
-															// + "||" +
-															// pick.To.id.toLowerCase()).size();
 							if (edgeType.size() == 0 || (edgeType.size() != 0
 									&& ((edgeType.contains("syscall") && isSysCall(pick.Command))
 											|| edgeType.contains(pick.Command)))) {
 								if (verticeTypes.size() == 0
 										|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
+									// ret.addVertex(pick.From);
 									ret.addVertex(pick.To);
-									ret.addEdge(tempCall, tempCall.From, tempCall.To);
+									ret.addEdge(pick, pick.From, pick.To);
 								}
 							}
+
+						} else {
+							boolean edge_added_flag = false;
+							for (AccessCall x : ret.getEdges()) {
+								if (x.Command.equals(pick.Command) && x.From.id.equals(pick.From.id)
+										&& x.To.id.equals(pick.To.id)) {
+									x.OccuranceFactor++;
+									edge_added_flag = true;
+									break;
+								}
+							}
+							if (!edge_added_flag) {
+
+								AccessCall tempCall = new AccessCall();
+								tempCall.Command = pick.Command;
+								tempCall.Info = pick.Info;
+								tempCall.Description = pick.Description;
+								tempCall.From = pick.From;
+								tempCall.To = pick.To;
+								tempCall.user_id = pick.user_id;
+								tempCall.user_name = pick.user_name;
+								tempCall.OccuranceFactor = 1; // fromAndTosMap.get(pick.From.id.toLowerCase()
+																// + "||" +
+																// pick.To.id.toLowerCase()).size();
+								if (edgeType.size() == 0 || (edgeType.size() != 0
+										&& ((edgeType.contains("syscall") && isSysCall(pick.Command))
+												|| edgeType.contains(pick.Command)))) {
+									if (verticeTypes.size() == 0
+											|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
+										ret.addVertex(pick.To);
+										ret.addEdge(tempCall, tempCall.From, tempCall.To);
+									}
+								}
+							}
+							if (!temp.contains(pick.To) && !done.contains(pick.To))
+								temp.add(pick.To);
 						}
-						if (!temp.contains(pick.To) && !done.contains(pick.To))
-							temp.add(pick.To);
 					}
 				}
-			}
+			
+			if  ( isBackTracked && tosMap.containsKey(v.id.toLowerCase()))
+				for (AccessCall pick : tosMap.get(v.id.toLowerCase())) {
+
+					/**
+					 * check if there is any criteria for user names and ids,
+					 * apply it. ( if there is no user based criteria, add the
+					 * edge, otherwise apply the cirterai )
+					 */
+					if ((edge_criteria.size() > 0 && edge_criteria.stream()
+							.anyMatch(x -> ((x.getOp().equalsIgnoreCase("has") && pick.user_name.contains(x.getValue())
+									&& x.getFieldName().equalsIgnoreCase("user_name"))
+									|| (x.getOp().equalsIgnoreCase("is") && pick.user_name.equals(x.getValue())
+											&& x.getFieldName().equalsIgnoreCase("user_name"))
+									|| (x.getOp().equalsIgnoreCase("has") && pick.user_id.contains(x.getValue())
+											&& x.getFieldName().equalsIgnoreCase("user_id"))
+									|| (x.getOp().equalsIgnoreCase("is") && pick.user_id.equals(x.getValue())
+											&& x.getFieldName().equalsIgnoreCase("user_id")))))
+							|| edge_criteria.size() == 0) {
+
+						if (isVerbose) {
+							if (!temp.contains(pick.From) && !done.contains(pick.From))
+								temp.add(pick.From);
+
+							if (edgeType.size() == 0 || (edgeType.size() != 0
+									&& ((edgeType.contains("syscall") && isSysCall(pick.Command))
+											|| edgeType.contains(pick.Command)))) {
+								if (verticeTypes.size() == 0
+										|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.From.Type)))) {
+									// ret.addVertex(pick.From);
+									ret.addVertex(pick.From);
+									ret.addEdge(pick, pick.From, pick.To);
+								}
+							}
+
+						} else {
+							boolean edge_added_flag = false;
+							for (AccessCall x : ret.getEdges()) {
+								if (x.Command.equals(pick.Command) && x.From.id.equals(pick.From.id)
+										&& x.To.id.equals(pick.To.id)) {
+									x.OccuranceFactor++;
+									edge_added_flag = true;
+									break;
+								}
+							}
+							if (!edge_added_flag) {
+
+								AccessCall tempCall = new AccessCall();
+								tempCall.Command = pick.Command;
+								tempCall.Info = pick.Info;
+								tempCall.Description = pick.Description;
+								tempCall.From = pick.From;
+								tempCall.To = pick.To;
+								tempCall.user_id = pick.user_id;
+								tempCall.user_name = pick.user_name;
+								tempCall.OccuranceFactor = 1; // fromAndTosMap.get(pick.From.id.toLowerCase()
+																// + "||" +
+																// pick.To.id.toLowerCase()).size();
+								if (edgeType.size() == 0 || (edgeType.size() != 0
+										&& ((edgeType.contains("syscall") && isSysCall(pick.Command))
+												|| edgeType.contains(pick.Command)))) {
+									if (verticeTypes.size() == 0
+											|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
+										ret.addVertex(pick.To);
+										ret.addEdge(tempCall, tempCall.From, tempCall.To);
+									}
+								}
+							}
+							if (!temp.contains(pick.From) && !done.contains(pick.From))
+								temp.add(pick.From);
+						}
+					}
+				}
+
 		}
 
 		return ret;
