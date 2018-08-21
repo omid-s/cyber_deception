@@ -37,7 +37,7 @@ public class BaseMemory {
 	private Map<String, ArrayList<AccessCall>> fromAndTosMap = new HashMap<String, ArrayList<AccessCall>>();
 
 	private Map<String, ResourceItem> ProcessMap = new HashMap<String, ResourceItem>();
-	private Map<String, ArrayList<ResourceItem>> ThreadMap = new HashMap<String, ArrayList<ResourceItem>>();
+	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
 	private Map<String, ArrayList<ResourceItem>> FDMap = new HashMap<String, ArrayList<ResourceItem>>();
 
 	public static BaseMemory getSignleton() {
@@ -70,15 +70,19 @@ public class BaseMemory {
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 		}
 		if (inp.Type == ResourceType.Thread) {
-			if (!ThreadMap.containsKey(inp.Number.toLowerCase()))
-				ThreadMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
-			ThreadMap.get(inp.Number.toLowerCase()).add(inp);
+			if (!idMap.containsKey(inp.Number.toLowerCase()))
+				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
+			idMap.get(inp.Number.toLowerCase()).add(inp);
 		}
 		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
 				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
+
+			if (!idMap.containsKey(inp.Number.toLowerCase()))
+				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
+			idMap.get(inp.Number.toLowerCase()).add(inp);
 		}
 	}
 
@@ -130,11 +134,6 @@ public class BaseMemory {
 	/// query by type and return the vertices
 	public ArrayList<ResourceItem> getResourceItemsByType(ArrayList<ResourceType> types) {
 		ArrayList<ResourceItem> ret = new ArrayList<ResourceItem>();
-		// ArrayList<ResourceType> temp = new ArrayList<ResourceType>();
-		//
-		// for (String pick : types) {
-		// temp.add(ResourceType.valueOf(pick));
-		// }
 
 		for (ResourceItem pick : V.values()) {
 			if (types.contains(pick.Type))
@@ -144,8 +143,8 @@ public class BaseMemory {
 	}
 
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
-			boolean isVerbose, boolean isBackTracked, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph)
-			throws QueryFormatException {
+			boolean isVerbose, boolean isBackTracked, ArrayList<Criteria> criterias,
+			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
 
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
 				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>() : originalGraph;
@@ -200,18 +199,18 @@ public class BaseMemory {
 						break;
 					}
 					break;
-				case "tid":
+				case "id":
 					switch (pick.getOp()) {
 					case "is":
-						if (ThreadMap.containsKey(pick.getValue()))
-							for (ResourceItem x : ThreadMap.get(pick.getValue())) {
+						if (idMap.containsKey(pick.getValue()))
+							for (ResourceItem x : idMap.get(pick.getValue())) {
 								temp.add(x);
 							}
 						break;
 					case "has":
-						for (String x : ThreadMap.keySet()) {
+						for (String x : idMap.keySet()) {
 							if (x.contains(pick.getValue()))
-								for (ResourceItem y : ThreadMap.get(x)) {
+								for (ResourceItem y : idMap.get(x)) {
 									temp.add(y);
 								}
 						}
@@ -227,8 +226,14 @@ public class BaseMemory {
 				}
 			}
 
+		ArrayList<ResourceItem> temp2 = new ArrayList<ResourceItem>();
+		temp2.addAll(temp.stream().filter(x -> verticeTypes.size() == 0 || verticeTypes.contains(x.Type))
+				.collect(Collectors.toList()));
+		temp = temp2;
+
 		for (ResourceItem pick : temp)
-			ret.addVertex(pick);
+			if (verticeTypes.size() == 0 || verticeTypes.contains(pick.Type))
+				ret.addVertex(pick);
 
 		// temp.add(V.get(id));
 		// ret.addVertex(ProcessMap.get(id));
@@ -329,8 +334,8 @@ public class BaseMemory {
 						}
 					}
 				}
-			
-			if  ( isBackTracked && tosMap.containsKey(v.id.toLowerCase()))
+
+			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase()))
 				for (AccessCall pick : tosMap.get(v.id.toLowerCase())) {
 
 					/**
