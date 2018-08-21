@@ -217,7 +217,7 @@ public class MainClass {
 
 		GraphQueryModel qt = new GraphQueryModel();
 
-		Graph<ResourceItem, AccessCall> theGraph2 = null;
+		 
 		EdgeLabelDemo theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 

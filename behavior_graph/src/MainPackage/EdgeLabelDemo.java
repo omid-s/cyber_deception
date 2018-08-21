@@ -58,8 +58,6 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.iterators.ArrayListIterator;
 
-
-
 import Classes.AccessCall;
 import Classes.ResourceItem;
 import Classes.ResourceType;
@@ -73,6 +71,7 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.CrossoverScalingControl;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.GraphMouseListener;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.decorators.AbstractEdgeShapeTransformer;
@@ -83,8 +82,6 @@ import edu.uci.ics.jung.visualization.decorators.PickableVertexPaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.EdgeLabelRenderer;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
-
-
 
 /**
  * Demonstrates jung support for drawing edge labels that can be positioned at
@@ -142,7 +139,7 @@ public class EdgeLabelDemo extends JPanel {
 
 		// RefreshGraph(Items, Calls);
 
-		Layout<ResourceItem, AccessCall> layout = new FRLayout2<ResourceItem, AccessCall>(graph);
+		Layout<ResourceItem, AccessCall> layout = new FRLayout<ResourceItem, AccessCall>(graph);
 		java.awt.Toolkit tk = java.awt.Toolkit.getDefaultToolkit();
 		vv = new VisualizationViewer<ResourceItem, AccessCall>(layout,
 				new Dimension((int) tk.getScreenSize().getWidth() - 80, (int) tk.getScreenSize().getHeight() - 80));
@@ -171,7 +168,8 @@ public class EdgeLabelDemo extends JPanel {
 		vv.setGraphMouse(graphMouse);
 		graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
 
-		MutableDirectionalEdgeValue mv = new MutableDirectionalEdgeValue(.5, .7);
+		// MutableDirectionalEdgeValue mv = new MutableDirectionalEdgeValue(.5,
+		// .7);
 		// vv.getRenderContext().setEdgeLabelClosenessTransformer(mv);
 
 		Box controls = Box.createHorizontalBox();
@@ -190,7 +188,9 @@ public class EdgeLabelDemo extends JPanel {
 					else
 						graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
 					clickToReorder = !clickToReorder;
+
 				}
+
 			}
 		});
 
@@ -204,7 +204,7 @@ public class EdgeLabelDemo extends JPanel {
 
 		// create a simple graph for the demo
 		graph = inp;
-		
+
 		System.out.println("Number of Edges: " + graph.getEdgeCount());
 		System.out.println("Number of Vertices: " + graph.getVertices().size());
 
@@ -225,7 +225,7 @@ public class EdgeLabelDemo extends JPanel {
 		vv.getRenderContext().setEdgeDrawPaintTransformer(gvHelper.getEdgeColorizer());
 		vv.getRenderContext().setEdgeStrokeTransformer(gvHelper.getEdgeStroker(graph));
 		vv.setVertexToolTipTransformer(gvHelper.gettoolTipper());
-		vv.setEdgeToolTipTransformer(gvHelper.getEdgeToolTip() );
+		vv.setEdgeToolTipTransformer(gvHelper.getEdgeToolTip());
 
 		// create a from to hold the graph
 		panel = new GraphZoomScrollPane(vv);
@@ -238,7 +238,40 @@ public class EdgeLabelDemo extends JPanel {
 		vv.setGraphMouse(graphMouse);
 		graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
 
-		MutableDirectionalEdgeValue mv = new MutableDirectionalEdgeValue(.5, .7);
+		vv.addGraphMouseListener(new GraphMouseListener<ResourceItem>() {
+
+			@Override
+			public void graphReleased(ResourceItem arg0, MouseEvent arg1) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void graphPressed(ResourceItem arg0, MouseEvent arg1) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void graphClicked(ResourceItem arg0, MouseEvent arg1) {
+				if (arg1.getButton() == 2) {
+					if (clickToReorder)
+						graphMouse.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+					else
+						graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
+					clickToReorder = !clickToReorder;
+				}
+
+				if (arg0 != null) {
+					ColorHelpers.PrintRed(graph.degree(arg0) + "\n");
+					for (AccessCall x : graph.getOutEdges(arg0))
+						System.out.println(x.toString());
+				}
+			}
+		});
+
+		// MutableDirectionalEdgeValue mv = new MutableDirectionalEdgeValue(.5,
+		// .7);
 		// vv.getRenderContext().setEdgeLabelClosenessTransformer(mv);
 
 		Box controls = Box.createHorizontalBox();
@@ -266,105 +299,19 @@ public class EdgeLabelDemo extends JPanel {
 
 	}
 
-	public void RefreshGraph(ArrayList<ResourceItem> Items, ArrayList<AccessCall> Calls) {
-		this.Calls = Calls;
-		this.Items = Items;
-		// for (ResourceItem item : graph.getVertices())
-		// graph.removeVertex(item);
-		// for (AccessCall item : graph.getEdges())
-		// graph.removeEdge(item);
-		createVertices();
-		createEdges();
-		System.out.println("Number of Edges: " + graph.getEdgeCount());
-		System.out.println("Number of Vertices: " + graph.getVertices().size());
-
-	}
-
-	/**
-	 * subclassed to hold two BoundedRangeModel instances that are used by
-	 * JSliders to move the edge label positions
-	 * 
-	 * @author Tom Nelson
-	 *
-	 *
-	 */
-	class MutableDirectionalEdgeValue extends ConstantDirectionalEdgeValueTransformer<Integer, Number> {
-		BoundedRangeModel undirectedModel = new DefaultBoundedRangeModel(5, 0, 0, 10);
-		BoundedRangeModel directedModel = new DefaultBoundedRangeModel(7, 0, 0, 10);
-
-		public MutableDirectionalEdgeValue(double undirected, double directed) {
-			super(undirected, directed);
-			undirectedModel.setValue((int) (undirected * 10));
-			directedModel.setValue((int) (directed * 10));
-
-			undirectedModel.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-					setUndirectedValue(new Double(undirectedModel.getValue() / 10f));
-					vv.repaint();
-				}
-			});
-			directedModel.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-					setDirectedValue(new Double(directedModel.getValue() / 10f));
-					vv.repaint();
-				}
-			});
-		}
-
-		/**
-		 * @return Returns the directedModel.
-		 */
-		public BoundedRangeModel getDirectedModel() {
-			return directedModel;
-		}
-
-		/**
-		 * @return Returns the undirectedModel.
-		 */
-		public BoundedRangeModel getUndirectedModel() {
-			return undirectedModel;
-		}
-	}
-
-	/**
-	 * create some vertices
-	 * 
-	 * @param count
-	 *            how many to create
-	 * @return the Vertices in an array
-	 */
-	private void createVertices() {
-
-		for (ResourceItem pick : Items)
-			graph.addVertex(pick);
-
-		/*
-		 * String[] v = new String[count]; for (int i = 0; i < count; i++) {
-		 * v[i] = String.valueOf(i); graph.addVertex(String.valueOf(v[i])); }
-		 * return v;
-		 */
-	}
-
-	/**
-	 * create edges for this demo graph
-	 * 
-	 * @param v
-	 *            an array of Vertices to connect
-	 */
-	void createEdges() {
-		for (AccessCall pick : Calls) {
-			// if( graph.getEdges().stream().anyMatch(x-> x.From.equals(
-			// pick.From )&& x.To.equals( pick.To ) ))
-			// graph.getEdges().stream().filter(x-> x.From.equals( pick.From )&&
-			// x.To.equals( pick.To ) ).findFirst().get().OccuranceFactor++;
-
-			graph.addEdge(pick, pick.From, pick.To);
-		}
-		// graph.addEdge(String.valueOf(new Double(Math.random())), v[4], v[2]);
-	}
-
-	/**
-	 * a driver for this demo
-	 */
+	// public void RefreshGraph(ArrayList<ResourceItem> Items,
+	// ArrayList<AccessCall> Calls) {
+	// this.Calls = Calls;
+	// this.Items = Items;
+	// // for (ResourceItem item : graph.getVertices())
+	// // graph.removeVertex(item);
+	// // for (AccessCall item : graph.getEdges())
+	// // graph.removeEdge(item);
+	// createVertices();
+	// createEdges();
+	// System.out.println("Number of Edges: " + graph.getEdgeCount());
+	// System.out.println("Number of Vertices: " + graph.getVertices().size());
+	//
+	// }
 
 }

@@ -61,7 +61,7 @@ public class BaseMemory {
 		V.put(inp.id.toLowerCase(), inp);
 		if (inp.Type == ResourceType.Process) {
 			ProcessMap.put(inp.Number.toLowerCase(), inp);
-			
+
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
@@ -71,7 +71,8 @@ public class BaseMemory {
 				ThreadMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
 			ThreadMap.get(inp.Number.toLowerCase()).add(inp);
 		}
-		if (  inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4|| inp.Type == ResourceType.NetworkIPV6|| inp.Type == ResourceType.Unix  ) {
+		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
+				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
@@ -140,10 +141,11 @@ public class BaseMemory {
 	}
 
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
-			boolean isVerbose, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException{
+			boolean isVerbose, ArrayList<Criteria> criterias, Graph<ResourceItem, AccessCall> originalGraph)
+			throws QueryFormatException {
 
-		Graph<ResourceItem, AccessCall> ret = (originalGraph == null) ? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>()
-				: originalGraph;
+		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
+				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>() : originalGraph;
 
 		ArrayList<ResourceItem> temp = new ArrayList<ResourceItem>();
 		ArrayList<ResourceItem> done = new ArrayList<ResourceItem>();
@@ -221,43 +223,68 @@ public class BaseMemory {
 		// .get("11955/Activity{free.guidegame.shadowfightfree/free.guidegame.shadowfightfree.MainActivity}")
 		// .get(0));
 
+		
+		
+		/**
+		 * propcess all the edges that initiate from the chosen nodes, 
+		 * if a new noew is encountered, add it to the list ( this is a part of forwards analysis )
+		 */
 		while (temp.size() > 0) {
+			
+			///pick a node
 			ResourceItem v = temp.get(0);
 			temp.remove(0);
 			done.add(v);
+			
+			/// if the node is not goiing anywhere then ignore it!
 			if (!fromsMap.containsKey(v.id.toLowerCase()))
 				continue;
+			
+			/// iterate over all the edges that go out of the picked node and add them as apropriate
 			for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
 				if (isVerbose) {
+					if (!temp.contains(pick.To) && !done.contains(pick.To))
+						temp.add(pick.To);
+
 					if (edgeType.size() == 0
 							|| (edgeType.size() != 0 && ((edgeType.contains("syscall") && isSysCall(pick.Command))
 									|| edgeType.contains(pick.Command)))) {
 						if (verticeTypes.size() == 0
 								|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
-							ret.addVertex(pick.To);
+//							ret.addVertex(pick.From);
 							ret.addVertex(pick.To);
 							ret.addEdge(pick, pick.From, pick.To);
 						}
 					}
-					if (!temp.contains(pick.To) && !done.contains(pick.To))
-						temp.add(pick.To);
+
 				} else {
-					AccessCall tempCall = new AccessCall();
-					tempCall.Command = "->";
-					tempCall.From = pick.From;
-					tempCall.To = pick.To;
-					tempCall.OccuranceFactor = fromAndTosMap
-							.get(pick.From.id.toLowerCase() + "||" + pick.To.id.toLowerCase()).size();
-					if (edgeType.size() == 0
-							|| (edgeType.size() != 0 && ((edgeType.contains("syscall") && isSysCall(pick.Command))
-									|| edgeType.contains(pick.Command)))) {
-						if (verticeTypes.size() == 0
-								|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
-							ret.addVertex(pick.To);
-							ret.addEdge(tempCall, tempCall.From, tempCall.To);
+					boolean edge_added_flag = false;
+					for (AccessCall x : ret.getEdges()) {
+						if (x.Command.equals(pick.Command) && x.From.id.equals(pick.From.id) &&  x.To.id.equals(pick.To.id)) {
+							x.OccuranceFactor++;
+							edge_added_flag = true;
+							break;
 						}
 					}
+					if (!edge_added_flag) {
 
+						AccessCall tempCall = new AccessCall();
+						tempCall.Command = pick.Command;
+						tempCall.Info = pick.Info;
+						tempCall.Description= pick.Description;
+						tempCall.From = pick.From;
+						tempCall.To = pick.To;
+						tempCall.OccuranceFactor = 1;  // fromAndTosMap.get(pick.From.id.toLowerCase() + "||" + pick.To.id.toLowerCase()).size();
+						if (edgeType.size() == 0
+								|| (edgeType.size() != 0 && ((edgeType.contains("syscall") && isSysCall(pick.Command))
+										|| edgeType.contains(pick.Command)))) {
+							if (verticeTypes.size() == 0
+									|| (verticeTypes.size() != 0 && (verticeTypes.contains(pick.To.Type)))) {
+								ret.addVertex(pick.To);
+								ret.addEdge(tempCall, tempCall.From, tempCall.To);
+							}
+						}
+					}
 					if (!temp.contains(pick.To) && !done.contains(pick.To))
 						temp.add(pick.To);
 				}
