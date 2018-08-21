@@ -150,6 +150,16 @@ public class BaseMemory {
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
 				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>() : originalGraph;
 
+		/**
+		 * seperate edge based criterias
+		 */
+		ArrayList<Criteria> edge_criteria = new ArrayList<Criteria>();
+		edge_criteria.addAll(criterias.stream().filter(
+				x -> (x.getFieldName().equalsIgnoreCase("user_name") || x.getFieldName().equalsIgnoreCase("user_id")))
+				.collect(Collectors.toList()));
+
+		criterias.removeAll(edge_criteria);
+
 		ArrayList<ResourceItem> temp = new ArrayList<ResourceItem>();
 		ArrayList<ResourceItem> done = new ArrayList<ResourceItem>();
 		if (criterias == null || criterias.size() == 0) {
@@ -244,10 +254,6 @@ public class BaseMemory {
 			/// if the node is not goiing anywhere then ignore it!
 			if (!fromsMap.containsKey(v.id.toLowerCase()))
 				continue;
-
-			ArrayList<Criteria> edge_criteria = new ArrayList<Criteria>();
-			edge_criteria.addAll(criterias.stream().filter(x -> (x.getFieldName().equalsIgnoreCase("user_name")
-					|| x.getFieldName().equalsIgnoreCase("user_id"))).collect(Collectors.toList()));
 
 			/// iterate over all the edges that go out of the picked node and
 			/// add them as apropriate
