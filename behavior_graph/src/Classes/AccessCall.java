@@ -12,6 +12,8 @@ public class AccessCall extends Object {
 	public String direction;
 	public String args;
 	public String Info;
+	public String user_id;
+	public String user_name;
 	public int OccuranceFactor = 1;
 
 	public boolean isEqual(AccessCall theOther) {
@@ -22,7 +24,8 @@ public class AccessCall extends Object {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return id + " | from: " + this.From.toString() + " | to :" + this.To.toString() + " | cooamnd:" + Command;
+		return id + " | from: " + this.From.toString() + " | to :" + this.To.toString() + " | cooamnd:" + Command
+				+ " | user:" + user_name;
 	}
 
 	@Override
@@ -31,6 +34,8 @@ public class AccessCall extends Object {
 		if (obj == null || obj.getClass() != this.getClass())
 			return false;
 
-		return this.toString().equals(obj.toString()) ; //.  this.id.equals(((AccessCall) obj).id) ;
+		return this.toString().equals(obj.toString()); // .
+														// this.id.equals(((AccessCall)
+														// obj).id) ;
 	}
 }
