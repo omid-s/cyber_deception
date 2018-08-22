@@ -155,6 +155,7 @@ public class EdgeLabelDemo extends JPanel {
 		vv.getRenderContext().setVertexFillPaintTransformer(gvHelper.getVerticeColorifier());
 		vv.getRenderContext().setEdgeDrawPaintTransformer(gvHelper.getEdgeColorizer());
 		vv.getRenderContext().setEdgeStrokeTransformer(gvHelper.getEdgeStroker(graph));
+		vv.getRenderContext().setVertexShapeTransformer(gvHelper.getVertexShapper());
 		vv.setVertexToolTipTransformer(gvHelper.gettoolTipper());
 
 		// create a from to hold the graph
@@ -224,6 +225,7 @@ public class EdgeLabelDemo extends JPanel {
 		vv.getRenderContext().setVertexFillPaintTransformer(gvHelper.getVerticeColorifier());
 		vv.getRenderContext().setEdgeDrawPaintTransformer(gvHelper.getEdgeColorizer());
 		vv.getRenderContext().setEdgeStrokeTransformer(gvHelper.getEdgeStroker(graph));
+		vv.getRenderContext().setVertexShapeTransformer(gvHelper.getVertexShapper());
 		vv.setVertexToolTipTransformer(gvHelper.gettoolTipper());
 		vv.setEdgeToolTipTransformer(gvHelper.getEdgeToolTip());
 
