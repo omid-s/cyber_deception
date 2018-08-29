@@ -35,7 +35,7 @@ public class GraphQueryModel {
 
 		boolean isVerbose = input.contains( "verbose" ) && input.indexOf("verbose") < selectIndex;
 		boolean isBackTracked = input.contains( "back" ) && input.indexOf("back") < selectIndex;
-		
+		boolean isForwardTracked = input.contains( "forward" ) && input.indexOf("forward") < selectIndex;
 		String types = "";
 
 		/// ----- tokenize the vertice types
@@ -86,7 +86,7 @@ public class GraphQueryModel {
 		// new ArrayList<Criteria>(Arrays
 		// .asList(new Criteria("pid", "has", "1195"), new Criteria("pid", "is",
 		// "312 / Main Process"))
-		return mem.getSubGraph(resourceTypes, callTypes, isVerbose, isBackTracked, criterias, doesAppend ? oldGraph : null);
+		return mem.getSubGraph(resourceTypes, callTypes, isVerbose, isBackTracked, isForwardTracked, criterias, doesAppend ? oldGraph : null);
 	}
 
 	public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {

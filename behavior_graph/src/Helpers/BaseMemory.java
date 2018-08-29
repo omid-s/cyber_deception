@@ -143,7 +143,7 @@ public class BaseMemory {
 	}
 
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
-			boolean isVerbose, boolean isBackTracked, ArrayList<Criteria> criterias,
+			boolean isVerbose, boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
 			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
 
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
@@ -231,10 +231,12 @@ public class BaseMemory {
 				.collect(Collectors.toList()));
 		temp = temp2;
 
-		for (ResourceItem pick : temp)
+		Map<ResourceItem, Integer> depthMap = new HashMap<ResourceItem, Integer>();
+		for (ResourceItem pick : temp) {
+			depthMap.put(pick, 1);
 			if (verticeTypes.size() == 0 || verticeTypes.contains(pick.Type))
 				ret.addVertex(pick);
-
+		}
 		// temp.add(V.get(id));
 		// ret.addVertex(ProcessMap.get(id));
 		// temp.add(ActivityMap
@@ -243,7 +245,7 @@ public class BaseMemory {
 		// ret.addVertex(ActivityMap
 		// .get("11955/Activity{free.guidegame.shadowfightfree/free.guidegame.shadowfightfree.MainActivity}")
 		// .get(0));
-		Map<ResourceItem, Integer> depthMap = new HashMap<ResourceItem, Integer>();
+
 		/**
 		 * propcess all the edges that initiate from the chosen nodes, if a new
 		 * noew is encountered, add it to the list ( this is a part of forwards
@@ -262,7 +264,7 @@ public class BaseMemory {
 
 			/// iterate over all the edges that go out of the picked node and
 			/// add them as apropriate
-			if (fromsMap.containsKey(v.id.toLowerCase()))
+			if (isForwardTracked && fromsMap.containsKey(v.id.toLowerCase()))
 				for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
 
 					/**
@@ -335,7 +337,8 @@ public class BaseMemory {
 					}
 				}
 
-			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase()))
+			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase()) && depthMap.containsKey(v)
+					&& depthMap.get(v) > 0)
 				for (AccessCall pick : tosMap.get(v.id.toLowerCase())) {
 
 					/**
@@ -403,10 +406,10 @@ public class BaseMemory {
 								}
 							}
 						}
-//						if (!temp.contains(pick.From) && !done.contains(pick.From) && depthMap.get(pick) != 0) {
-//							temp.add(pick.From);
-//
-//						}
+						if (!temp.contains(pick.From) && !done.contains(pick.From)) {
+							temp.add(pick.From);
+							depthMap.put(pick.From, 1);
+						}
 
 					}
 				}

@@ -91,7 +91,8 @@ public class GraphObjectHelper {
 		if (theGraph.getVertices().stream()
 				.anyMatch(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID()))) {
 			ResourceItem parentP = theGraph.getVertices().stream()
-					.filter(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID())).findFirst().get();
+					.filter(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID())).findFirst()
+					.get();
 			ResourceItem tp = TheProc;
 			if (!theGraph.getEdges().stream().anyMatch(x -> x.From.isEqual(parentP) && x.To.isEqual(tp))) {
 
@@ -100,6 +101,8 @@ public class GraphObjectHelper {
 				tempCallItem.From = parentP;
 				tempCallItem.To = TheProc;
 				tempCallItem.Command = "exec";
+				tempCallItem.user_id = pick.user_uid;
+				tempCallItem.user_name = pick.user_name;
 
 				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 			}
