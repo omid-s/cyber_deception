@@ -243,7 +243,7 @@ public class BaseMemory {
 		// ret.addVertex(ActivityMap
 		// .get("11955/Activity{free.guidegame.shadowfightfree/free.guidegame.shadowfightfree.MainActivity}")
 		// .get(0));
-
+		Map<ResourceItem, Integer> depthMap = new HashMap<ResourceItem, Integer>();
 		/**
 		 * propcess all the edges that initiate from the chosen nodes, if a new
 		 * noew is encountered, add it to the list ( this is a part of forwards
@@ -402,9 +402,12 @@ public class BaseMemory {
 									}
 								}
 							}
-							if (!temp.contains(pick.From) && !done.contains(pick.From))
-								temp.add(pick.From);
 						}
+//						if (!temp.contains(pick.From) && !done.contains(pick.From) && depthMap.get(pick) != 0) {
+//							temp.add(pick.From);
+//
+//						}
+
 					}
 				}
 

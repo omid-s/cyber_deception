@@ -5,29 +5,28 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import Classes.*;
 
-public class SysdigObjectDAL
-{
+public class SysdigObjectDAL {
 	private Field[] ClassFields;
 	private String InsertTemplate;
-	private final String[] shortFieldsList = { "evt_datetime", "evt_latency", "evt_type", "thread_tid", "proc_name", "proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory", "fd_filename", "fd_ip", "fd_is_server", "fd_l4proto", "fd_name", "fd_num", "fd_port", "fd_sip", "fd_sockfamily", "fd_sport", "fd_type", "user_name", "user_uid", "evt_num" };
-	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid", "evt_dir", "evt_type", "fd_typechar", "evt_args" };
+	private final String[] shortFieldsList = { "evt_datetime", "evt_latency", "evt_type", "thread_tid", "proc_name",
+			"proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory", "fd_filename", "fd_ip",
+			"fd_is_server", "fd_l4proto", "fd_name", "fd_num", "fd_port", "fd_sip", "fd_sockfamily", "fd_sport",
+			"fd_type", "user_name", "user_uid", "evt_num" };
+	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid",
+			"evt_dir", "evt_type", "fd_typechar", "evt_args" };
 
-	public SysdigObjectDAL(boolean shortList, boolean android) throws Exception
-	{
+	public SysdigObjectDAL(boolean shortList, boolean android) throws Exception {
 		// region Set Class fields
 		Class<?> c = new SysdigRecordObject().getClass();
 		if (!shortList && !android)
 			ClassFields = c.getFields();
-		else if (shortList && !android)
-		{
+		else if (shortList && !android) {
 			ArrayList<Field> temp = new ArrayList<Field>();
 			for (String pick : shortFieldsList)
 				temp.add(c.getField(pick));
 
 			ClassFields = temp.toArray(new Field[temp.size()]);
-		}
-		else if (android)
-		{
+		} else if (android) {
 			ArrayList<Field> temp = new ArrayList<Field>();
 			for (String pick : androidFieldsList)
 				temp.add(c.getField(pick));
@@ -41,8 +40,7 @@ public class SysdigObjectDAL
 		String Keys = " Insert into SysdigOutPut ( ";
 		String Values = "";
 		int FirstLen = Keys.length();
-		for (Field pick : ClassFields)
-		{
+		for (Field pick : ClassFields) {
 			if (Keys.length() != FirstLen)
 				Keys += ",";
 
@@ -55,17 +53,16 @@ public class SysdigObjectDAL
 	}
 
 	/**
-	 * Insets the record into the Database 
-	 * @param inp the object to be inseted
+	 * Insets the record into the Database
+	 * 
+	 * @param inp
+	 *            the object to be inseted
 	 */
-	public void Insert(SysdigRecordObject inp)
-	{
+	public void Insert(SysdigRecordObject inp) {
 		String Query = "";
-		try
-		{
+		try {
 			String PickString = "";
-			for (Field pick : ClassFields)
-			{
+			for (Field pick : ClassFields) {
 				Object temp = pick.get(inp);
 				if (temp == null)
 					temp = "";
@@ -73,45 +70,46 @@ public class SysdigObjectDAL
 				if (PickString.length() != 0)
 					PickString += " , ";
 
-				PickString += "'" + temp.toString().replace("'","''") + "'";
+				PickString += "'" + temp.toString().replace("'", "''") + "'";
 				// PickString +="\""+ temp.toString().replace("\"",
 				// "\\\"")+"\"";
 			}
 			DataBaseLayer DL = new DataBaseLayer();
 			Query = String.format(InsertTemplate, PickString);
 			DL.runUpdateQuery(Query);
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			System.out.println(Query);
 			System.out.println("Class Not found!");
 		}
 	}
 
-	
 	/**
-	 * Reads the line of input and tryes to create a sysdig reciord based on the input text. number of fields in the row should match
+	 * Reads the line of input and tryes to create a sysdig reciord based on the
+	 * input text. number of fields in the row should match
+	 * 
 	 * @param inp
 	 * @return
 	 * @throws NumberFormatException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public SysdigRecordObject GetObjectFromTextLine(String inp) throws NumberFormatException, IllegalArgumentException, IllegalAccessException
-	{
+	public SysdigRecordObject GetObjectFromTextLine(String inp)
+			throws NumberFormatException, IllegalArgumentException, IllegalAccessException {
 		SysdigRecordObject ret = new SysdigRecordObject();
 
 		String tokens[] = inp.split("=&amin&=");
 
-		if (tokens.length != ClassFields.length)
-		{
-			throw new NumberFormatException("Error! number of fields do not match!" + tokens.length + " instead of " + ClassFields.length + " : " + inp);
+		if (tokens.length != ClassFields.length) {
+			throw new NumberFormatException("Error! number of fields do not match!" + tokens.length + " instead of "
+					+ ClassFields.length + " : " + inp);
 			// System.out.println("Error! number of fields do not match!" +
 			// tokens.length + " instead of "+ ClassFields.length);
 		}
 		for (int index = 0; index < tokens.length; index++)
 			ClassFields[index].set(ret, tokens[index].trim());
 
+//		ret.fd_num = ret.fd_name + "|" + ret.fd_num;
+//		ret.proc_pid = ret.proc_pid+"|" + ret.proc_name;
 		return ret;
 	}
 

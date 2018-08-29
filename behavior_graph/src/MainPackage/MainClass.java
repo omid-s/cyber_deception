@@ -159,35 +159,39 @@ public class MainClass {
 				// int counter = 0;
 				GraphDBDal db = new GraphDBDal();
 				while (test.hasNextLine()) {
-					SysdigRecordObject tempObj = temp.GetObjectFromTextLine(test.nextLine());
-					items.add(tempObj);
-					counter++;
-					// System.out.println ( "show graph : " + ShowGraph);
-					// db.Save(tempObj, true);
-					if (SaveToDB)
-						temp.Insert(tempObj);
+					try {
+						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(test.nextLine());
+						items.add(tempObj);
+						counter++;
+						// System.out.println ( "show graph : " + ShowGraph);
+						// db.Save(tempObj, true);
+						if (SaveToDB)
+							temp.Insert(tempObj);
 
-					if (SaveToGraph)
-						GraphActionFactory.Save(tempObj, Neo4JVerbose);
+						if (SaveToGraph)
+							GraphActionFactory.Save(tempObj, Neo4JVerbose);
 
-					if (ShowVerbose) {
-						VerboseHelper.AddRowToGraph(theGraph, tempObj);
-						// VerboseHelper.AddRowToGraph(VerboseGraphWindow.graph,
+						if (ShowVerbose) {
+							VerboseHelper.AddRowToGraph(theGraph, tempObj);
+							// VerboseHelper.AddRowToGraph(VerboseGraphWindow.graph,
+							// tempObj);
+							// VerboseGraphWindow.vv.repaint();
+						}
+						if (ShowGraph) {
+							ClearHelper.AddRowToGraph(theGraph, tempObj);
+							// ClearGraphWindow.vv.repaint();
+						}
+						// GraphObjectHelper tempHelper = new
+						// GraphObjectHelper(false);
+						// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
 						// tempObj);
 						// VerboseGraphWindow.vv.repaint();
-					}
-					if (ShowGraph) {
-						ClearHelper.AddRowToGraph(theGraph, tempObj);
-						// ClearGraphWindow.vv.repaint();
-					}
-					// GraphObjectHelper tempHelper = new
-					// GraphObjectHelper(false);
-					// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
-					// tempObj);
-					// VerboseGraphWindow.vv.repaint();
-					if (counter % 1000 == 0) {
-						System.out.println(counter);
-						break;
+						if (counter % 1000 == 0) {
+							System.out.println(counter);
+							// break;
+						}
+					} catch (Exception ex) {
+						System.out.println(ex.getMessage());
 					}
 
 				}
@@ -217,7 +221,6 @@ public class MainClass {
 
 		GraphQueryModel qt = new GraphQueryModel();
 
-		 
 		EdgeLabelDemo theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 

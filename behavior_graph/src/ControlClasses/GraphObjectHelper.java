@@ -70,13 +70,13 @@ public class GraphObjectHelper {
 		ResourceItem TheProc = null;
 		// is process new ?
 		if (!theGraph.getVertices().stream()
-				.anyMatch(x -> x.Type == ResourceType.Process && x.Number.equals(pick.proc_pid))) {
+				.anyMatch(x -> x.Type == ResourceType.Process && x.id.equals(pick.getProcPID()))) {
 			// add the process
 			ResourceItem tempItem = new ResourceItem();
 
 			tempItem.Type = ResourceType.Process;
 			tempItem.Number = pick.proc_pid;
-			tempItem.id = pick.proc_pid;
+			tempItem.id = pick.getProcPID();
 			tempItem.Title = pick.proc_name;
 			tempItem.Description = pick.proc_args;
 
@@ -84,14 +84,14 @@ public class GraphObjectHelper {
 			theGraph.addVertex(tempItem);
 		} else {
 			TheProc = theGraph.getVertices().stream()
-					.filter(x -> x.Type == ResourceType.Process && x.Number.equals(pick.proc_pid)).findFirst().get();
+					.filter(x -> x.Type == ResourceType.Process && x.id.equals(pick.getProcPID())).findFirst().get();
 
 		}
 
 		if (theGraph.getVertices().stream()
-				.anyMatch(x -> x.Type == ResourceType.Process && x.Number.equals(pick.proc_apid))) {
+				.anyMatch(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID()))) {
 			ResourceItem parentP = theGraph.getVertices().stream()
-					.filter(x -> x.Type == ResourceType.Process && x.Number.equals(pick.proc_apid)).findFirst().get();
+					.filter(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID())).findFirst().get();
 			ResourceItem tp = TheProc;
 			if (!theGraph.getEdges().stream().anyMatch(x -> x.From.isEqual(parentP) && x.To.isEqual(tp))) {
 
@@ -108,7 +108,7 @@ public class GraphObjectHelper {
 		// is there an fd resource ?
 		if (pick.fd_num != "<NA>" && !theGraph.getVertices().stream()
 				.anyMatch(x -> (x.Type != ResourceType.Process && x.Type != ResourceType.Thread)
-						&& x.Number.equals(pick.fd_num))) {
+						&& x.id.equals(pick.getFD_ID()))) {
 			ResourceItem tempItem = new ResourceItem();
 			// / find type, field types come from SYSDIG fd type definition
 			ResourceType ItemType = ResourceType.File;
@@ -146,7 +146,7 @@ public class GraphObjectHelper {
 
 			tempItem.Type = ItemType;
 			tempItem.Number = pick.fd_num;
-			tempItem.id = pick.fd_num;
+			tempItem.id = pick.getFD_ID();
 			tempItem.Path = pick.fd_directory;
 			tempItem.Title = pick.fd_name;
 			// tempItem.Description = pick.fd_
@@ -161,7 +161,7 @@ public class GraphObjectHelper {
 			FromItem = TheProc;
 
 			if (ToItem == null)
-				ToItem = theGraph.getVertices().stream().filter(x -> x.Number.equals(pick.fd_num)).findFirst().get();
+				ToItem = theGraph.getVertices().stream().filter(x -> x.id.equals(pick.getFD_ID())).findFirst().get();
 
 			// create the link item :
 			final ResourceItem FF = FromItem;

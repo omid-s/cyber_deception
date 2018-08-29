@@ -84,7 +84,20 @@ public class SysdigRecordObject {
 	public String syslog_severity_str;
 	public String syslog_severity;
 	public String syslog_message;
-//	public String arg1;
-//	public String arg2;
-//	public String returnValue;
+	// public String arg1;
+	// public String arg2;
+	// public String returnValue;
+
+	public String getProcPID() {
+		return proc_pid + "|" + proc_name;
+	}
+
+	public String getParentProcID() {
+		return proc_ppid + "|" + proc_pname;
+	}
+
+	public String getFD_ID() {
+		return fd_num + "|" + fd_name;
+	}
+
 }
