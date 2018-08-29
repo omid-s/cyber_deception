@@ -331,8 +331,10 @@ public class BaseMemory {
 									}
 								}
 							}
-							if (!temp.contains(pick.To) && !done.contains(pick.To))
+							if (!temp.contains(pick.To) && !done.contains(pick.To)) {
 								temp.add(pick.To);
+								depthMap.put(pick.To, 0);
+							}
 						}
 					}
 				}

@@ -6,6 +6,7 @@ package Helpers;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
@@ -217,11 +218,19 @@ public class GraphVisualsHelper {
 			switch (arg0.Type) {
 			case Process:
 				ret = new Ellipse2D.Float(-2 * size, -1 * size / 2, size * 4, size);
-
 				break;
 			case File:
 			case Pipe:
 				ret = new Rectangle2D.Float(-2 * size, -1 * size / 2, size * 4, size);
+				break;
+			case NetworkIPV4:
+			case NetworkIPV6:
+				Polygon tp = new Polygon();
+				tp.addPoint(0, -1 * (int) size);
+				tp.addPoint(-2 * (int) size, 0);
+				tp.addPoint(0, 1 * (int) size);
+				tp.addPoint(2 * (int) size, 0);
+				ret = tp;
 				break;
 			default:
 				ret = new Ellipse2D.Float(-1 * size / 2, -1 * size / 2, size, size);
