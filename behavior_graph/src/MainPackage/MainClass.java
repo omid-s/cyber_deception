@@ -109,7 +109,8 @@ public class MainClass {
 					if (counterr == 1 || counterr == 100000)
 						System.out.println(inputStr);
 					// if(true) continue;
-					SysdigRecordObject tempObj = temp.GetObjectFromTextLine(inputStr);
+					SysdigRecordObject tempObj=temp.GetObjectFromTextLine(inputStr);
+ 
 					// items.add(tempObj);
 					if (Thread.currentThread().getId() == Long.parseLong(tempObj.thread_tid)) {
 						skipped++;
@@ -158,9 +159,18 @@ public class MainClass {
 				Scanner test = new Scanner(new File(fileAdr));
 				// int counter = 0;
 				GraphDBDal db = new GraphDBDal();
+				String multipleRecords = "";
 				while (test.hasNextLine()) {
 					try {
-						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(test.nextLine());
+						SysdigRecordObject tempObj;
+						try {
+							multipleRecords +=  test.nextLine(); 
+							tempObj = temp.GetObjectFromTextLine(multipleRecords);
+						} catch (NumberFormatException ex) {
+							continue;
+						}
+						multipleRecords = "";
+//						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(test.nextLine());
 						items.add(tempObj);
 						counter++;
 						// System.out.println ( "show graph : " + ShowGraph);
