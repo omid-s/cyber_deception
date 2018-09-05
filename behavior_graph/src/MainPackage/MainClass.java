@@ -246,6 +246,7 @@ public class MainClass {
 				String command = reader.nextLine();
 				if (command.equals("exit()"))
 					break;
+				
 				else if( command.trim().equalsIgnoreCase("info") )
 				{
 					ColorHelpers.PrintGreen( String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex) );
