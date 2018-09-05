@@ -31,6 +31,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Properties;
 
 import javax.swing.JFrame;
@@ -227,6 +229,9 @@ public class MainClass {
 			mem.addAccessCall(pick);
 		}
 
+		int num_edges = theGraph.getEdgeCount();
+		int num_vertex  = theGraph.getVertexCount();
+		
 		theGraph = null;
 
 		GraphQueryModel qt = new GraphQueryModel();
@@ -241,11 +246,22 @@ public class MainClass {
 				String command = reader.nextLine();
 				if (command.equals("exit()"))
 					break;
-
+				else if( command.trim().equalsIgnoreCase("info") )
+				{
+					ColorHelpers.PrintGreen( String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex) );
+					continue;
+				}
+				Instant start = Instant.now();
+				
 				theGraph = qt.RunQuety(command, theGraph);
 
+				Instant end = Instant.now();
+				
+				
 				theGraphWindow = new EdgeLabelDemo(theGraph);
 
+				ColorHelpers.PrintBlue( "in : "+  Duration.between(start, end).toMillis() + "  Milli Seconds \n" );
+				
 				if (frame1.isVisible()) {
 					frame1.setVisible(false);
 					frame1.dispose();

@@ -1,2 +1,3 @@
 # ignore built classes
 *.class
+*.log
