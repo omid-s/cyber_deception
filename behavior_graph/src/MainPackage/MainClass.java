@@ -93,7 +93,8 @@ public class MainClass {
 		}
 
 		if (SaveFormated && output_file.isEmpty()) {
-			ColorHelpers.PrintRed("to save formated output the outoutfuile has to be supplied! use outpath= key to set the path");
+			ColorHelpers.PrintRed(
+					"to save formated output the outoutfuile has to be supplied! use outpath= key to set the path");
 			return;
 		}
 
@@ -175,7 +176,7 @@ public class MainClass {
 				System.out.println("Error");
 			}
 		}
-
+		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
 				System.out.println("in read File");
@@ -239,11 +240,17 @@ public class MainClass {
 			}
 
 		}
+		ClearHelper.release_maps();
+		VerboseHelper.release_maps();
 
+		Instant end2 = Instant.now();
+
+		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
 		/// clsoe the output file
-		output_file_writer.flush();
-		output_file_writer.close();
-
+		if (output_file_writer != null) {
+			output_file_writer.flush();
+			output_file_writer.close();
+		}
 		JFrame frame2 = new JFrame();
 		frame2.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		// frame2.setSize(800, 600); // Container content =

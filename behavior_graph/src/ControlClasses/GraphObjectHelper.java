@@ -24,8 +24,15 @@ public class GraphObjectHelper {
 	private HashSet<String> blacklist;
 	private int count = 0;
 
+	private HashMap<ResourceType, HashMap<String, ResourceItem>> resourcesMap;
+	private HashMap<String, AccessCall> EdgeMap;
+
 	public GraphObjectHelper(boolean isInVerboseMode, String _pid) {
 		this.isInVerboseMode = isInVerboseMode;
+
+		resourcesMap = new HashMap<ResourceType, HashMap<String, ResourceItem>>();
+		EdgeMap = new HashMap<String, AccessCall>();
+
 		pid = _pid;
 		vectorPid = new HashSet<String>();
 		vectorPid.add(_pid);
@@ -69,8 +76,15 @@ public class GraphObjectHelper {
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
 		// is process new ?
-		if (!theGraph.getVertices().stream()
-				.anyMatch(x -> x.Type == ResourceType.Process && x.id.equals(pick.getProcPID()))) {
+
+		if (!resourcesMap.containsKey(ResourceType.Process)) {
+			resourcesMap.put(ResourceType.Process, new HashMap<String, ResourceItem>());
+		}
+
+		if (!resourcesMap.get(ResourceType.Process).containsKey(pick.getProcPID())) {
+			// if (!theGraph.getVertices().stream()
+			// .anyMatch(x -> x.Type == ResourceType.Process &&
+			// x.id.equals(pick.getProcPID()))) {
 			// add the process
 			ResourceItem tempItem = new ResourceItem();
 
@@ -82,19 +96,32 @@ public class GraphObjectHelper {
 
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
+			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
-			TheProc = theGraph.getVertices().stream()
-					.filter(x -> x.Type == ResourceType.Process && x.id.equals(pick.getProcPID())).findFirst().get();
+			// TheProc = theGraph.getVertices().stream()
+			// .filter(x -> x.Type == ResourceType.Process &&
+			// x.id.equals(pick.getProcPID())).findFirst().get();
+			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProcPID());
 
 		}
 
-		if (theGraph.getVertices().stream()
-				.anyMatch(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID()))) {
-			ResourceItem parentP = theGraph.getVertices().stream()
-					.filter(x -> x.Type == ResourceType.Process && x.id.equals(pick.getParentProcID())).findFirst()
-					.get();
+		if (resourcesMap.get(ResourceType.Process).containsKey(pick.getParentProcID()))
+		// if (theGraph.getVertices().stream()
+		// .anyMatch(x -> x.Type == ResourceType.Process &&
+		// x.id.equals(pick.getParentProcID())))
+		{
+			ResourceItem parentP = resourcesMap.get(ResourceType.Process).get(pick.getParentProcID());
+
+			// theGraph.getVertices().stream()
+			// .filter(x -> x.Type == ResourceType.Process &&
+			// x.id.equals(pick.getParentProcID())).findFirst()
+			// .get();
 			ResourceItem tp = TheProc;
-			if (!theGraph.getEdges().stream().anyMatch(x -> x.From.isEqual(parentP) && x.To.isEqual(tp))) {
+			// if (!theGraph.getEdges().stream().anyMatch(x ->
+			// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
+			if (!EdgeMap.containsKey(parentP.getID() + tp.getID()))
+
+			{
 
 				// add the connection to the process
 				AccessCall tempCallItem = new AccessCall();
@@ -105,45 +132,60 @@ public class GraphObjectHelper {
 				tempCallItem.user_name = pick.user_name;
 
 				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+				EdgeMap.put(parentP.getID() + tp.getID(), tempCallItem);
 			}
 
 		}
+
+		ResourceType ItemType = ResourceType.File;
+		switch (pick.fd_typechar.toLowerCase()) {
+		case "f":
+			ItemType = ResourceType.File;
+			break;
+		case "4":
+			ItemType = ResourceType.NetworkIPV4;
+			break;
+		case "6":
+			ItemType = ResourceType.NetworkIPV6;
+			break;
+		case "u":
+			ItemType = ResourceType.Unix;
+			break;
+		case "s":
+			ItemType = ResourceType.SignalFDs;
+			break;
+		case "e":
+			ItemType = ResourceType.EventFDs;
+			break;
+		case "i":
+			ItemType = ResourceType.iNotifyFDS;
+			break;
+		case "t":
+			ItemType = ResourceType.TimerFDs;
+			break;
+		case "p":
+			ItemType = ResourceType.Pipe;
+			break;
+		}
+
+		if (!resourcesMap.containsKey(ItemType)) {
+			resourcesMap.put(ItemType, new HashMap<String, ResourceItem>());
+		}
+
 		// is there an fd resource ?
-		if (pick.fd_num != "<NA>" && !theGraph.getVertices().stream()
-				.anyMatch(x -> (x.Type != ResourceType.Process && x.Type != ResourceType.Thread)
-						&& x.id.equals(pick.getFD_ID()))) {
+		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID()))
+		// .anyMatch(x -> (x.Type != ResourceType.Process && x.Type !=
+		// ResourceType.Thread)
+		// && x.id.equals(pick.getFD_ID())))
+
+		// if (pick.fd_num != "<NA>" && !theGraph.getVertices().stream()
+		// .anyMatch(x -> (x.Type != ResourceType.Process && x.Type !=
+		// ResourceType.Thread)
+		// && x.id.equals(pick.getFD_ID())))
+		//
+		{
 			ResourceItem tempItem = new ResourceItem();
 			// / find type, field types come from SYSDIG fd type definition
-			ResourceType ItemType = ResourceType.File;
-			switch (pick.fd_typechar.toLowerCase()) {
-			case "f":
-				ItemType = ResourceType.File;
-				break;
-			case "4":
-				ItemType = ResourceType.NetworkIPV4;
-				break;
-			case "6":
-				ItemType = ResourceType.NetworkIPV6;
-				break;
-			case "u":
-				ItemType = ResourceType.Unix;
-				break;
-			case "s":
-				ItemType = ResourceType.SignalFDs;
-				break;
-			case "e":
-				ItemType = ResourceType.EventFDs;
-				break;
-			case "i":
-				ItemType = ResourceType.iNotifyFDS;
-				break;
-			case "t":
-				ItemType = ResourceType.TimerFDs;
-				break;
-			case "p":
-				ItemType = ResourceType.Pipe;
-				break;
-			}
 
 			// /end of find type
 
@@ -156,6 +198,8 @@ public class GraphObjectHelper {
 
 			theGraph.addVertex(tempItem);
 
+			resourcesMap.get(ItemType).put(pick.getFD_ID(), tempItem);
+
 			ToItem = tempItem;
 		}
 
@@ -164,7 +208,9 @@ public class GraphObjectHelper {
 			FromItem = TheProc;
 
 			if (ToItem == null)
-				ToItem = theGraph.getVertices().stream().filter(x -> x.id.equals(pick.getFD_ID())).findFirst().get();
+				ToItem = resourcesMap.get(ItemType).get(pick.getFD_ID());
+			// ToItem = theGraph.getVertices().stream().filter(x ->
+			// x.id.equals(pick.getFD_ID())).findFirst().get();
 
 			// create the link item :
 			final ResourceItem FF = FromItem;
@@ -176,8 +222,16 @@ public class GraphObjectHelper {
 			 * wise check if it exists raise the occirance factor otherwisde
 			 * insert it
 			 */
-			if (!isInVerboseMode && theGraph.getEdges().stream()
-					.anyMatch(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))) {
+if (!isInVerboseMode && 
+					EdgeMap.containsKey( FF.getID() + TT.getID() )
+					 ) 
+//			if (!isInVerboseMode && 
+//					
+//					theGraph.getEdges().stream()
+//					.anyMatch(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))) {
+	
+{
+	
 				theGraph.getEdges().stream()
 						.filter(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))
 						.findFirst().get().OccuranceFactor++;
@@ -194,7 +248,20 @@ public class GraphObjectHelper {
 				theCall.user_id = pick.user_uid;
 				theCall.user_name = pick.user_name;
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
+
+				EdgeMap.put(theCall.From.getID() + theCall.To.getID(), theCall);
+
 			}
 		}
 	}
+
+	public void release_maps() {
+		this.resourcesMap.clear();
+		this.EdgeMap.clear();
+		this.resourcesMap = null;
+		this.EdgeMap = null;
+		System.gc();
+		System.runFinalization();
+	}
+
 }
