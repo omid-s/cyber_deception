@@ -22,6 +22,7 @@ import java.awt.Container;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,13 +51,16 @@ public class MainClass {
 		String pid = "";
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
-				InShortFormat = false;
-		String fileAdr = "";
+				InShortFormat = false, SaveFormated = false;
+		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
 			if (pick.startsWith("\"path") || pick.startsWith("path")) {
 				fileAdr = pick.split("=")[1].replace("\"", "");
+			}
+			if (pick.startsWith("\"outpath") || pick.startsWith("outpath")) {
+				output_file = pick.split("=")[1].replace("\"", "");
 			}
 			if (pick.startsWith("pid")) {
 				pid = pick.split("=")[1];
@@ -78,12 +82,19 @@ public class MainClass {
 				Neo4JVerbose = true;
 			if (pick.equals("short"))
 				InShortFormat = true;
+			if (pick.equals("sf"))
+				SaveFormated = true;
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
-						+ "neo4jv : save neo4j data in verbose");
+						+ "neo4jv : save neo4j data in verbose  \r\nsv: save in a key value pair format");
 				return;
 			}
+		}
+
+		if (SaveFormated && output_file.isEmpty()) {
+			ColorHelpers.PrintRed("to save formated output the outoutfuile has to be supplied! use outpath= key to set the path");
+			return;
 		}
 
 		ArrayList<SysdigRecordObject> items = new ArrayList<SysdigRecordObject>();
@@ -100,6 +111,12 @@ public class MainClass {
 		int inError = 0;
 		long counterr = 0;
 		int skipped = 0;
+
+		FileWriter output_file_writer = null;
+		if (SaveFormated) {
+			output_file_writer = new FileWriter(new File(output_file));
+		}
+
 		while (true) {
 			if (ReadFromFile)
 				break;
@@ -111,8 +128,12 @@ public class MainClass {
 					if (counterr == 1 || counterr == 100000)
 						System.out.println(inputStr);
 					// if(true) continue;
-					SysdigRecordObject tempObj=temp.GetObjectFromTextLine(inputStr);
- 
+					SysdigRecordObject tempObj = temp.GetObjectFromTextLine(inputStr);
+
+					/// if desired write the formated file
+					if (SaveFormated)
+						output_file_writer.write(tempObj.toString() + "\n");
+
 					// items.add(tempObj);
 					if (Thread.currentThread().getId() == Long.parseLong(tempObj.thread_tid)) {
 						skipped++;
@@ -166,13 +187,18 @@ public class MainClass {
 					try {
 						SysdigRecordObject tempObj;
 						try {
-							multipleRecords +=  test.nextLine(); 
+							multipleRecords += test.nextLine();
 							tempObj = temp.GetObjectFromTextLine(multipleRecords);
+
+							if (SaveFormated)
+								output_file_writer.write(tempObj.toString() + "\n");
+
 						} catch (NumberFormatException ex) {
 							continue;
 						}
 						multipleRecords = "";
-//						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(test.nextLine());
+						// SysdigRecordObject tempObj =
+						// temp.GetObjectFromTextLine(test.nextLine());
 						items.add(tempObj);
 						counter++;
 						// System.out.println ( "show graph : " + ShowGraph);
@@ -211,7 +237,13 @@ public class MainClass {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
+
 		}
+
+		/// clsoe the output file
+		output_file_writer.flush();
+		output_file_writer.close();
+
 		JFrame frame2 = new JFrame();
 		frame2.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		// frame2.setSize(800, 600); // Container content =
@@ -230,8 +262,8 @@ public class MainClass {
 		}
 
 		int num_edges = theGraph.getEdgeCount();
-		int num_vertex  = theGraph.getVertexCount();
-		
+		int num_vertex = theGraph.getVertexCount();
+
 		theGraph = null;
 
 		GraphQueryModel qt = new GraphQueryModel();
@@ -246,23 +278,22 @@ public class MainClass {
 				String command = reader.nextLine();
 				if (command.equals("exit()"))
 					break;
-				
-				else if( command.trim().equalsIgnoreCase("info") )
-				{
-					ColorHelpers.PrintGreen( String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex) );
+
+				else if (command.trim().equalsIgnoreCase("info")) {
+					ColorHelpers.PrintGreen(
+							String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex));
 					continue;
 				}
 				Instant start = Instant.now();
-				
+
 				theGraph = qt.RunQuety(command, theGraph);
 
 				Instant end = Instant.now();
-				
-				
+
 				theGraphWindow = new EdgeLabelDemo(theGraph);
 
-				ColorHelpers.PrintBlue( "in : "+  Duration.between(start, end).toMillis() + "  Milli Seconds \n" );
-				
+				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
+
 				if (frame1.isVisible()) {
 					frame1.setVisible(false);
 					frame1.dispose();

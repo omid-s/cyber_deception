@@ -100,4 +100,40 @@ public class SysdigRecordObject {
 		return fd_num + "|" + fd_name;
 	}
 
+	@Override
+	public String toString() {
+		return "fd_num=\"" + fd_num.trim() + "\", fd_type=\"" + fd_type.trim() + "\", fd_typechar=\"" + fd_typechar
+				+ "\", fd_name=\"" + fd_name.trim() + "\", fd_directory=\"" + fd_directory.trim() + "\", fd_filename=\"" + fd_filename
+				+ "\", fd_ip=\"" + fd_ip.trim() + "\", fd_cip=\"" + fd_cip.trim() + "\", fd_sip=\"" + fd_sip.trim() + "\", fd_port=\"" + fd_port
+				+ "\", fd_cport=\"" + fd_cport.trim() + "\", fd_sport=\"" + fd_sport.trim() + "\", fd_l4proto=\"" + fd_l4proto
+				+ "\", fd_sockfamily=\"" + fd_sockfamily.trim() + "\", fd_is_server=\"" + fd_is_server.trim() + "\", proc_pid=\"" + proc_pid
+				+ "\", proc_exe=\"" + proc_exe.trim() + "\", proc_name=\"" + proc_name.trim() + "\", proc_args=\"" + proc_args.trim() + "\", proc_cmdline=\""
+				+ proc_cmdline.trim() + "\", proc_cwd=\"" + proc_cwd.trim() + "\", proc_nchilds=\"" + proc_nchilds.trim() + "\", proc_ppid=\""
+				+ proc_ppid.trim() + "\", proc_pname=\"" + proc_pname.trim() + "\", proc_apid=\"" + proc_apid.trim() + "\", proc_aname=\"" + proc_aname
+				+ "\", proc_loginshellid=\"" + proc_loginshellid.trim() + "\", proc_duration=\"" + proc_duration
+				+ "\", proc_fdopencount=\"" + proc_fdopencount.trim() + "\", proc_fdlimit=\"" + proc_fdlimit.trim() + "\", proc_fdusage=\""
+				+ proc_fdusage.trim() + "\", proc_vmsize=\"" + proc_vmsize.trim() + "\", proc_vmrss=\"" + proc_vmrss.trim() + "\", proc_vmswap=\""
+				+ proc_vmswap.trim() + "\", thread_pfmajor=\"" + thread_pfmajor.trim() + "\", thread_pfminor=\"" + thread_pfminor
+				+ "\", thread_tid=\"" + thread_tid.trim() + "\", thread_ismain=\"" + thread_ismain.trim() + "\", thread_exectime=\""
+				+ thread_exectime.trim() + "\", thread_totexectime=\"" + thread_totexectime.trim() + "\", evt_num=\"" + evt_num
+				+ "\", evt_time=\"" + evt_time.trim() + "\", evt_time_s=\"" + evt_time_s.trim() + "\", evt_datetime=\"" + evt_datetime
+				+ "\", evt_rawtime=\"" + evt_rawtime.trim() + "\", evt_rawtime_s=\"" + evt_rawtime_s.trim() + "\", evt_rawtime_ns=\""
+				+ evt_rawtime_ns.trim() + "\", evt_reltime=\"" + evt_reltime.trim() + "\", evt_reltime_s=\"" + evt_reltime_s
+				+ "\", evt_reltime_ns=\"" + evt_reltime_ns.trim() + "\", evt_latency=\"" + evt_latency.trim() + "\", evt_latency_s=\""
+				+ evt_latency_s.trim() + "\", evt_latency_ns=\"" + evt_latency_ns.trim() + "\", evt_deltatime=\"" + evt_deltatime
+				+ "\", evt_deltatime_s=\"" + evt_deltatime_s.trim() + "\", evt_deltatime_ns=\"" + evt_deltatime_ns.trim() + "\", evt_dir=\""
+				+ evt_dir.trim() + "\", evt_type=\"" + evt_type.trim() + "\", evt_cpu=\"" + evt_cpu.trim() + "\", evt_args=\"" + evt_args.trim() + "\", evt_info=\""
+				+ evt_info.trim() + "\", evt_buffer=\"" + evt_buffer.trim() + "\", evt_res=\"" + evt_res.trim() + "\", evt_rawres=\"" + evt_rawres
+				+ "\", evt_failed=\"" + evt_failed.trim() + "\", evt_is_io=\"" + evt_is_io.trim() + "\", evt_is_io_read=\"" + evt_is_io_read
+				+ "\", evt_is_io_write=\"" + evt_is_io_write.trim() + "\", evt_io_dir=\"" + evt_io_dir.trim() + "\", evt_is_wait=\"" + evt_is_wait
+				+ "\", evt_is_syslog=\"" + evt_is_syslog.trim() + "\", evt_count=\"" + evt_count.trim() + "\", user_uid=\"" + user_uid
+				+ "\", user_name=\"" + user_name.trim() + "\", user_homedir=\"" + user_homedir.trim() + "\", user_shell=\"" + user_shell
+				+ "\", group_gid=\"" + group_gid.trim() + "\", group_name=\"" + group_name.trim() + "\", syslog_facility_str=\""
+				+ syslog_facility_str.trim() + "\", syslog_facility=\"" + syslog_facility.trim() + "\", syslog_severity_str=\""
+				+ syslog_severity_str.trim() + "\", syslog_severity=\"" + syslog_severity.trim() + "\", syslog_message=\"" + syslog_message.trim().replace("\n", " ")
+				;
+	}
+	
+	
+
 }
