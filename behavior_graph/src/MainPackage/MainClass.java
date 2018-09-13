@@ -241,8 +241,8 @@ public class MainClass {
 			}
 
 		}
-		ClearHelper.release_maps();
-		VerboseHelper.release_maps();
+//		ClearHelper.release_maps();
+//		VerboseHelper.release_maps();
 
 		Instant end2 = Instant.now();
 
