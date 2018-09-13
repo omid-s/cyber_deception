@@ -69,9 +69,8 @@ public class MainClass {
 
 			if (pick.equals("gv")) {
 				ShowVerbose = true;
-				ShowGraph = true;
+//				ShowGraph = true;
 			}
-
 			if (pick.equals("g"))
 				ShowGraph = true;
 			if (pick.equals("ssql"))
@@ -225,10 +224,12 @@ public class MainClass {
 						// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
 						// tempObj);
 						// VerboseGraphWindow.vv.repaint();
+						
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
 							// break;
 						}
+						
 					} catch (Exception ex) {
 						System.out.println(ex.getMessage());
 					}
@@ -309,7 +310,7 @@ public class MainClass {
 				frame1 = new JFrame();
 				frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				frame1.setSize(400, 400);
-				if (ShowGraph) {
+				if (ShowGraph || ShowVerbose) {
 					theGraphWindow.vv.repaint();
 					frame1.add(theGraphWindow);
 					frame1.setVisible(true);

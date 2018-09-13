@@ -96,6 +96,8 @@ public class GraphObjectHelper {
 
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
+			// resourcesMap.get(ResourceType.Process).put(pick.getProcPID(),
+			// TheProc);
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
 			// TheProc = theGraph.getVertices().stream()
@@ -119,9 +121,7 @@ public class GraphObjectHelper {
 			ResourceItem tp = TheProc;
 			// if (!theGraph.getEdges().stream().anyMatch(x ->
 			// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
-			if (!EdgeMap.containsKey(parentP.getID() + tp.getID()))
-
-			{
+			if (!EdgeMap.containsKey(parentP.getID() + tp.getID())) {
 
 				// add the connection to the process
 				AccessCall tempCallItem = new AccessCall();
@@ -222,16 +222,15 @@ public class GraphObjectHelper {
 			 * wise check if it exists raise the occirance factor otherwisde
 			 * insert it
 			 */
-if (!isInVerboseMode && 
-					EdgeMap.containsKey( FF.getID() + TT.getID() )
-					 ) 
-//			if (!isInVerboseMode && 
-//					
-//					theGraph.getEdges().stream()
-//					.anyMatch(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))) {
-	
-{
-	
+			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID()))
+			// if (!isInVerboseMode &&
+			//
+			// theGraph.getEdges().stream()
+			// .anyMatch(x -> x.Command.equals(pick.evt_type) &&
+			// x.From.equals(FF) && x.To.equals(TT))) {
+
+			{
+
 				theGraph.getEdges().stream()
 						.filter(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))
 						.findFirst().get().OccuranceFactor++;
@@ -247,8 +246,9 @@ if (!isInVerboseMode &&
 				theCall.Info = pick.evt_args;
 				theCall.user_id = pick.user_uid;
 				theCall.user_name = pick.user_name;
+				
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
-
+//
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID(), theCall);
 
 			}
