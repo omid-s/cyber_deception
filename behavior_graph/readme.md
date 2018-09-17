@@ -16,3 +16,10 @@ sysdig is required for running this tool to install sysdig :
 ## Running
 
 * ssql : save to sql database 
+
+## Jar file 
+
+there is a build jar file in tool_bin dir. to run it :
+
+	java -jar dcf.jar [arguments]
+	
