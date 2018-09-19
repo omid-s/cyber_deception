@@ -1,3 +1,5 @@
+package Classes;
+
 import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
@@ -28,8 +30,6 @@ public class AuditParse {
      * @throws IOException
      */
     public void parseAuditLog(File auditlog) throws IOException {
-        String logId = "";
-        Record tempRec;
 
         try {
             buff = new BufferedReader(new FileReader(auditlog)); //Reads the audit log file into a buffer
@@ -38,6 +38,7 @@ public class AuditParse {
             System.out.println(new File(".").getAbsolutePath());
             System.exit(0);
         }
+
         while ((line = buff.readLine()) != null) { //Parses each line of the audit log file
             List<String> LineSplit = splitString(line); //split string by space
             if (LineSplit.get(0).equals("type=SYSCALL")) {
