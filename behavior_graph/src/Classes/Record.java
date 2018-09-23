@@ -11,7 +11,6 @@ public class Record {
     String type;
     List<Token> tokenList = new ArrayList<Token>();
     HashMap<String, String> sysCallTable = new HashMap<>();
-    HashMap<String, String> pidHashTable = new HashMap<>();
     Token syscallToken;
     Record(List<String> list) throws IOException{
 
@@ -23,31 +22,11 @@ public class Record {
             list.remove(0);
             list.remove(0);
 
-            //Tokens to be appended to end of record list
-            Token syscallname = null;
-            Token ppid = null;
-            Token pid = null;
-
-            for(int i = 0; i<list.size(); i++){
-                Token token = new Token(list.get(i));
-                tokenList.add(token);
-
-                //Conditionals for parsing specific tokens to be appended to very end
-                if(token.getKey().equals("syscall")){
-                    syscallname = new Token("syscallname=" + sysCallTable.get(token.getValue()));
-                }else if(token.getKey().equals("ppid")){
-                    ppid = new Token("ppid_name=PLACEHOLDER");
-                }else if(token.getKey().equals("pid")){
-                    pid =  new Token("pid_name=PLACEHOLDER");
-                }
+            if(type.equals("SYSCALL")){
+                SysCallRecordSetup(list);
+            }else if(type.equals("EXECVE")){
 
             }
-
-            //Only add to end of line if the tokens are not null is not null and has been initialized
-            if(syscallname != null){tokenList.add(syscallname);}
-            if(pid != null){tokenList.add(syscallname);}
-            if(ppid != null){tokenList.add(syscallname);}
-
 
     }
 
@@ -66,6 +45,18 @@ public class Record {
     public String getId() {
         return id;
     }
+
+    public Token getToken(String tokenType){
+        for(int i = 0; i<tokenList.size(); i++){
+            if(tokenList.get(i).equals(tokenType)){
+                return tokenList.get(i);
+            }
+
+        }
+        System.out.println("Error token not found!");
+        return null;
+    }
+
     class Token{
 
         private String key;
@@ -95,6 +86,51 @@ public class Record {
             return value;
         }
 
+    }
+
+    public void SysCallRecordSetup(List<String> list) throws IOException{
+        //Tokens to be appended to end of record list
+        Token syscallname = null;
+        Token ppid = null;
+        Token pid = null;
+
+        for (int i = 0; i < list.size(); i++) {
+            Token token = new Token(list.get(i));
+            tokenList.add(token);
+
+            //Conditionals for parsing specific tokens to be appended to very end
+            if (token.getKey().equals("syscall")) {
+                syscallname = new Token("syscallname=" + sysCallTable.get(token.getValue()));
+            } else if (token.getKey().equals("ppid")) {
+                ppid = new Token("ppid_name=PLACEHOLDER");
+            } else if (token.getKey().equals("pid")) {
+                pid = new Token("pid_name=PLACEHOLDER");
+            }
+
+        }
+
+        //Only add to end of line if the tokens are not null is not null and has been initialized
+        if (syscallname != null) {
+            tokenList.add(syscallname);
+        }
+        if (pid != null) {
+            tokenList.add(pid);
+        }
+        if (ppid != null) {
+            tokenList.add(syscallname);
+        }
+    }
+
+    public void execveHandling(List<String> list)throws IOException{
+        for(int i = 0; i<list.size(); i++){
+            Token newToken = new Token(list.get(i));
+            tokenList.add(newToken);
+        }
+    }
+
+    public void appendToken(String keyValue) throws IOException{
+        Token appendToken = new Token(keyValue);
+        tokenList.add(appendToken);
     }
 
 

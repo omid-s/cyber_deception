@@ -16,9 +16,8 @@ import java.util.stream.Stream;
 public class AuditParse {
     public BufferedReader buff;
     String line;
-
-    List<Record> recordList = new ArrayList<Record>(); //list of all records
     HashMap<String, Record> recordHashMap = new HashMap<>();
+    HashMap<String, String> processHashMap = new HashMap<>();
 
 
     /**
@@ -45,16 +44,38 @@ public class AuditParse {
                 Record newRec = new Record(LineSplit); //create new record
                 if(recordHashMap.containsKey(newRec.getId())){
                     recordHashMap.get(newRec.getId()).tokenList.addAll(newRec.tokenList);
-                }else if(newRec.getType().equals("SYSCALL")){
+                }else if(newRec.getType().equals(
+                        "SYSCALL")){
                     recordHashMap.put(newRec.getId(), newRec);
+                }else if(newRec.getType().equals("EXECVE")){
+                    Record sysCallRec = recordHashMap.get(newRec.getId());
+                    String pid = sysCallRec.getToken("pid").getValue();
+                    String ppid = sysCallRec.getToken("ppid").getValue();
+                    if(!processHashMap.containsKey(pid)){
+                        String a0 = newRec.tokenList.get(0).getKey()
+                        processHashMap.put(pid, newRec.tokenList.get(0).getKey());
+                        sysCallRec.appendToken(pid+"="+);
+                    }
+                    if(!processHashMap.containsKey(ppid)){
+                        processHashMap.put(ppid, newRec.tokenList.get(0).getKey());
+                    }
+
                 }
 
             }
 
         }
+
+
     }
 
 
+    /**
+     * Splits the string line up into a list that will then be parsed by the record object
+     *
+     * @param line the line to be fed and split up
+     * @return the list containing all the tokens
+     */
     private List<String> splitString(String line){
 
         boolean quoteMode = false;
@@ -94,7 +115,7 @@ public class AuditParse {
     public static void main(String[] args){
         AuditParse audit = new AuditParse();
         try {
-            audit.parseAuditLog(new File("audit.log"));
+            audit.parseAuditLog(new File("audittest.log"));
         } catch(IOException iox){
             System.out.println("IO Exception Error!");
             System.exit(0);
