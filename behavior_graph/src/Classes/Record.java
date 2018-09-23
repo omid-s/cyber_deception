@@ -48,7 +48,7 @@ public class Record {
 
     public Token getToken(String tokenType){
         for(int i = 0; i<tokenList.size(); i++){
-            if(tokenList.get(i).equals(tokenType)){
+            if(tokenList.get(i).getKey().equals(tokenType)){
                 return tokenList.get(i);
             }
 

@@ -40,31 +40,40 @@ public class AuditParse {
 
         while ((line = buff.readLine()) != null) { //Parses each line of the audit log file
             List<String> LineSplit = splitString(line); //split string by space
-            if (LineSplit.get(0).equals("type=SYSCALL")) {
+            if (LineSplit.get(0).equals("type=SYSCALL") || LineSplit.get(0).equals("type=EXECVE")) {
                 Record newRec = new Record(LineSplit); //create new record
-                if(recordHashMap.containsKey(newRec.getId())){
+                if(recordHashMap.containsKey(newRec.getId()) && newRec.getType().equals("SYSCALL")){
+
                     recordHashMap.get(newRec.getId()).tokenList.addAll(newRec.tokenList);
-                }else if(newRec.getType().equals(
-                        "SYSCALL")){
+
+                }else if(newRec.getType().equals("SYSCALL")){
+
                     recordHashMap.put(newRec.getId(), newRec);
                 }else if(newRec.getType().equals("EXECVE")){
+                    //Obtain the syscall record from the hashmap
                     Record sysCallRec = recordHashMap.get(newRec.getId());
+
+                    //Obtain the pid and ppid values from the syscall record
                     String pid = sysCallRec.getToken("pid").getValue();
                     String ppid = sysCallRec.getToken("ppid").getValue();
+
+                    //check to see if the pid is already mapped to a name or not.
                     if(!processHashMap.containsKey(pid)){
-                        String a0 = newRec.tokenList.get(0).getKey()
-                        processHashMap.put(pid, newRec.tokenList.get(0).getKey());
-                        sysCallRec.appendToken(pid+"="+);
+                        String pid_name = sysCallRec.getToken("comm").getValue().replaceAll("^\"|\"$", "");
+                        processHashMap.put(pid, pid_name);
+                        sysCallRec.appendToken(pid+"="+pid_name);
+
                     }
-                    if(!processHashMap.containsKey(ppid)){
+                    /*if(!processHashMap.containsKey(ppid)){
                         processHashMap.put(ppid, newRec.tokenList.get(0).getKey());
-                    }
+                    }*/
 
                 }
 
             }
 
         }
+
 
 
     }
