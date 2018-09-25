@@ -15,7 +15,8 @@ public class AccessCall extends Object {
 	public String user_id;
 	public String user_name;
 	public int OccuranceFactor = 1;
-
+	public long sequenceNumber;
+	
 	public boolean isEqual(AccessCall theOther) {
 		AccessCall tmp = (AccessCall) theOther;
 		return this.From == tmp.From && this.To == tmp.To && this.Command.equals(tmp.Command);

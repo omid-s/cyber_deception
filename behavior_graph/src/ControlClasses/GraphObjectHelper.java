@@ -24,6 +24,8 @@ public class GraphObjectHelper {
 	private HashSet<String> blacklist;
 	private int count = 0;
 
+	private long sequenceCounter=0;
+	
 	private HashMap<ResourceType, HashMap<String, ResourceItem>> resourcesMap;
 	private HashMap<String, AccessCall> EdgeMap;
 
@@ -75,6 +77,7 @@ public class GraphObjectHelper {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
+		 
 		// is process new ?
 
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
@@ -93,7 +96,7 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getProcPID();
 			tempItem.Title = pick.proc_name;
 			tempItem.Description = pick.proc_args;
-
+			
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
 			// resourcesMap.get(ResourceType.Process).put(pick.getProcPID(),
@@ -131,6 +134,8 @@ public class GraphObjectHelper {
 				tempCallItem.user_id = pick.user_uid;
 				tempCallItem.user_name = pick.user_name;
 
+				tempCallItem.sequenceNumber = sequenceCounter++;
+				
 				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 				EdgeMap.put(parentP.getID() + tp.getID(), tempCallItem);
 			}
@@ -246,6 +251,7 @@ public class GraphObjectHelper {
 				theCall.Info = pick.evt_args;
 				theCall.user_id = pick.user_uid;
 				theCall.user_name = pick.user_name;
+				theCall.sequenceNumber = sequenceCounter++;
 				
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 //
@@ -253,6 +259,7 @@ public class GraphObjectHelper {
 
 			}
 		}
+		
 	}
 
 	public void release_maps() {

@@ -318,7 +318,9 @@ public class BaseMemory {
 								tempCall.To = pick.To;
 								tempCall.user_id = pick.user_id;
 								tempCall.user_name = pick.user_name;
-								tempCall.OccuranceFactor = 1; // fromAndTosMap.get(pick.From.id.toLowerCase()
+								tempCall.OccuranceFactor = 1; 
+								tempCall.sequenceNumber =pick.sequenceNumber  ;
+								// fromAndTosMap.get(pick.From.id.toLowerCase()
 																// + "||" +
 																// pick.To.id.toLowerCase()).size();
 								if (edgeType.size() == 0 || (edgeType.size() != 0
@@ -394,7 +396,9 @@ public class BaseMemory {
 								tempCall.To = pick.To;
 								tempCall.user_id = pick.user_id;
 								tempCall.user_name = pick.user_name;
-								tempCall.OccuranceFactor = 1; // fromAndTosMap.get(pick.From.id.toLowerCase()
+								tempCall.OccuranceFactor = 1;
+								tempCall.sequenceNumber =pick.sequenceNumber  ;
+								// fromAndTosMap.get(pick.From.id.toLowerCase()
 																// + "||" +
 																// pick.To.id.toLowerCase()).size();
 								if (edgeType.size() == 0 || (edgeType.size() != 0

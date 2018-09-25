@@ -54,8 +54,8 @@ public class GraphVisualsHelper {
 		public String transform(AccessCall e) {
 			String Call = "";
 
-			Call = e.Command + "(" + e.OccuranceFactor + ")";
-
+			Call = e.Command + "(" + e.OccuranceFactor + ")" + "-"+ e.sequenceNumber;
+ 
 			return Call; // "Call ( "+ Call + " ) : "
 							// +graph.getEndpoints(e).toString();
 		}
