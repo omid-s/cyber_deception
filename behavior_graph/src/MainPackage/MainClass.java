@@ -69,7 +69,7 @@ public class MainClass {
 
 			if (pick.equals("gv")) {
 				ShowVerbose = true;
-//				ShowGraph = true;
+				// ShowGraph = true;
 			}
 			if (pick.equals("g"))
 				ShowGraph = true;
@@ -224,12 +224,12 @@ public class MainClass {
 						// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
 						// tempObj);
 						// VerboseGraphWindow.vv.repaint();
-						
+
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
 							// break;
 						}
-						
+
 					} catch (Exception ex) {
 						System.out.println(ex.getMessage());
 					}
@@ -241,8 +241,8 @@ public class MainClass {
 			}
 
 		}
-//		ClearHelper.release_maps();
-//		VerboseHelper.release_maps();
+		// ClearHelper.release_maps();
+		// VerboseHelper.release_maps();
 
 		Instant end2 = Instant.now();
 
@@ -294,8 +294,13 @@ public class MainClass {
 				}
 				Instant start = Instant.now();
 
-				theGraph = qt.RunQuety(command, theGraph);
+				try {
 
+					theGraph = qt.RunQuety(command, theGraph);
+				} catch (Exception ex) {
+					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.");
+					continue;
+				}
 				Instant end = Instant.now();
 
 				theGraphWindow = new EdgeLabelDemo(theGraph);
