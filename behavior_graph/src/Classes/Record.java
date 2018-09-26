@@ -14,7 +14,6 @@ public class Record {
     String id;
     String type;
     List<Token> tokenList = new ArrayList<Token>();
-    Token syscallToken;
     Record(List<String> list) throws IOException{
 
             //Extract the type from the string type=value
@@ -74,7 +73,7 @@ public class Record {
         private String value;
 
         //Constructor class for each individual token
-        Token(String keyValuePair) throws IOException{
+        Token(String keyValuePair){
 
             key = keyValuePair.substring(0, keyValuePair.indexOf("="));
             value = keyValuePair.substring(keyValuePair.indexOf("=")+1);
@@ -105,7 +104,7 @@ public class Record {
      * @param keyValue New key value pair to instantiate as token and append to the end of the token list
      * @throws IOException
      */
-    public void appendToken(String keyValue) throws IOException{
+    public void appendToken(String keyValue){
         Token appendToken = new Token(keyValue);
         tokenList.add(appendToken);
     }

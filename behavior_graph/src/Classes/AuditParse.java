@@ -1,5 +1,7 @@
 package Classes;
 
+import com.mysql.fabric.xmlrpc.base.Array;
+
 import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
@@ -19,7 +21,7 @@ public class AuditParse {
     HashMap<String, Record> recordHashMap = new HashMap<>();
     HashMap<String, String> processHashMap = new HashMap<>();
     HashMap<String, String> sysCallTable = new HashMap<>();
-
+    List<SysdigRecordObject> sysDigList  = new ArrayList<>();
 
     /**
      * Parses the audit log file given to it into a list of records. Each record is identified by it's ID and type, and within each record is a list of tokens containing key=value pairs
@@ -72,14 +74,59 @@ public class AuditParse {
                         sysCallRec.appendToken("pid_name=" + pid_name);
                     }
 
+                }else if(newRec.getType().equals("CWD")){
+                    recordHashMap.get(newRec.getId()).appendToken("cwd="+newRec.getToken("cwd").getValue());
                 }
 
             }
 
+
+        }
+        sysDigList = maptoSysDig(recordHashMap.values());
+
+
+    }
+
+
+    List<SysdigRecordObject> maptoSysDig(Collection<Record> collection){
+        ArrayList<SysdigRecordObject> sysdigList = new ArrayList<>();
+        ArrayList<Record> arrRec = new ArrayList<>(collection);
+        for(int i = 0; i<arrRec.size(); i++){
+            for(int j = 0; j<arrRec.get(i).tokenList.size(); j++){
+                SysdigRecordObject sysdig = new SysdigRecordObject();
+                switch (arrRec.get(i).tokenList.get(j).getKey()){
+                    case "pid":
+                        sysdig.proc_pid = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
+
+                    case "ppid":
+                        sysdig.proc_ppid = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
+
+                    case "exe":
+                        sysdig.proc_exe = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
+
+                    case "comm":
+                        sysdig.proc_name = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
+
+                    case "uid":
+                        sysdig.user_uid = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
+                    case"gid":
+                        sysdig.group_gid = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
+
+                    case "cwd":
+                        sysdig.proc_cwd = arrRec.get(i).tokenList.get(j).getValue();
+
+                }
+                sysdigList.add(sysdig);
+            }
         }
 
-
-
+        return sysdigList;
     }
 
 
