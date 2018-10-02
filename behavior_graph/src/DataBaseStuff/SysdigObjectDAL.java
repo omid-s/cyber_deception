@@ -8,10 +8,17 @@ import Classes.*;
 public class SysdigObjectDAL {
 	private Field[] ClassFields;
 	private String InsertTemplate;
-	private final String[] shortFieldsList = { "evt_datetime", "evt_latency", "evt_type", "thread_tid", "proc_name",
-			"proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory", "fd_filename", "fd_ip",
-			"fd_is_server", "fd_l4proto", "fd_name", "fd_num", "fd_port", "fd_sip", "fd_sockfamily", "fd_sport",
-			"fd_type", "user_name", "user_uid", "evt_num" };
+	
+	private final String[] shortFieldsList = { "evt_datetime", 
+            "evt_type", "thread_tid", "proc_name",
+           "proc_args","proc_cwd","proc_cmdline",
+           "proc_pname", "proc_pid", "proc_ppid", "fd_cip",
+           "fd_cport", "fd_directory", "fd_filename", "fd_ip",
+            "fd_name", "fd_num",
+           "fd_sip", "fd_sockfamily", "fd_sport",
+           "fd_type","fd_typechar", "user_name",
+           "user_uid", "evt_num" ,"evt_args"};
+	
 	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid",
 			"evt_dir", "evt_type", "fd_typechar", "evt_args" };
 
