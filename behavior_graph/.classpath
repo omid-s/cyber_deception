@@ -33,7 +33,6 @@
 	<classpathentry kind="lib" path="lib/jung-visualization-2.0.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jung-visualization-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.36-bin.jar"/>
 	<classpathentry kind="lib" path="lib/neo4j-jdbc-2.1.4-SNAPSHOT-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="lib/orsoncharts-1.4-eval-nofx.jar"/>
 	<classpathentry kind="lib" path="lib/orsonpdf-1.6-eval.jar"/>
@@ -42,5 +41,6 @@
 	<classpathentry kind="lib" path="lib/swtgraphics2d.jar"/>
 	<classpathentry kind="lib" path="lib/vecmath-1.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.6.jar"/>
+	<classpathentry kind="lib" path="lib/postgresql-42.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

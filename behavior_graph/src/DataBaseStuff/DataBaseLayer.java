@@ -16,11 +16,9 @@ public class DataBaseLayer {
 	public static Connection getConnection() throws SQLException {
 		if (_underlyingConnectionObject == null) {
 			Connection conn = null;
-			Properties connectionProps = new Properties();
-			connectionProps.put("user", "root");
-			connectionProps.put("password", "omidomid");
 
-			conn = DriverManager.getConnection("jdbc:mysql://omid.cs.uga.edu:3306/", connectionProps);
+			conn = DriverManager.getConnection("jdbc:postgresql://omid.cs.uga.edu:5432/SysDigData", "postgres",
+					"IeGeekPassword");
 			_underlyingConnectionObject = conn;
 		}
 		return _underlyingConnectionObject;

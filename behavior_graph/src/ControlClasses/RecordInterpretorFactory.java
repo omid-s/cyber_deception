@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import javax.annotation.Resources;
 
-import com.mysql.jdbc.Connection; 
+import java.sql.Connection; 
 
 import Classes.*;
 
@@ -86,7 +86,7 @@ public class RecordInterpretorFactory
 				AccessCall tempCallItem = new AccessCall ();
 				tempCallItem.From = TempProcItem;
 				tempCallItem.To = tempItem;
-				tempCallItem.Command = "";
+				tempCallItem.Command = "exec";
 
 				Connections.add (tempCallItem);
 			}
