@@ -17,7 +17,7 @@ public class SysdigObjectDAL {
             "fd_name", "fd_num",
            "fd_sip", "fd_sockfamily", "fd_sport",
            "fd_type","fd_typechar", "user_name",
-           "user_uid", "evt_num" ,"evt_args"};
+           "user_uid", "evt_num" ,"evt_args","user_shell"};
 	
 	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid",
 			"evt_dir", "evt_type", "fd_typechar", "evt_args" };

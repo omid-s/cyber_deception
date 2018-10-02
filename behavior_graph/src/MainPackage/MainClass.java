@@ -69,7 +69,7 @@ public class MainClass {
 
 			if (pick.equals("gv")) {
 				ShowVerbose = true;
-//				ShowGraph = true;
+				// ShowGraph = true;
 			}
 			if (pick.equals("g"))
 				ShowGraph = true;
@@ -98,7 +98,7 @@ public class MainClass {
 		}
 
 		ArrayList<SysdigRecordObject> items = new ArrayList<SysdigRecordObject>();
-		SysdigObjectDAL temp = new SysdigObjectDAL(false, false);
+		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat, false);
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
@@ -187,13 +187,16 @@ public class MainClass {
 					try {
 						SysdigRecordObject tempObj;
 						try {
+							int theL = multipleRecords.length(); 
 							multipleRecords += test.nextLine();
 							tempObj = temp.GetObjectFromTextLine(multipleRecords);
 
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
-
+							if( theL > 1  )
+								System.out.println("---------------------------------------------");
 						} catch (NumberFormatException ex) {
+							System.out.println(multipleRecords);
 							continue;
 						}
 						multipleRecords = "";
@@ -224,12 +227,12 @@ public class MainClass {
 						// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
 						// tempObj);
 						// VerboseGraphWindow.vv.repaint();
-						
+
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
 							// break;
 						}
-						
+
 					} catch (Exception ex) {
 						System.out.println(ex.getMessage());
 					}
@@ -241,8 +244,8 @@ public class MainClass {
 			}
 
 		}
-//		ClearHelper.release_maps();
-//		VerboseHelper.release_maps();
+		// ClearHelper.release_maps();
+		// VerboseHelper.release_maps();
 
 		Instant end2 = Instant.now();
 
@@ -294,7 +297,12 @@ public class MainClass {
 				}
 				Instant start = Instant.now();
 
-				theGraph = qt.RunQuety(command, theGraph);
+				try {
+					theGraph = qt.RunQuety(command, theGraph);
+				} catch (Exception ex) {
+					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.");
+					continue;
+				}
 
 				Instant end = Instant.now();
 
