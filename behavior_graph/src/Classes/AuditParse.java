@@ -32,7 +32,7 @@ public class AuditParse {
      * @throws IOException
      */
     public void parseAuditLog(File auditlog) throws IOException {
-
+        long start = System.nanoTime();
         try {
             buff = new BufferedReader(new FileReader(auditlog)); //Reads the audit log file into a buffer
             setUpSysCallHash(sysCallTable);
@@ -84,7 +84,7 @@ public class AuditParse {
         }
         sysDigList = maptoSysDig(recordHashMap.values());
 
-
+        System.out.println(System.nanoTime()-start);
     }
 
 
@@ -120,6 +120,7 @@ public class AuditParse {
 
                     case "cwd":
                         sysdig.proc_cwd = arrRec.get(i).tokenList.get(j).getValue();
+                        break;
 
                 }
                 sysdigList.add(sysdig);
