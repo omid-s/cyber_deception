@@ -16,6 +16,8 @@ import Helpers.GraphQueryModel;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
+import exceptions.HighFieldNumberException;
+import exceptions.LowFieldNumberException;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -183,22 +185,31 @@ public class MainClass {
 				// int counter = 0;
 				GraphDBDal db = new GraphDBDal();
 				String multipleRecords = "";
+				String currentRecord="";
 				while (test.hasNextLine()) {
 					try {
 						SysdigRecordObject tempObj;
 						try {
-							int theL = multipleRecords.length(); 
+							int theL = multipleRecords.length();
+							
 							multipleRecords += test.nextLine();
 							tempObj = temp.GetObjectFromTextLine(multipleRecords);
 
+							currentRecord = "";
+							
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
-							if( theL > 1  )
+							if (theL > 1)
 								System.out.println("---------------------------------------------");
-						} catch (NumberFormatException ex) {
+						} catch (LowFieldNumberException ex) {
 							System.out.println(multipleRecords);
+							currentRecord = "";
+							continue;
+						} catch (HighFieldNumberException ex) {
+							multipleRecords = "";
 							continue;
 						}
+
 						multipleRecords = "";
 						// SysdigRecordObject tempObj =
 						// temp.GetObjectFromTextLine(test.nextLine());

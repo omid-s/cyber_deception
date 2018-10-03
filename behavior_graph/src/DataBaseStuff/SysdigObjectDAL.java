@@ -4,21 +4,18 @@ import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.ArrayList;
 import Classes.*;
+import exceptions.HighFieldNumberException;
+import exceptions.LowFieldNumberException;
 
 public class SysdigObjectDAL {
 	private Field[] ClassFields;
 	private String InsertTemplate;
-	
-	private final String[] shortFieldsList = { "evt_datetime", 
-            "evt_type", "thread_tid", "proc_name",
-           "proc_args","proc_cwd","proc_cmdline",
-           "proc_pname", "proc_pid", "proc_ppid", "fd_cip",
-           "fd_cport", "fd_directory", "fd_filename", "fd_ip",
-            "fd_name", "fd_num",
-           "fd_sip", "fd_sockfamily", "fd_sport",
-           "fd_type","fd_typechar", "user_name",
-           "user_uid", "evt_num" ,"evt_args","user_shell"};
-	
+
+	private final String[] shortFieldsList = { "evt_datetime", "evt_type", "thread_tid", "proc_name", "proc_args",
+			"proc_cwd", "proc_cmdline", "proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory",
+			"fd_filename", "fd_ip", "fd_name", "fd_num", "fd_sip", "fd_sockfamily", "fd_sport", "fd_type",
+			"fd_typechar", "user_name", "user_uid", "evt_num", "evt_args", "user_shell" };
+
 	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid",
 			"evt_dir", "evt_type", "fd_typechar", "evt_args" };
 
@@ -101,22 +98,26 @@ public class SysdigObjectDAL {
 	 * @throws IllegalAccessException
 	 */
 	public SysdigRecordObject GetObjectFromTextLine(String inp)
-			throws NumberFormatException, IllegalArgumentException, IllegalAccessException {
+			throws LowFieldNumberException, HighFieldNumberException, IllegalArgumentException, IllegalAccessException {
 		SysdigRecordObject ret = new SysdigRecordObject();
 
 		String tokens[] = inp.split("=&amin&=");
 
-		if (tokens.length != ClassFields.length) {
-			throw new NumberFormatException("Error! number of fields do not match!" + tokens.length + " instead of "
+		if (tokens.length < ClassFields.length) {
+			throw new LowFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 			// System.out.println("Error! number of fields do not match!" +
 			// tokens.length + " instead of "+ ClassFields.length);
+		} else if (tokens.length > ClassFields.length) {
+			throw new HighFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
+					+ ClassFields.length + " : " + inp);
+
 		}
 		for (int index = 0; index < tokens.length; index++)
 			ClassFields[index].set(ret, tokens[index].trim());
 
-//		ret.fd_num = ret.fd_name + "|" + ret.fd_num;
-//		ret.proc_pid = ret.proc_pid+"|" + ret.proc_name;
+		// ret.fd_num = ret.fd_name + "|" + ret.fd_num;
+		// ret.proc_pid = ret.proc_pid+"|" + ret.proc_name;
 		return ret;
 	}
 
