@@ -16,7 +16,7 @@ import edu.uci.ics.jung.graph.Graph;
 
 public class GraphObjectHelper {
 	private final boolean isInVerboseMode;
-	private String pid;
+	private String pid; 
 	private HashSet<String> vectorPid;
 	private HashSet<String> vectorFile;
 	private HashMap<String, String> currentActivity;
@@ -124,7 +124,7 @@ public class GraphObjectHelper {
 			ResourceItem tp = TheProc;
 			// if (!theGraph.getEdges().stream().anyMatch(x ->
 			// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
-			if (!EdgeMap.containsKey(parentP.getID() + tp.getID())) {
+			if (!EdgeMap.containsKey(parentP.getID() + tp.getID()+"exec")) {
 
 				// add the connection to the process
 				AccessCall tempCallItem = new AccessCall();
@@ -137,7 +137,7 @@ public class GraphObjectHelper {
 				tempCallItem.sequenceNumber = sequenceCounter++;
 				
 				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
-				EdgeMap.put(parentP.getID() + tp.getID(), tempCallItem);
+				EdgeMap.put(parentP.getID() + tp.getID()+ tempCallItem.Command, tempCallItem);
 			}
 
 		}
@@ -179,15 +179,6 @@ public class GraphObjectHelper {
 
 		// is there an fd resource ?
 		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID()))
-		// .anyMatch(x -> (x.Type != ResourceType.Process && x.Type !=
-		// ResourceType.Thread)
-		// && x.id.equals(pick.getFD_ID())))
-
-		// if (pick.fd_num != "<NA>" && !theGraph.getVertices().stream()
-		// .anyMatch(x -> (x.Type != ResourceType.Process && x.Type !=
-		// ResourceType.Thread)
-		// && x.id.equals(pick.getFD_ID())))
-		//
 		{
 			ResourceItem tempItem = new ResourceItem();
 			// / find type, field types come from SYSDIG fd type definition
@@ -227,7 +218,7 @@ public class GraphObjectHelper {
 			 * wise check if it exists raise the occirance factor otherwisde
 			 * insert it
 			 */
-			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID()))
+			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID()+ pick.evt_type))
 			// if (!isInVerboseMode &&
 			//
 			// theGraph.getEdges().stream()
@@ -236,10 +227,15 @@ public class GraphObjectHelper {
 
 			{
 
-				theGraph.getEdges().stream()
-						.filter(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))
-						.findFirst().get().OccuranceFactor++;
-
+//				theGraph.getEdges().stream()
+//						.filter(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))
+//						.findFirst().get().OccuranceFactor++;
+//
+//				
+				
+				EdgeMap.get( FF.getID() + TT.getID()+ pick.evt_type ).OccuranceFactor++;
+			
+				int  a = 12; 
 			} else {
 				// create the edge between resources of start and end
 				AccessCall theCall = new AccessCall();
@@ -255,7 +251,7 @@ public class GraphObjectHelper {
 				
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 //
-				EdgeMap.put(theCall.From.getID() + theCall.To.getID(), theCall);
+				EdgeMap.put(theCall.From.getID() + theCall.To.getID()+ theCall.Command, theCall);
 
 			}
 		}
