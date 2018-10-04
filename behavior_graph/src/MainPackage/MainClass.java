@@ -35,8 +35,7 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.jfree.ui.RefineryUtilities;
-import org.omg.DynamicAny.DynAnyFactoryPackage.InconsistentTypeCodeHelper;
+
 
  
 

@@ -32,7 +32,7 @@ public class AuditParse {
      * @throws IOException
      */
     public void parseAuditLog(File auditlog) throws IOException {
-        long start = System.nanoTime();
+        long start = System.currentTimeMillis();
         try {
             buff = new BufferedReader(new FileReader(auditlog)); //Reads the audit log file into a buffer
             setUpSysCallHash(sysCallTable);
@@ -74,17 +74,18 @@ public class AuditParse {
                         sysCallRec.appendToken("pid_name=" + pid_name);
                     }
 
-                }else if(newRec.getType().equals("CWD")){
-                    recordHashMap.get(newRec.getId()).appendToken("cwd="+newRec.getToken("cwd").getValue());
                 }
 
+            }else if(LineSplit.get(0).equals("CWD")){
+                Record cwdRec = new Record(LineSplit);
+                recordHashMap.get(cwdRec.getId()).appendToken("cwd="+cwdRec.getToken("cwd").getValue());
             }
 
 
         }
         sysDigList = maptoSysDig(recordHashMap.values());
 
-        System.out.println(System.nanoTime()-start);
+        System.out.println((System.currentTimeMillis()-start)/1000.0 + " seconds");
     }
 
 
