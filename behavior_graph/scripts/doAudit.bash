@@ -1,5 +1,9 @@
 #!/bin/bash
 
+######
+## audit runner 
+## based on an initial script by @kyuhlee
+######
 
 #### Set up #######################
 
