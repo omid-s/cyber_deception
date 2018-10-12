@@ -45,3 +45,28 @@ arguments :
 	* path=[path to input file] : path to input file
 	* outpath=[path to file] : path to which the formated output is supposed to be stored. 
 	
+	
+## Query model 
+
+
+OQL is capable supports projection and filter and it’s based on the sub graphs initiated by the nodes identified through the criterias. 
+In our data model we divide the data in two parts : 
+	Resources : are represented as vertices in our causal graph representation, and include processes, threads, files, pipes, networks, activities, etc. we identify them by color coding based on type in the graph. 
+	Access Calls : are represented as edges in our  causal graph and represent access to resources, systems calls, initiations, API calls, Binder Calls, etc. we identify them by color coding based on the type in the graph.
+ 
+The general structure of our query language is as follows : 
+
+	[verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
+
+The parts in the query account for the followings :
+[verbose] : we have two options to show only existence of the relation between resources or seeing all the relations on the graph. 
+[back] : back tracks from selected nodes to first node with input degree = 0 in the graph. 
+[forward] : forward tracks from selected nodes to all resources it has touched and this will recursively continue. 
+
+[projection of access types]  : this option is either * for all, or is a selection of system calls including read, write, open, exec, etc. NOTE : because we do not capture starting of all processes, `exec` denotes an execution of a process by it's parent but time stamp will be the first time it has been executed which might or might not be when it was started.
+[projection of Resource types] : this option is either * for all, or is a selection of “file”, "process", "soc" for all types of socket calls, "pipe" or "unix"
+, ..
+Criteria : criterias are formated as `[field] [operator] [value]` . The “field” is one of the options : “pid” for process id, “tid” for thread Id and “activity.name” is the name of activity. The “operator” is either “is” or “has” which account for exact match and the contains operator. Different criterions can be added in the query using the separator “,also,”; “or” logical operator would be applied to these criterias. we have used this format to minimize the parsing efforts.  
+
+The “;” in the end indicates whether to add the results of the current query to the graph which is already present in the window; so we can have results of multiple queries create the whole picture piece by piece. 
+
