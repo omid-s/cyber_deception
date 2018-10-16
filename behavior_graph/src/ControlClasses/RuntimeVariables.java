@@ -36,7 +36,7 @@ public class RuntimeVariables {
 		}
 
 		// ****** set default values :
-		forwardDepth = -1;
+		forwardDepth = Integer.MAX_VALUE;
 
 	}
 
