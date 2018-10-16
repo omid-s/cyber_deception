@@ -91,8 +91,9 @@ public class RuntimeVariables {
 	public void setValue(String Key, String Value) throws VariableNoitFoundException {
 		// validate the key
 		if (!fieldsMap.containsKey(Key.toLowerCase()))
-			throw new VariableNoitFoundException(
-					String.format("Variable '%s' was not found!Please cehck and try again ... \r\n", Key));
+			throw new VariableNoitFoundException(String.format(
+					"You are trying to set a variable '%s' which was not found!Please cehck and try again ... \r\n",
+					Key));
 
 		Object TheValue = null;
 
@@ -126,13 +127,14 @@ public class RuntimeVariables {
 	public String getValue(String Key) throws VariableNoitFoundException {
 		// validate the key
 		if (!fieldsMap.containsKey(Key.toLowerCase()))
-			throw new VariableNoitFoundException(
-					String.format("Variable '%s' was not found!Please cehck and try again ... \r\n", Key));
+			throw new VariableNoitFoundException(String.format(
+					"You are trying to read a variable '%s' which was not found!Please cehck and try again ... \r\n",
+					Key));
 
 		Object TheValue = null;
 
 		try {
-			return fieldsMap.get(Key.toLowerCase()).get(this).toString();
+			return String.format("%s = '%s'", Key.toUpperCase(), fieldsMap.get(Key.toLowerCase()).get(this).toString());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return "Not Found!";
