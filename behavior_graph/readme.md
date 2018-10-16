@@ -53,7 +53,7 @@ OQL is capable supports projection and filter and it’s based on the sub graphs
 In our data model we divide the data in two parts : 
 	Resources : are represented as vertices in our causal graph representation, and include processes, threads, files, pipes, networks, activities, etc. we identify them by color coding based on type in the graph. 
 	Access Calls : are represented as edges in our  causal graph and represent access to resources, systems calls, initiations, API calls, Binder Calls, etc. we identify them by color coding based on the type in the graph.
- 
+
 The general structure of our query language is as follows : 
 
 	[verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
