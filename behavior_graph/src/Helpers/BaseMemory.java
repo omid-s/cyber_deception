@@ -345,7 +345,8 @@ public class BaseMemory {
 					}
 				}
 
-			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase()) )
+			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase())
+					&& depth < RuntimeVariables.getInstance().getBackDepth())
 				for (AccessCall pick : tosMap.get(v.id.toLowerCase())) {
 
 					/**
@@ -417,7 +418,7 @@ public class BaseMemory {
 						}
 						if (!temp.contains(pick.From) && !done.contains(pick.From)) {
 							temp.add(pick.From);
-							depthMap.add(-1);
+							depthMap.add(depth + 1);
 						}
 
 					}
