@@ -55,9 +55,18 @@ In our data model we divide the data in two parts :
 	Access Calls : are represented as edges in our  causal graph and represent access to resources, systems calls, initiations, API calls, Binder Calls, etc. we identify them by color coding based on the type in the graph.
 
 The general structure of our query language is as follows : 
+	
+	1- [set/get] [variable_name] [value]
+	
+	2- [verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
 
-	[verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
+### Variable setting/ Getting query
 
+THis model is used to set or get environment variables, variables are as follows (case insensitive) : 
+ 
+ * FORWARD_DEPTH : this sets the depth to which each forward tree is traversed 
+
+### Searching query
 The parts in the query account for the followings :
 [verbose] : we have two options to show only existence of the relation between resources or seeing all the relations on the graph. 
 [back] : back tracks from selected nodes to first node with input degree = 0 in the graph. 
