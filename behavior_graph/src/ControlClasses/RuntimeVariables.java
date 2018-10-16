@@ -31,6 +31,7 @@ public class RuntimeVariables {
 
 			fieldsMap.put("forward_depth", this.getClass().getDeclaredField("forwardDepth"));
 			fieldsMap.put("back_depth", this.getClass().getDeclaredField("backDepth"));
+			fieldsMap.put("ignore_fd_num", this.getClass().getDeclaredField("ignoreFDNumber"));
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -39,6 +40,7 @@ public class RuntimeVariables {
 		// ****** set default values :
 		forwardDepth = Integer.MAX_VALUE;
 		backDepth = Integer.MAX_VALUE;
+		ignoreFDNumber = false;
 	}
 
 	private Map<String, Field> fieldsMap;
@@ -100,6 +102,28 @@ public class RuntimeVariables {
 	 */
 	public int getBackDepth() {
 		return this.backDepth;
+	}
+
+	/**
+	 * sets to ignore FD_numbers, this will create a cleaner graph with
+	 * ignoreing fd numbers for files
+	 */
+	private boolean ignoreFDNumber;
+
+	/**
+	 * sets weather fd_number should be  ignored in files or not
+	 * @param value
+	 */
+	public void setIgnoreFDNumber(boolean value) {
+		this.ignoreFDNumber = value;
+	}
+
+	/**
+	 * retuiens wheather fd_number should be  ignored in files or not
+	 * @return
+	 */
+	public boolean getIgnoreFDNumber() {
+		return this.ignoreFDNumber;
 	}
 
 	/**
