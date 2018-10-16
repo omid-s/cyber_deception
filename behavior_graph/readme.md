@@ -65,7 +65,9 @@ The general structure of our query language is as follows :
 THis model is used to set or get environment variables, variables are as follows (case insensitive) : 
  
  * FORWARD_DEPTH : this sets the depth to which each forward tree is traversed 
-
+ * BACK_DEPTH : this sets the depth to which each backward tracking is done 
+ 
+ 
 ### Searching query
 The parts in the query account for the followings :
 [verbose] : we have two options to show only existence of the relation between resources or seeing all the relations on the graph. 
