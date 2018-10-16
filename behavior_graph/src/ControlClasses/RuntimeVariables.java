@@ -30,6 +30,7 @@ public class RuntimeVariables {
 		try {
 
 			fieldsMap.put("forward_depth", this.getClass().getDeclaredField("forwardDepth"));
+			fieldsMap.put("back_depth", this.getClass().getDeclaredField("backDepth"));
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -37,7 +38,7 @@ public class RuntimeVariables {
 
 		// ****** set default values :
 		forwardDepth = Integer.MAX_VALUE;
-
+		backDepth = Integer.MAX_VALUE;
 	}
 
 	private Map<String, Field> fieldsMap;
@@ -78,6 +79,30 @@ public class RuntimeVariables {
 	}
 
 	/**
+	 * sets the back traversla steps count
+	 */
+	private Integer backDepth;
+
+	/**
+	 * sets number of steps a back track should follow in the tree
+	 * 
+	 * @param value
+	 *            number of steps
+	 */
+	public void setBackDepth(int value) {
+		this.backDepth = value;
+	}
+
+	/**
+	 * returns number of steps a back track should follow in the tree
+	 * 
+	 * @return
+	 */
+	public int getBackDepth() {
+		return this.backDepth;
+	}
+
+	/**
 	 * autoamtically sets the value for the given key
 	 * 
 	 * @param Key
@@ -111,7 +136,6 @@ public class RuntimeVariables {
 			fieldsMap.get(Key.toLowerCase()).set(this, TheValue);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-
 		}
 	}
 
