@@ -323,12 +323,11 @@ public class MainClass {
 							.PrintGreen(RuntimeVariables.getInstance().getValue(command.trim().split(" ")[1]) + "\r\n");
 					continue;
 				} else if (command.trim().toLowerCase().startsWith("describe")) {
-					if (command.trim().split(" ").length > 0) {
-						DescribeFactory.doDescribe(
-								command.trim().substring( "describe".length())
-								);
-					} else
-						DescribeFactory.doDescribe(null);
+
+					boolean isAggregated = ! (command.contains(" verbose"));
+					boolean hasPath = command.indexOf("path=") > 0;
+					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
+					DescribeFactory.doDescribe(thePath, isAggregated);
 					continue;
 				}
 
