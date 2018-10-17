@@ -13,6 +13,7 @@ import javax.security.auth.x500.X500Principal;
 import org.neo4j.cypherdsl.grammar.ForEach;
 
 import Classes.*;
+import ControlClasses.RuntimeVariables;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
@@ -142,6 +143,8 @@ public class BaseMemory {
 		return ret;
 	}
 
+	public static ArrayList<AccessCall> edges_for_describe = new ArrayList<AccessCall>();
+
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
 			boolean isVerbose, boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
 			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
@@ -149,6 +152,12 @@ public class BaseMemory {
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
 				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>() : originalGraph;
 
+		// clear describe history if new instance is requested
+				
+		if (originalGraph == null)
+			edges_for_describe = new ArrayList<AccessCall>();
+		
+		
 		/**
 		 * seperate edge based criterias
 		 */
@@ -231,9 +240,9 @@ public class BaseMemory {
 				.collect(Collectors.toList()));
 		temp = temp2;
 
-		Map<ResourceItem, Integer> depthMap = new HashMap<ResourceItem, Integer>();
+		ArrayList<Integer> depthMap = new ArrayList<Integer>();
 		for (ResourceItem pick : temp) {
-			depthMap.put(pick, 1);
+			depthMap.add(0);
 			if (verticeTypes.size() == 0 || verticeTypes.contains(pick.Type))
 				ret.addVertex(pick);
 		}
@@ -255,6 +264,8 @@ public class BaseMemory {
 
 			/// pick a node
 			ResourceItem v = temp.get(0);
+			int depth = depthMap.get(0);
+			depthMap.remove(0);
 			temp.remove(0);
 			done.add(v);
 
@@ -264,7 +275,8 @@ public class BaseMemory {
 
 			/// iterate over all the edges that go out of the picked node and
 			/// add them as apropriate
-			if (isForwardTracked && fromsMap.containsKey(v.id.toLowerCase()))
+			if (isForwardTracked && fromsMap.containsKey(v.id.toLowerCase())
+					&& depth < RuntimeVariables.getInstance().getForwardDepth())
 				for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
 
 					/**
@@ -282,6 +294,9 @@ public class BaseMemory {
 									|| (x.getOp().equalsIgnoreCase("is") && pick.user_id.equals(x.getValue())
 											&& x.getFieldName().equalsIgnoreCase("user_id")))))
 							|| edge_criteria.size() == 0) {
+
+						// add to list for describe
+						edges_for_describe.add(pick);
 
 						if (isVerbose) {
 							if (!temp.contains(pick.To) && !done.contains(pick.To))
@@ -318,11 +333,11 @@ public class BaseMemory {
 								tempCall.To = pick.To;
 								tempCall.user_id = pick.user_id;
 								tempCall.user_name = pick.user_name;
-								tempCall.OccuranceFactor = 1; 
-								tempCall.sequenceNumber =pick.sequenceNumber  ;
+								tempCall.OccuranceFactor = 1;
+								tempCall.sequenceNumber = pick.sequenceNumber;
 								// fromAndTosMap.get(pick.From.id.toLowerCase()
-																// + "||" +
-																// pick.To.id.toLowerCase()).size();
+								// + "||" +
+								// pick.To.id.toLowerCase()).size();
 								if (edgeType.size() == 0 || (edgeType.size() != 0
 										&& ((edgeType.contains("syscall") && isSysCall(pick.Command))
 												|| edgeType.contains(pick.Command)))) {
@@ -335,14 +350,14 @@ public class BaseMemory {
 							}
 							if (!temp.contains(pick.To) && !done.contains(pick.To)) {
 								temp.add(pick.To);
-								depthMap.put(pick.To, 0);
+								depthMap.add(depth + 1);
 							}
 						}
 					}
 				}
 
-			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase()) && depthMap.containsKey(v)
-					&& depthMap.get(v) > 0)
+			if (isBackTracked && tosMap.containsKey(v.id.toLowerCase())
+					&& depth < RuntimeVariables.getInstance().getBackDepth())
 				for (AccessCall pick : tosMap.get(v.id.toLowerCase())) {
 
 					/**
@@ -360,6 +375,9 @@ public class BaseMemory {
 									|| (x.getOp().equalsIgnoreCase("is") && pick.user_id.equals(x.getValue())
 											&& x.getFieldName().equalsIgnoreCase("user_id")))))
 							|| edge_criteria.size() == 0) {
+
+						// add to list for describe
+						edges_for_describe.add(pick);
 
 						if (isVerbose) {
 							if (!temp.contains(pick.From) && !done.contains(pick.From))
@@ -397,10 +415,10 @@ public class BaseMemory {
 								tempCall.user_id = pick.user_id;
 								tempCall.user_name = pick.user_name;
 								tempCall.OccuranceFactor = 1;
-								tempCall.sequenceNumber =pick.sequenceNumber  ;
+								tempCall.sequenceNumber = pick.sequenceNumber;
 								// fromAndTosMap.get(pick.From.id.toLowerCase()
-																// + "||" +
-																// pick.To.id.toLowerCase()).size();
+								// + "||" +
+								// pick.To.id.toLowerCase()).size();
 								if (edgeType.size() == 0 || (edgeType.size() != 0
 										&& ((edgeType.contains("syscall") && isSysCall(pick.Command))
 												|| edgeType.contains(pick.Command)))) {
@@ -414,13 +432,24 @@ public class BaseMemory {
 						}
 						if (!temp.contains(pick.From) && !done.contains(pick.From)) {
 							temp.add(pick.From);
-							depthMap.put(pick.From, 1);
+							depthMap.add(depth + 1);
 						}
 
 					}
 				}
 
 		}
+
+		// describe Magic :
+		Collections.sort(edges_for_describe, new Comparator<AccessCall>() {
+
+			@Override
+			public int compare(AccessCall o1, AccessCall o2) {
+				Long o1_l = o1.sequenceNumber;
+				Long o2_l = o2.sequenceNumber;
+				return o1_l.compareTo(o2_l);
+			}
+		});
 
 		return ret;
 	}
