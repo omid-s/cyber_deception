@@ -56,9 +56,11 @@ In our data model we divide the data in two parts :
 
 The general structure of our query language is as follows : 
 	
-	1- [set/get] [variable_name] [value]
+	1- {set/get} [variable_name] [value]
 	
 	2- [verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
+	
+	3- describe [verbose] [path=/path/to/file]
 
 ### Variable setting/ Getting query
 
@@ -81,3 +83,8 @@ Criteria : criterias are formated as `[field] [operator] [value]` . The “field
 
 The “;” in the end indicates whether to add the results of the current query to the graph which is already present in the window; so we can have results of multiple queries create the whole picture piece by piece. 
 
+### Describe 
+
+This keyword is to be used for creating a textuall representation of the graph. When this keyword is used a textual representation of the graph in the window will be presented. This can also be printed to a file with use of optional `path=` parameter. 
+
+by default describe, flattens the similar calls after eachother into a signle record. if seperate row for each call is desired user should use the optional verbose keyword.  

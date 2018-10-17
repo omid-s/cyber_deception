@@ -21,8 +21,6 @@ public class DescribeFactory {
 		String printFormat = isAggregated ? "%14d) %s : %s --%s--> %s ||%12d times" : "%14d) %s : %s --%s--> %s";
 
 		PrintStream printer = null;
-
-//		System.out.print(FilePath);
 		
 		if (FilePath == null) {
 			printer = System.out;
