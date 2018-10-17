@@ -322,8 +322,13 @@ public class MainClass {
 					ColorHelpers
 							.PrintGreen(RuntimeVariables.getInstance().getValue(command.trim().split(" ")[1]) + "\r\n");
 					continue;
-				} else if (command.trim().toLowerCase().equals("describe")) {
-					DescribeFactory.doDescribe(null);
+				} else if (command.trim().toLowerCase().startsWith("describe")) {
+					if (command.trim().split(" ").length > 0) {
+						DescribeFactory.doDescribe(
+								command.trim().substring( "describe".length())
+								);
+					} else
+						DescribeFactory.doDescribe(null);
 					continue;
 				}
 
