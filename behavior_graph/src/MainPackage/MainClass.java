@@ -7,6 +7,7 @@ import Classes.ResourceType;
 import Classes.SysdigRecordObject;
 import ControlClasses.GraphObjectHelper;
 import ControlClasses.RecordInterpretorFactory;
+import ControlClasses.RuntimeVariables;
 import DataBaseStuff.DataBaseLayer;
 import DataBaseStuff.GraphDBDal;
 import DataBaseStuff.SysdigObjectDAL;
@@ -18,6 +19,7 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
+import exceptions.VariableNoitFoundException;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -185,18 +187,18 @@ public class MainClass {
 				// int counter = 0;
 				GraphDBDal db = new GraphDBDal();
 				String multipleRecords = "";
-				String currentRecord="";
+				String currentRecord = "";
 				while (test.hasNextLine()) {
 					try {
 						SysdigRecordObject tempObj;
 						try {
 							int theL = multipleRecords.length();
-							
+
 							multipleRecords += test.nextLine();
 							tempObj = temp.GetObjectFromTextLine(multipleRecords);
 
 							currentRecord = "";
-							
+
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
 							if (theL > 1)
@@ -305,13 +307,28 @@ public class MainClass {
 					ColorHelpers.PrintGreen(
 							String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex));
 					continue;
+				} else if (command.trim().toLowerCase().startsWith("set ")) { // process
+																				// runtime
+																				// variablse
+																				// settings
+
+					RuntimeVariables.getInstance().setValue(command.trim().split(" ")[1], command.trim().split(" ")[2]);
+					continue;
+				} else if (command.trim().toLowerCase().startsWith("get ")) {// process
+																				// runtime
+																				// variablse
+																				// settings
+					ColorHelpers
+							.PrintGreen(RuntimeVariables.getInstance().getValue(command.trim().split(" ")[1]) + "\r\n");
+					continue;
 				}
+
 				Instant start = Instant.now();
 
 				try {
 					theGraph = qt.RunQuety(command, theGraph);
 				} catch (Exception ex) {
-					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.");
+					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
 					continue;
 				}
 
@@ -340,6 +357,8 @@ public class MainClass {
 				// System.out.print("\033[H\033[2J >");
 
 				System.out.flush();
+			} catch (VariableNoitFoundException ex) {
+				ColorHelpers.PrintRed(ex.getMessage());
 			} catch (Exception ex) {
 				throw (ex);
 				// ColorHelpers.PrintRed("query Problem!please try agin...
