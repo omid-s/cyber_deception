@@ -143,6 +143,8 @@ public class BaseMemory {
 		return ret;
 	}
 
+	public static ArrayList<AccessCall> edges_for_describe = new ArrayList<AccessCall>();
+
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
 			boolean isVerbose, boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
 			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
@@ -150,6 +152,12 @@ public class BaseMemory {
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
 				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>() : originalGraph;
 
+		// clear describe history if new instance is requested
+				
+		if (originalGraph == null)
+			edges_for_describe = new ArrayList<AccessCall>();
+		
+		
 		/**
 		 * seperate edge based criterias
 		 */
@@ -287,6 +295,9 @@ public class BaseMemory {
 											&& x.getFieldName().equalsIgnoreCase("user_id")))))
 							|| edge_criteria.size() == 0) {
 
+						// add to list for describe
+						edges_for_describe.add(pick);
+
 						if (isVerbose) {
 							if (!temp.contains(pick.To) && !done.contains(pick.To))
 								temp.add(pick.To);
@@ -365,6 +376,9 @@ public class BaseMemory {
 											&& x.getFieldName().equalsIgnoreCase("user_id")))))
 							|| edge_criteria.size() == 0) {
 
+						// add to list for describe
+						edges_for_describe.add(pick);
+
 						if (isVerbose) {
 							if (!temp.contains(pick.From) && !done.contains(pick.From))
 								temp.add(pick.From);
@@ -425,6 +439,17 @@ public class BaseMemory {
 				}
 
 		}
+
+		// describe Magic :
+		Collections.sort(edges_for_describe, new Comparator<AccessCall>() {
+
+			@Override
+			public int compare(AccessCall o1, AccessCall o2) {
+				Long o1_l = o1.sequenceNumber;
+				Long o2_l = o2.sequenceNumber;
+				return o1_l.compareTo(o2_l);
+			}
+		});
 
 		return ret;
 	}

@@ -13,6 +13,7 @@ import DataBaseStuff.GraphDBDal;
 import DataBaseStuff.SysdigObjectDAL;
 import Helpers.BaseMemory;
 import Helpers.ColorHelpers;
+import Helpers.DescribeFactory;
 import Helpers.GraphQueryModel;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -320,6 +321,13 @@ public class MainClass {
 																				// settings
 					ColorHelpers
 							.PrintGreen(RuntimeVariables.getInstance().getValue(command.trim().split(" ")[1]) + "\r\n");
+					continue;
+				} else if (command.trim().toLowerCase().startsWith("describe")) {
+
+					boolean isAggregated = ! (command.contains(" verbose"));
+					boolean hasPath = command.indexOf("path=") > 0;
+					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
+					DescribeFactory.doDescribe(thePath, isAggregated);
 					continue;
 				}
 
