@@ -76,7 +76,7 @@ public class AuditParse {
 
                 }
 
-            }else if(LineSplit.get(0).equals("CWD")){
+            }else if(LineSplit.get(0).equals("type=CWD")){
                 Record cwdRec = new Record(LineSplit);
                 recordHashMap.get(cwdRec.getId()).appendToken("cwd="+cwdRec.getToken("cwd").getValue());
             }
@@ -502,7 +502,7 @@ public class AuditParse {
     public static void main(String[] args){
         AuditParse audit = new AuditParse();
         try {
-            audit.parseAuditLog(new File("audit.log"));
+            audit.parseAuditLog(new File("audittest.log"));
         } catch(IOException iox){
             System.out.println("IO Exception Error!");
             System.exit(0);
