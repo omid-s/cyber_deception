@@ -108,10 +108,11 @@ public class RuntimeVariables {
 	 * sets to ignore FD_numbers, this will create a cleaner graph with
 	 * ignoreing fd numbers for files
 	 */
-	private boolean ignoreFDNumber;
+	private Boolean ignoreFDNumber;
 
 	/**
-	 * sets weather fd_number should be  ignored in files or not
+	 * sets weather fd_number should be ignored in files or not
+	 * 
 	 * @param value
 	 */
 	public void setIgnoreFDNumber(boolean value) {
@@ -119,10 +120,11 @@ public class RuntimeVariables {
 	}
 
 	/**
-	 * retuiens wheather fd_number should be  ignored in files or not
+	 * retuiens wheather fd_number should be ignored in files or not
+	 * 
 	 * @return
 	 */
-	public boolean getIgnoreFDNumber() {
+	public Boolean getIgnoreFDNumber() {
 		return this.ignoreFDNumber;
 	}
 
@@ -152,7 +154,11 @@ public class RuntimeVariables {
 			break;
 		case "java.lang.String":
 			TheValue = Value;
+			break;
 
+		case "java.lang.Boolean":
+			TheValue = Boolean.parseBoolean(Value);
+			break;
 		default:
 			break;
 		}

@@ -1,5 +1,7 @@
 package Classes;
 
+import ControlClasses.RuntimeVariables;
+
 public class ResourceItem {
 
 	public String id;
@@ -30,6 +32,9 @@ public class ResourceItem {
 	}
 
 	public String getID() {
-		return this.Number + "|" + this.Title;
+		if (RuntimeVariables.getInstance().getIgnoreFDNumber() && this.Type == ResourceType.File)
+			return this.Title;
+		else
+			return this.Number + "|" + this.Title;
 	}
 }
