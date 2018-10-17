@@ -40,7 +40,7 @@ public class RuntimeVariables {
 		// ****** set default values :
 		forwardDepth = Integer.MAX_VALUE;
 		backDepth = Integer.MAX_VALUE;
-		ignoreFDNumber = false;
+		ignoreFDNumber = true;
 	}
 
 	private Map<String, Field> fieldsMap;
