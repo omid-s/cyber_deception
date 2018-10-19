@@ -301,7 +301,7 @@ public class MainClass {
 			try {
 				ColorHelpers.PrintBlue("$$>>");
 				String command = reader.nextLine();
-				if (command.equals("exit()"))
+				if (command.equalsIgnoreCase("exit") || command.equalsIgnoreCase("quit") )
 					break;
 
 				else if (command.trim().equalsIgnoreCase("info")) {
