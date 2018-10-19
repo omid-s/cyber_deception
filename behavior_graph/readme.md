@@ -61,6 +61,8 @@ The general structure of our query language is as follows :
 	2- [verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
 	
 	3- describe [verbose] [path=/path/to/file]
+	
+	4- {exit|quit}
 
 ### Variable setting/ Getting query
 
@@ -88,3 +90,8 @@ The “;” in the end indicates whether to add the results of the current query
 This keyword is to be used for creating a textuall representation of the graph. When this keyword is used a textual representation of the graph in the window will be presented. This can also be printed to a file with use of optional `path=` parameter. 
 
 by default describe, flattens the similar calls after eachother into a signle record. if seperate row for each call is desired user should use the optional verbose keyword.  
+
+
+### Exiting
+
+to exit the program gracefully, one the commands `exit` or `quit` can be used- both case insensetive. 
