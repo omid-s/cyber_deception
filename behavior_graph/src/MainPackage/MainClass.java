@@ -334,7 +334,6 @@ public class MainClass {
 									: command.length())
 							: null;
 
-					System.out.println(SortBy);
 					DescribeFactory.doDescribe(thePath, isAggregated, SortBy);
 					continue;
 				}

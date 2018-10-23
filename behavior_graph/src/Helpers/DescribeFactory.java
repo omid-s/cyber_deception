@@ -57,7 +57,7 @@ public class DescribeFactory {
 			printFormat = isAggregated ? "%1$14d) %2$s : %3$s(%4$s) --%5$s--> %6$s ||%7$12d times"
 					: "%1$14d) %2$s : %3$s(%4$s) --%5$s--> %6$s";
 		} else
-			printFormat = " { \"sequence_number\": %1$d, \"user\": \"%2$s\", \"pid\": %3$s , \"proc_name\": \"%4$s\", \"evt_type\": \"%5$s\", \"file_name\": \"%6$s\" ,  \"count\": %7$d}";
+			printFormat = " { \"sequence_number\": %1$d, \"user\": \"%2$s\", \"from_id\": %3$s , \"from_name\": \"%4$s\", \"evt_type\": \"%5$s\", \"to_name\": \"%6$s\" , \"to_id\":%8$s ,  \"count\": %7$d}";
 
 		PrintStream printer = null;
 
@@ -91,10 +91,10 @@ public class DescribeFactory {
 			if (index != 0 && FilePath != null)
 				printer.println(",");
 
-			printer.println(String.format(printFormat, pick.sequenceNumber, pick.user_name,
-					pick.From.getID().split("\\|")[0], pick.From.getID().split("\\|")[1], pick.Command,
+			printer.println(String.format(printFormat, pick.sequenceNumber, pick.user_name, pick.From.Number,
+					pick.From.Title, pick.Command,
 
-					pick.To.getID().contains("|") ? pick.To.getID().split("\\|")[1] : pick.To.getID(), count));
+					pick.To.Title, count, pick.To.Number));
 			count = 1;
 		}
 		printer.println("]");
