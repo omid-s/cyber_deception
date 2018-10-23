@@ -3,6 +3,8 @@ package Helpers;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import Classes.AccessCall;
 
@@ -15,8 +17,40 @@ import Classes.AccessCall;
  */
 
 public class DescribeFactory {
-	public static void doDescribe(String FilePath, boolean isAggregated) {
+	public static void doDescribe(String FilePath, boolean isAggregated, String sortBy) {
 		ArrayList<AccessCall> theList = BaseMemory.edges_for_describe;
+
+		// describe Magic :
+		Collections.sort(theList, new Comparator<AccessCall>() {
+
+			@Override
+			public int compare(AccessCall o1, AccessCall o2) {
+				int ret = 0;
+				if (sortBy == null) {
+					Long o1_l = o1.sequenceNumber;
+					Long o2_l = o2.sequenceNumber;
+					ret = o1_l.compareTo(o2_l);
+
+				} else if (sortBy.equalsIgnoreCase("pid")) {
+					ret = o1.From.Number.compareTo(o2.From.Number);
+				} else if (sortBy.equalsIgnoreCase("pname")) {
+					ret = o1.From.Title.compareTo(o2.From.Title);
+					if (ret == 0)
+						ret = o1.From.Number.compareTo(o2.From.Number);
+				} else if (sortBy.equalsIgnoreCase("seq")) {
+					Long o1_l = o1.sequenceNumber;
+					Long o2_l = o2.sequenceNumber;
+					ret = o1_l.compareTo(o2_l);
+				} else if (sortBy.equalsIgnoreCase("fname")) {
+					ret = o1.To.Title.compareTo(o2.To.Title);
+					if (ret == 0)
+						ret = o1.To.Number.compareTo(o2.To.Number);
+				}
+
+				return ret;
+
+			}
+		});
 
 		String printFormat = "";
 		if (FilePath == null) {

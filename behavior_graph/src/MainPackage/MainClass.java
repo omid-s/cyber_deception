@@ -301,7 +301,7 @@ public class MainClass {
 			try {
 				ColorHelpers.PrintBlue("$$>>");
 				String command = reader.nextLine();
-				if (command.equalsIgnoreCase("exit") || command.equalsIgnoreCase("quit") )
+				if (command.equalsIgnoreCase("exit") || command.equalsIgnoreCase("quit"))
 					break;
 
 				else if (command.trim().equalsIgnoreCase("info")) {
@@ -324,10 +324,18 @@ public class MainClass {
 					continue;
 				} else if (command.trim().toLowerCase().startsWith("describe")) {
 
-					boolean isAggregated = ! (command.contains(" verbose"));
+					boolean isAggregated = !(command.contains(" verbose"));
 					boolean hasPath = command.indexOf("path=") > 0;
+					boolean hasSort = command.indexOf("orderby=") > 0;
 					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
-					DescribeFactory.doDescribe(thePath, isAggregated);
+					String SortBy = hasSort ? command.substring(command.indexOf("orderby=") + "orderby=".length(),
+							command.indexOf(" ", command.indexOf("orderby=")) > 0
+									? command.indexOf(" ", command.indexOf("orderby="))
+									: command.length())
+							: null;
+
+					System.out.println(SortBy);
+					DescribeFactory.doDescribe(thePath, isAggregated, SortBy);
 					continue;
 				}
 
