@@ -19,10 +19,15 @@ public class testMain {
 //		ResourceType T  = ResourceType.valueOf("Activity");
 //		System.out.print(T.toString());	
 		
-		RuntimeVariables v = RuntimeVariables.getInstance();
+//		RuntimeVariables v = RuntimeVariables.getInstance();
+//		
+//		v.setValue("forward_depth", "123");
+//		System.out.println( v.getValue("forward_depth") );
+//		
 		
-		v.setValue("forward_depth", "123");
-		System.out.println( v.getValue("forward_depth") );
+		System.out.println("12940|sshd".split("\\|")[0]);
+		
+		
 		
 	}
 }
