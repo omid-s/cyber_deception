@@ -440,16 +440,7 @@ public class BaseMemory {
 
 		}
 
-		// describe Magic :
-		Collections.sort(edges_for_describe, new Comparator<AccessCall>() {
-
-			@Override
-			public int compare(AccessCall o1, AccessCall o2) {
-				Long o1_l = o1.sequenceNumber;
-				Long o2_l = o2.sequenceNumber;
-				return o1_l.compareTo(o2_l);
-			}
-		});
+	
 
 		return ret;
 	}

@@ -60,7 +60,7 @@ The general structure of our query language is as follows :
 	
 	2- [verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
 	
-	3- describe [verbose] [path=/path/to/file]
+	3- describe [verbose] [orderby={pid|pname|fname|seq}] [path=/path/to/file]
 	
 	4- {exit|quit}
 
@@ -91,6 +91,14 @@ This keyword is to be used for creating a textuall representation of the graph. 
 
 by default describe, flattens the similar calls after eachother into a signle record. if seperate row for each call is desired user should use the optional verbose keyword.  
 
+to order the items in the list one can use `orderby=` with one the given arguments as follows : 
+
+* seq : sorts by sequence number 
+* pname : sorts by process name 
+* pid : sorts by processid 
+* fname : sorts by file ( edge's destination ) name 
+
+*NOTE* : sort filed will also control how the merger of rows happens, eg. if sort by seq is selected the tow records which come after each other having same user,from, to, commands will be merged. if sorted by processid , the same will happen except they will be dealt with based on the order of processid .
 
 ### Exiting
 
