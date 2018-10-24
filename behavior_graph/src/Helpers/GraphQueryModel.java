@@ -72,9 +72,9 @@ public class GraphQueryModel {
 		if (whereIndex > 0) {
 			String temp = input.substring(whereIndex);
 			/*
-			 * criterias are seperated by ",also," tokens, they need to be
-			 * seerated before each token can be processed into a criteria
-			 * object which then will be appplied to the filter
+			 * criterias are seperated by ",also," tokens, they need to be seerated before
+			 * each token can be processed into a criteria object which then will be
+			 * appplied to the filter
 			 * 
 			 */
 			String tokens[] = temp.split(",also,");
@@ -82,8 +82,30 @@ public class GraphQueryModel {
 			for (int i = 0; i < tokens.length; i++) {
 				String t1[] = tokens[i].trim().split(" ");
 
-				criterias.add(new Criteria(t1[0].trim().toLowerCase(), t1[1].trim().toLowerCase(),
-						tokens[i].substring(t1[1].length() + tokens[i].indexOf(t1[1])).trim()));
+				if (t1.length == 3)
+					criterias.add(new Criteria(t1[0].trim().toLowerCase(), t1[1].trim().toLowerCase(),
+							tokens[i].substring(t1[1].length() + tokens[i].indexOf(t1[1])).trim()));
+				else {
+					ArrayList<ResourceType> cRtypes = new ArrayList<ResourceType>();
+					String type = t1[0];
+					for (String pick : type.split(",")) {
+						// if any is desired skip this
+						if (pick.equalsIgnoreCase("any"))
+							break;
+
+						if (pick.trim().toLowerCase().equals("soc")) {
+							cRtypes.add(ResourceType.NetworkIPV4);
+							cRtypes.add(ResourceType.NetworkIPV6);
+						} else {
+							ResourceType t = searchEnum(ResourceType.class, pick.trim());
+							if (t != null)
+								cRtypes.add(t);
+						}
+					}
+
+					criterias.add(new Criteria(cRtypes, t1[1].trim().toLowerCase(), t1[2].trim().toLowerCase(),
+							tokens[i].substring(t1[2].length() + tokens[i].indexOf(t1[2])).trim()));
+				}
 			}
 		}
 		//
