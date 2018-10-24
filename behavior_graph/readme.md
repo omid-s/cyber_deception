@@ -63,6 +63,8 @@ The general structure of our query language is as follows :
 	3- describe [verbose] [orderby={pid|pname|fname|seq}] [path=/path/to/file]
 	
 	4- {exit|quit}
+	
+	5- info
 
 ### Variable setting/ Getting query
 
@@ -81,7 +83,18 @@ The parts in the query account for the followings :
 [projection of access types]  : this option is either * for all, or is a selection of system calls including read, write, open, exec, etc. NOTE : because we do not capture starting of all processes, `exec` denotes an execution of a process by it's parent but time stamp will be the first time it has been executed which might or might not be when it was started.
 [projection of Resource types] : this option is either * for all, or is a selection of “file”, "process", "soc" for all types of socket calls, "pipe" or "unix"
 , ..
-Criteria : criterias are formated as `[field] [operator] [value]` . The “field” is one of the options : “pid” for process id, “tid” for thread Id and “activity.name” is the name of activity. The “operator” is either “is” or “has” which account for exact match and the contains operator. Different criterions can be added in the query using the separator “,also,”; “or” logical operator would be applied to these criterias. we have used this format to minimize the parsing efforts.  
+Criteria : criterias are formated as `[type] field operator value` . 
+type parameter can be any of resource types described in projection of resources section. This part is optional, skipping it or putting `any` means matching of all types is desired. 
+
+
+The “field” is one of the options :
+*  pid : for process id.
+*  name : searches in titles of resources 
+*  user_name : to search fir activities done by the user
+*  user_id : to search fir activities done by the user
+
+
+ The “operator” is either “is” or “has” which account for exact match and the contains operator. Different criterions can be added in the query using the separator “,also,”; “or” logical operator would be applied to these criterias. we have used this format to minimize the parsing efforts.  
 
 The “;” in the end indicates whether to add the results of the current query to the graph which is already present in the window; so we can have results of multiple queries create the whole picture piece by piece. 
 
@@ -103,3 +116,7 @@ to order the items in the list one can use `orderby=` with one the given argumen
 ### Exiting
 
 to exit the program gracefully, one the commands `exit` or `quit` can be used- both case insensetive. 
+
+### Getting graph info and stats
+
+to get information ( for now, edge and vertex counts ) use `info` keyword.

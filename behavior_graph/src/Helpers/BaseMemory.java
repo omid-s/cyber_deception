@@ -38,7 +38,7 @@ public class BaseMemory {
 	private Map<String, ArrayList<AccessCall>> fromAndTosMap = new HashMap<String, ArrayList<AccessCall>>();
 
 	private Map<String, ResourceItem> ProcessMap = new HashMap<String, ResourceItem>();
-	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
+//	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
 	private Map<String, ArrayList<ResourceItem>> FDMap = new HashMap<String, ArrayList<ResourceItem>>();
 
 	public static BaseMemory getSignleton() {
@@ -70,20 +70,20 @@ public class BaseMemory {
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 		}
-		if (inp.Type == ResourceType.Thread) {
-			if (!idMap.containsKey(inp.Number.toLowerCase()))
-				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
-			idMap.get(inp.Number.toLowerCase()).add(inp);
-		}
+//		if (inp.Type == ResourceType.Thread) {
+//			if (!idMap.containsKey(inp.Number.toLowerCase()))
+//				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
+//			idMap.get(inp.Number.toLowerCase()).add(inp);
+//		}
 		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
 				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 
-			if (!idMap.containsKey(inp.Number.toLowerCase()))
-				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
-			idMap.get(inp.Number.toLowerCase()).add(inp);
+//			if (!idMap.containsKey(inp.Number.toLowerCase()))
+//				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
+//			idMap.get(inp.Number.toLowerCase()).add(inp);
 		}
 	}
 
@@ -150,14 +150,14 @@ public class BaseMemory {
 			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
 
 		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
-				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>() : originalGraph;
+				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>()
+				: originalGraph;
 
 		// clear describe history if new instance is requested
-				
+
 		if (originalGraph == null)
 			edges_for_describe = new ArrayList<AccessCall>();
-		
-		
+
 		/**
 		 * seperate edge based criterias
 		 */
@@ -195,37 +195,41 @@ public class BaseMemory {
 					case "is":
 						if (FDMap.containsKey(pick.getValue()))
 							for (ResourceItem x : FDMap.get(pick.getValue())) {
-								temp.add(x);
+								if (pick.getFieldType().contains(x.Type) || pick.getFieldType().size() == 0)// cehck for filter type
+									temp.add(x);
 							}
 						break;
 					case "has":
 						for (String x : FDMap.keySet()) {
 							if (x.contains(pick.getValue()))
 								for (ResourceItem y : FDMap.get(x)) {
-									temp.add(y);
+									if (pick.getFieldType().contains(y.Type) || pick.getFieldType().size() == 0) // cehck for filter type
+										temp.add(y);
 								}
 						}
 						break;
 					}
 					break;
-				case "id":
-					switch (pick.getOp()) {
-					case "is":
-						if (idMap.containsKey(pick.getValue()))
-							for (ResourceItem x : idMap.get(pick.getValue())) {
-								temp.add(x);
-							}
-						break;
-					case "has":
-						for (String x : idMap.keySet()) {
-							if (x.contains(pick.getValue()))
-								for (ResourceItem y : idMap.get(x)) {
-									temp.add(y);
-								}
-						}
-						break;
-					}
-					break;
+//				case "id":
+//					switch (pick.getOp()) {
+//					case "is":
+//						if (idMap.containsKey(pick.getValue()))
+//							for (ResourceItem x : idMap.get(pick.getValue())) {
+//								if (pick.getFieldType().contains(x.Type) || pick.getFieldType().size() == 0)// cehck for filter type
+//									temp.add(x);
+//							}
+//						break;
+//					case "has":
+//						for (String x : idMap.keySet()) {
+//							if (x.contains(pick.getValue()))
+//								for (ResourceItem y : idMap.get(x)) {
+//									if (pick.getFieldType().contains(y.Type) || pick.getFieldType().size() == 0)// cehck for filter type
+//										temp.add(y);
+//								}
+//						}
+//						break;
+//					}
+//					break;
 				case "user_name":
 				case "user_id":
 					break;
@@ -256,9 +260,8 @@ public class BaseMemory {
 		// .get(0));
 
 		/**
-		 * propcess all the edges that initiate from the chosen nodes, if a new
-		 * noew is encountered, add it to the list ( this is a part of forwards
-		 * analysis )
+		 * propcess all the edges that initiate from the chosen nodes, if a new noew is
+		 * encountered, add it to the list ( this is a part of forwards analysis )
 		 */
 		while (temp.size() > 0) {
 
@@ -280,9 +283,8 @@ public class BaseMemory {
 				for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
 
 					/**
-					 * check if there is any criteria for user names and ids,
-					 * apply it. ( if there is no user based criteria, add the
-					 * edge, otherwise apply the cirterai )
+					 * check if there is any criteria for user names and ids, apply it. ( if there
+					 * is no user based criteria, add the edge, otherwise apply the cirterai )
 					 */
 					if ((edge_criteria.size() > 0 && edge_criteria.stream()
 							.anyMatch(x -> ((x.getOp().equalsIgnoreCase("has") && pick.user_name.contains(x.getValue())
@@ -361,9 +363,8 @@ public class BaseMemory {
 				for (AccessCall pick : tosMap.get(v.id.toLowerCase())) {
 
 					/**
-					 * check if there is any criteria for user names and ids,
-					 * apply it. ( if there is no user based criteria, add the
-					 * edge, otherwise apply the cirterai )
+					 * check if there is any criteria for user names and ids, apply it. ( if there
+					 * is no user based criteria, add the edge, otherwise apply the cirterai )
 					 */
 					if ((edge_criteria.size() > 0 && edge_criteria.stream()
 							.anyMatch(x -> ((x.getOp().equalsIgnoreCase("has") && pick.user_name.contains(x.getValue())
@@ -439,8 +440,6 @@ public class BaseMemory {
 				}
 
 		}
-
-	
 
 		return ret;
 	}
