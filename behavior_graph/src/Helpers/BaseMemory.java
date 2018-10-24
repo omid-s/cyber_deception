@@ -38,7 +38,7 @@ public class BaseMemory {
 	private Map<String, ArrayList<AccessCall>> fromAndTosMap = new HashMap<String, ArrayList<AccessCall>>();
 
 	private Map<String, ResourceItem> ProcessMap = new HashMap<String, ResourceItem>();
-	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
+//	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
 	private Map<String, ArrayList<ResourceItem>> FDMap = new HashMap<String, ArrayList<ResourceItem>>();
 
 	public static BaseMemory getSignleton() {
@@ -70,20 +70,20 @@ public class BaseMemory {
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 		}
-		if (inp.Type == ResourceType.Thread) {
-			if (!idMap.containsKey(inp.Number.toLowerCase()))
-				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
-			idMap.get(inp.Number.toLowerCase()).add(inp);
-		}
+//		if (inp.Type == ResourceType.Thread) {
+//			if (!idMap.containsKey(inp.Number.toLowerCase()))
+//				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
+//			idMap.get(inp.Number.toLowerCase()).add(inp);
+//		}
 		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
 				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 
-			if (!idMap.containsKey(inp.Number.toLowerCase()))
-				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
-			idMap.get(inp.Number.toLowerCase()).add(inp);
+//			if (!idMap.containsKey(inp.Number.toLowerCase()))
+//				idMap.put(inp.Number.toLowerCase(), new ArrayList<ResourceItem>());
+//			idMap.get(inp.Number.toLowerCase()).add(inp);
 		}
 	}
 
@@ -210,26 +210,26 @@ public class BaseMemory {
 						break;
 					}
 					break;
-				case "id":
-					switch (pick.getOp()) {
-					case "is":
-						if (idMap.containsKey(pick.getValue()))
-							for (ResourceItem x : idMap.get(pick.getValue())) {
-								if (pick.getFieldType().contains(x.Type) || pick.getFieldType().size() == 0)// cehck for filter type
-									temp.add(x);
-							}
-						break;
-					case "has":
-						for (String x : idMap.keySet()) {
-							if (x.contains(pick.getValue()))
-								for (ResourceItem y : idMap.get(x)) {
-									if (pick.getFieldType().contains(y.Type) || pick.getFieldType().size() == 0)// cehck for filter type
-										temp.add(y);
-								}
-						}
-						break;
-					}
-					break;
+//				case "id":
+//					switch (pick.getOp()) {
+//					case "is":
+//						if (idMap.containsKey(pick.getValue()))
+//							for (ResourceItem x : idMap.get(pick.getValue())) {
+//								if (pick.getFieldType().contains(x.Type) || pick.getFieldType().size() == 0)// cehck for filter type
+//									temp.add(x);
+//							}
+//						break;
+//					case "has":
+//						for (String x : idMap.keySet()) {
+//							if (x.contains(pick.getValue()))
+//								for (ResourceItem y : idMap.get(x)) {
+//									if (pick.getFieldType().contains(y.Type) || pick.getFieldType().size() == 0)// cehck for filter type
+//										temp.add(y);
+//								}
+//						}
+//						break;
+//					}
+//					break;
 				case "user_name":
 				case "user_id":
 					break;
