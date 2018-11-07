@@ -83,7 +83,7 @@ public class GraphDBDal {
 			// Querying
 			// try (Statement stmt = TheConnection.createStatement()) {
 			// ResultSet rs = stmt.executeQuery(temp);
-			TheStateMent.executeQuery(temp);
+			TheStateMent.executeQuery(temp+"\n"+temp);
 			/*
 			 * while (rs.next()) { System.out.println(rs.getString("ID")); }
 			 */

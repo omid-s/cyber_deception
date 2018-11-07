@@ -17,8 +17,8 @@ public class DataBaseLayer {
 		if (_underlyingConnectionObject == null) {
 			Connection conn = null;
 
-			conn = DriverManager.getConnection("jdbc:postgresql://omid.cs.uga.edu:5432/SysDigData", "postgres",
-					"IeGeekPassword");
+			conn = DriverManager.getConnection("jdbc:postgresql://172.19.48.79:5432/SysDigData", "postgres",
+					"123456");
 			_underlyingConnectionObject = conn;
 		}
 		return _underlyingConnectionObject;
