@@ -77,13 +77,13 @@ public class GraphDBDal {
 			// Connect
 			if (TheConnection == null) {
 				TheConnection = DriverManager.getConnection(
-						"jdbc:neo4j://172.19.48.79:7474/", "neo4j", "123456");
+						"jdbc:neo4j:bolt://172.19.48.79/", "neo4j", "123456");
 				TheStateMent = TheConnection.createStatement();
 			}
 			// Querying
 			// try (Statement stmt = TheConnection.createStatement()) {
 			// ResultSet rs = stmt.executeQuery(temp);
-			TheStateMent.executeQuery(temp+"\n"+temp);
+			TheStateMent.executeQuery(temp);
 			/*
 			 * while (rs.next()) { System.out.println(rs.getString("ID")); }
 			 */
