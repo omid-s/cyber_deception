@@ -13,7 +13,7 @@ import java.util.List;
 public class Record {
     String id;
     String type;
-    List<Token> tokenList = new ArrayList<Token>();
+    HashMap<Integer, Token> tokenList = new HashMap<>();
     Record(List<String> list) throws IOException{
 
             //Extract the type from the string type=value
@@ -26,7 +26,7 @@ public class Record {
 
         for(int i = 0; i<list.size(); i++){
             Token newToken = new Token(list.get(i));
-            tokenList.add(newToken);
+            tokenList.put(i, newToken);
         }
 
     }
@@ -106,7 +106,7 @@ public class Record {
      */
     public void appendToken(String keyValue){
         Token appendToken = new Token(keyValue);
-        tokenList.add(appendToken);
+        tokenList.put(tokenList.size(), appendToken);
     }
 
 
