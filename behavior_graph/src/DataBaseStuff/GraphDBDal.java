@@ -77,7 +77,7 @@ public class GraphDBDal {
 			// Connect
 			if (TheConnection == null) {
 				TheConnection = DriverManager.getConnection(
-						"jdbc:neo4j://localhost:7474/", "neo4j", "omidomid");
+						"jdbc:neo4j://172.19.48.79:7474/", "neo4j", "123456");
 				TheStateMent = TheConnection.createStatement();
 			}
 			// Querying
