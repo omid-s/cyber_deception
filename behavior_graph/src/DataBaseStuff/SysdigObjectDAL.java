@@ -3,6 +3,8 @@ package DataBaseStuff;
 import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.StringJoiner;
+
 import Classes.*;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
@@ -50,17 +52,19 @@ public class SysdigObjectDAL {
 
 			Keys += pick.getName();
 		}
-		Keys += " ) values ( %1$s )";
+		Keys += " ) values ( %1$s ) ;\r\n ";
 		InsertTemplate = Keys;
 		// endregion
 
 	}
 
+	private static String big_query = "";
+	private static int big_query_counter = 0;
+private static StringJoiner items = new StringJoiner(" " );
 	/**
 	 * Insets the record into the Database
 	 * 
-	 * @param inp
-	 *            the object to be inseted
+	 * @param inp the object to be inseted
 	 */
 	public void Insert(SysdigRecordObject inp) {
 		String Query = "";
@@ -80,9 +84,29 @@ public class SysdigObjectDAL {
 			}
 			DataBaseLayer DL = new DataBaseLayer();
 			Query = String.format(InsertTemplate, PickString);
-			DL.runUpdateQuery(Query);
+
+			items.add(Query);
+//			big_query += Query;
+			big_query_counter++;
+
+			if (big_query_counter % 1000 == 0) {
+//				StringJoiner j = new StringJoiner(' ');
+				DL.runUpdateQuery(items.toString());
+				big_query= "";
+				System.out.println("Running!");
+			}
 		} catch (Exception ex) {
 			System.out.println(Query);
+			System.out.println("Class Not found!");
+		}
+	}
+
+	public void flushRows() {
+		try {
+			DataBaseLayer DL = new DataBaseLayer();
+			DL.runUpdateQuery(items.toString());
+		} catch (Exception ex) {
+			System.out.println(big_query);
 			System.out.println("Class Not found!");
 		}
 	}

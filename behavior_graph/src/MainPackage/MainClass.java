@@ -258,9 +258,12 @@ public class MainClass {
 			}
 
 		}
+		temp.flushRows();
 		// ClearHelper.release_maps();
 		// VerboseHelper.release_maps();
 
+		
+		
 		Instant end2 = Instant.now();
 
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
@@ -290,7 +293,7 @@ public class MainClass {
 		int num_vertex = theGraph.getVertexCount();
 
 		theGraph = null;
-
+		System.gc();
 		GraphQueryModel qt = new GraphQueryModel();
 
 		EdgeLabelDemo theGraphWindow = null;
@@ -372,6 +375,8 @@ public class MainClass {
 				// System.out.print("\033[H\033[2J >");
 
 				System.out.flush();
+				System.gc();
+				
 			} catch (VariableNoitFoundException ex) {
 				ColorHelpers.PrintRed(ex.getMessage());
 			} catch (Exception ex) {
