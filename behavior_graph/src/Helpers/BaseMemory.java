@@ -101,10 +101,10 @@ public class BaseMemory {
 			tosMap.put(inp.To.id.toLowerCase(), new ArrayList<AccessCall>());
 		tosMap.get(inp.To.id.toLowerCase()).add(inp);
 
-		String keys = inp.From.id.toLowerCase() + "||" + inp.To.id.toLowerCase();
-		if (!fromAndTosMap.containsKey(keys))
-			fromAndTosMap.put(keys, new ArrayList<AccessCall>());
-		fromAndTosMap.get(keys).add(inp);
+//		String keys = inp.From.id.toLowerCase() + "||" + inp.To.id.toLowerCase();
+//		if (!fromAndTosMap.containsKey(keys))
+//			fromAndTosMap.put(keys, new ArrayList<AccessCall>());
+//		fromAndTosMap.get(keys).add(inp);
 
 	}
 
