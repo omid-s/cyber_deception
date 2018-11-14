@@ -29,7 +29,7 @@ public class Configurations {
 
 		File configFile = new File(fileName);
 
-		if (configFile.exists()) {
+		if (configFile.exists()) { // read the config file and set values
 			try {
 				Scanner reader = new Scanner(configFile);
 				while (reader.hasNextLine()) {
@@ -60,11 +60,7 @@ public class Configurations {
 				Helpers.ColorHelpers.PrintRed("Error creating config file!");
 			}
 		}
-
-		/// TODO : add check for setuop file existnace
-		/// TODO : create the settings file if it dfoes not exist
-		/// TODO : read the settings off ofg the setup file
-	}
+ 	}
 
 	/**
 	 * creates or returns an instance of the configuration class which contains
@@ -108,7 +104,14 @@ public class Configurations {
 	 * @return setting value for the key
 	 */
 	public String getSetting(String Key) {
-		return "";
+		if( settings.containsKey(Key) )
+			return settings.get(Key)  ;
+		else 
+		{ // if the key is not in the config hash map, settings file was wrong!
+			Helpers.ColorHelpers.PrintRed("Error loading settings!");
+			System.exit(0);
+			return "";
+		}
 	}
 
 	/**
