@@ -8,17 +8,23 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import Helpers.Configurations;
+
 public class DataBaseLayer {
 
 	private static Connection _underlyingConnectionObject;
-	private static String DBName = "SysDigData";
 
 	public static Connection getConnection() throws SQLException {
 		if (_underlyingConnectionObject == null) {
 			Connection conn = null;
 
-			conn = DriverManager.getConnection("jdbc:postgresql://172.19.48.79:5432/SysDigData", "postgres",
-					"123456");
+			conn = DriverManager.getConnection(
+					String.format("jdbc:postgresql://%s:%s/%s",
+							Configurations.getInstance().getSetting(Configurations.PG_SERVER),
+							Configurations.getInstance().getSetting(Configurations.PG_PORT),
+							Configurations.getInstance().getSetting(Configurations.PG_BDNAME)),
+					Configurations.getInstance().getSetting(Configurations.PG_USERNAME),
+					Configurations.getInstance().getSetting(Configurations.PG_PASSWORD));
 			_underlyingConnectionObject = conn;
 		}
 		return _underlyingConnectionObject;
