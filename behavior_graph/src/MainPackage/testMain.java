@@ -6,6 +6,7 @@ package MainPackage;
 import Classes.ResourceType;
 import ControlClasses.RuntimeVariables;
 import DataBaseStuff.DataBaseLayer;
+import Helpers.Configurations;
 
 /**
  * @author omido
@@ -25,8 +26,9 @@ public class testMain {
 //		System.out.println( v.getValue("forward_depth") );
 //		
 		
-		System.out.println("12940|sshd".split("\\|")[0]);
+//		System.out.println("12940|sshd".split("\\|")[0]);
 		
+		Configurations.getInstance();
 		
 		
 	}
