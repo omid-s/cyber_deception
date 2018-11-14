@@ -6,6 +6,7 @@ package Helpers;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -17,6 +18,8 @@ public class Configurations {
 
 	private static String fileName = "oql.conf";
 	private static Configurations instance;
+
+	private ArrayList<String> keysOrder;
 
 	private HashMap<String, String> settings;
 
@@ -34,10 +37,11 @@ public class Configurations {
 				Scanner reader = new Scanner(configFile);
 				while (reader.hasNextLine()) {
 					String line = reader.nextLine().trim();
-					
-					if ( line.startsWith("#") ) // skip comment lines ( they start with a # )
+
+					if (line.startsWith("#")) // skip comment lines ( they start
+												// with a # )
 						continue;
-					
+
 					settings.put(line.split("=")[0], line.substring(line.indexOf("=") + 1));
 				}
 				reader.close();
@@ -49,18 +53,32 @@ public class Configurations {
 			// write settings to a default file (keys might not be in order)
 			try {
 				makeDefaults();
-				configFile.createNewFile();
-				PrintWriter printer = new PrintWriter(configFile);
-				for (String x : settings.keySet()) {
-					printer.println(String.format("%s=%s", x, settings.get(x)));
-				}
-				printer.flush();
-				printer.close();
+				storeSettigns();
 			} catch (IOException ex) {
 				Helpers.ColorHelpers.PrintRed("Error creating config file!");
 			}
 		}
- 	}
+	}
+
+	/**
+	 * Stores settings into the settign file This can be called when program is
+	 * runnig to set values for program settings
+	 * 
+	 * @throws IOException
+	 */
+	public void storeSettigns() throws IOException {
+		File configFile = new File(fileName);
+		configFile.createNewFile();
+		PrintWriter printer = new PrintWriter(configFile);
+		for (String x : keysOrder) {
+			if (x.startsWith("#"))
+				printer.println(x);
+			else
+				printer.println(String.format("%s=%s", x, settings.get(x)));
+		}
+		printer.flush();
+		printer.close();
+	}
 
 	/**
 	 * creates or returns an instance of the configuration class which contains
@@ -82,10 +100,19 @@ public class Configurations {
 	 * 
 	 */
 	private void makeDefaults() {
+		/// set the key storage order :)
+		keysOrder = new ArrayList<String>();
+		keysOrder.add("# OQL tool config file, please note all keys have to be present or program will not run!");
+
 		// neo 4 jj stuff
 		settings.put(NEO4J_SERVER, "localhost");
 		settings.put(NEO4J_USERNAME, "neo4j");
 		settings.put(NEO4J_PASSWORD, "neo4j");
+
+		keysOrder.add("# Neo4j access settings");
+		keysOrder.add(NEO4J_SERVER);
+		keysOrder.add(NEO4J_USERNAME);
+		keysOrder.add(NEO4J_PASSWORD);
 
 		// postgress stuff
 
@@ -94,6 +121,22 @@ public class Configurations {
 		settings.put(PG_PORT, "5432");
 		settings.put(PG_SERVER, "127.0.0.1");
 		settings.put(PG_USERNAME, "postgres");
+
+		keysOrder.add("# Postgres access settings");
+		keysOrder.add(PG_SERVER);
+		keysOrder.add(PG_PORT);
+		keysOrder.add(PG_BDNAME);
+		keysOrder.add(PG_USERNAME);
+		keysOrder.add(PG_PASSWORD);
+
+		// program variables
+		settings.put(BACKWARD_STEPS, "9999999");
+		settings.put(FORWARD_STEPS, "9999999");
+
+		keysOrder.add("# Enviroment variable settings");
+		keysOrder.add(BACKWARD_STEPS);
+		keysOrder.add(FORWARD_STEPS);
+
 	}
 
 	/**
@@ -104,10 +147,10 @@ public class Configurations {
 	 * @return setting value for the key
 	 */
 	public String getSetting(String Key) {
-		if( settings.containsKey(Key) )
-			return settings.get(Key)  ;
-		else 
-		{ // if the key is not in the config hash map, settings file was wrong!
+		if (settings.containsKey(Key))
+			return settings.get(Key);
+		else { // if the key is not in the config hash map, settings file was
+				// wrong!
 			Helpers.ColorHelpers.PrintRed("Error loading settings!");
 			System.exit(0);
 			return "";
@@ -118,14 +161,17 @@ public class Configurations {
 	 * Constant definitions
 	 */
 	// neo4j stuff
-	public final String NEO4J_USERNAME = "neo4j_username";
-	public final String NEO4J_PASSWORD = "neo4j_password";
-	public final String NEO4J_SERVER = "neo4j_server";
+	public static final String NEO4J_USERNAME = "neo4j_username";
+	public static final String NEO4J_PASSWORD = "neo4j_password";
+	public static final String NEO4J_SERVER = "neo4j_server";
 	// postgres stuff
-	public final String PG_USERNAME = "pg_username";
-	public final String PG_PASSWORD = "pg_password";
-	public final String PG_SERVER = "pg_server";
-	public final String PG_PORT = "pg_port";
-	public final String PG_BDNAME = "pg_dbname";
+	public static final String PG_USERNAME = "pg_username";
+	public static final String PG_PASSWORD = "pg_password";
+	public static final String PG_SERVER = "pg_server";
+	public static final String PG_PORT = "pg_port";
+	public static final String PG_BDNAME = "pg_dbname";
+	// program variables
+	public static final String BACKWARD_STEPS = "backward_steps";
+	public static final String FORWARD_STEPS = "forward_steps";
 
 }

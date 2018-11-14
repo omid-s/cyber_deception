@@ -28,8 +28,7 @@ public class testMain {
 		
 //		System.out.println("12940|sshd".split("\\|")[0]);
 		
-		Configurations.getInstance();
-		
+		System.out.println(  Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME));
 		
 	}
 }
