@@ -4,7 +4,10 @@ package DataBaseStuff;
 
 import java.sql.*;
 
+import org.neo4j.driver.v1.Config;
+
 import Classes.*;
+import Helpers.Configurations;
 
 public class GraphDBDal {
 
@@ -77,7 +80,11 @@ public class GraphDBDal {
 			// Connect
 			if (TheConnection == null) {
 				TheConnection = DriverManager.getConnection(
-						"jdbc:neo4j:bolt://172.19.48.79/", "neo4j", "123456");
+					 	String.format("jdbc:neo4j:bolt://%s/",  Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER) ), 
+					 	Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME) , 
+						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)  
+						 
+						);
 				TheStateMent = TheConnection.createStatement();
 			}
 			// Querying
