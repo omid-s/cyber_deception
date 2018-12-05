@@ -6,7 +6,8 @@ import classes.*;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
-
+import querying.parsing.Criteria;
+import querying.tools.EnumTools;
 /**
  * @author omido
  *
@@ -52,7 +53,7 @@ public class GraphQueryModel {
 					resourceTypes.add(ResourceType.NetworkIPV4);
 					resourceTypes.add(ResourceType.NetworkIPV6);
 				} else {
-					ResourceType t = searchEnum(ResourceType.class, pick.trim());
+					ResourceType t = EnumTools.searchEnum(ResourceType.class, pick.trim());
 					if (t != null)
 						resourceTypes.add(t);
 				}
@@ -97,7 +98,7 @@ public class GraphQueryModel {
 							cRtypes.add(ResourceType.NetworkIPV4);
 							cRtypes.add(ResourceType.NetworkIPV6);
 						} else {
-							ResourceType t = searchEnum(ResourceType.class, pick.trim());
+							ResourceType t = EnumTools.searchEnum(ResourceType.class, pick.trim());
 							if (t != null)
 								cRtypes.add(t);
 						}
@@ -116,12 +117,5 @@ public class GraphQueryModel {
 				doesAppend ? oldGraph : null);
 	}
 
-	public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
-		for (T each : enumeration.getEnumConstants()) {
-			if (each.name().compareToIgnoreCase(search) == 0) {
-				return each;
-			}
-		}
-		return null;
-	}
+	
 }

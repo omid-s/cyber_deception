@@ -16,6 +16,7 @@ import helpers.BaseMemory;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
 import helpers.GraphQueryModel;
+import querying.parsing.Criteria;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -43,7 +44,6 @@ import org.jfree.ui.RefineryUtilities;
 import org.omg.DynamicAny.DynAnyFactoryPackage.InconsistentTypeCodeHelper;
 
 import classes.AccessCall;
-import classes.Criteria;
 import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;

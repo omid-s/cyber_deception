@@ -1,10 +1,10 @@
 /**
  * 
  */
-package classes;
+package querying.parsing;
 
 import java.util.ArrayList;
-
+import classes.*;
 /**
  * @author omido
  *
