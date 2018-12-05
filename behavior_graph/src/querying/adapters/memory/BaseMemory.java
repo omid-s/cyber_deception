@@ -16,6 +16,7 @@ import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
+import querying.ParsedQuery;
 import querying.parsing.Criteria;
 
 /**
@@ -144,7 +145,22 @@ public class BaseMemory {
 
 	public static ArrayList<AccessCall> edges_for_describe = new ArrayList<AccessCall>();
 
-	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
+	
+	
+	public Graph<ResourceItem, AccessCall> getSubGraph( ParsedQuery theQuery ) throws QueryFormatException{
+		
+		return this.getSubGraph(
+				theQuery.getVerticeTypes(),
+				theQuery.getEdgeTypes(),
+				theQuery.isVerbose(),
+				theQuery.isBackTracked(),
+				theQuery.isForwardTracked(),
+				theQuery.getCriterias(),
+				theQuery.getOriginalGraph()
+				);
+	}
+	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes,
+ArrayList<String> edgeType,
 			boolean isVerbose, boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
 			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
 

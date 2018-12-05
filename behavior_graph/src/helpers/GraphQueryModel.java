@@ -6,9 +6,11 @@ import classes.*;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
+import querying.ParsedQuery;
 import querying.adapters.memory.BaseMemory;
 import querying.parsing.Criteria;
 import querying.tools.EnumTools;
+
 /**
  * @author omido
  *
@@ -110,13 +112,11 @@ public class GraphQueryModel {
 				}
 			}
 		}
-		//
-		// new ArrayList<Criteria>(Arrays
-		// .asList(new Criteria("pid", "has", "1195"), new Criteria("pid", "is",
-		// "312 / Main Process"))
-		return mem.getSubGraph(resourceTypes, callTypes, isVerbose, isBackTracked, isForwardTracked, criterias,
-				doesAppend ? oldGraph : null);
+
+		ParsedQuery query = new ParsedQuery(resourceTypes, callTypes, isVerbose, isBackTracked, isForwardTracked,
+				criterias, doesAppend ? oldGraph : null, doesAppend);
+
+		return mem.getSubGraph(query);
 	}
 
-	
 }
