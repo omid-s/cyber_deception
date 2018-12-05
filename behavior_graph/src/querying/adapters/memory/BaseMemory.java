@@ -1,7 +1,7 @@
 /**
  * 
  */
-package helpers;
+package querying.adapters.memory;
 
 import java.util.*;
 import java.util.HashMap;

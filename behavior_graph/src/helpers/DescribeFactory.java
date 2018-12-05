@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import classes.AccessCall;
+import querying.adapters.memory.BaseMemory;
 
 /***
  * 

@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
-import helpers.BaseMemory;
+import querying.adapters.memory.BaseMemory;
 
 /**
  * @author omido

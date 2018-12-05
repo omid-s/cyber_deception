@@ -9,6 +9,7 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import dataBaseStuff.*;
 import helpers.*;
+import querying.adapters.memory.BaseMemory;
 
 /**
  * @author omido

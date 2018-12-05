@@ -12,10 +12,10 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
-import helpers.BaseMemory;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
 import helpers.GraphQueryModel;
+import querying.adapters.memory.BaseMemory;
 import querying.parsing.Criteria;
 
 import java.awt.Color;
