@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
-import querying.adapters.memory.BaseMemory;
+import querying.adapters.memory.InMemoryAdapter;
 
 /**
  * @author omido
@@ -53,7 +53,7 @@ public class AccessCallObjectDal {
 	
 	private AccessCall itemFromDBRow(ResultSet inp, boolean saveToMem) throws Exception {
 		AccessCall ret = new AccessCall();
-		BaseMemory mem = BaseMemory.getSignleton();
+		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
 		
 		ret.id = inp.getString("id");
 		ret.DateTime = inp.getString("DateTime");

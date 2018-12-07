@@ -8,7 +8,7 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
 import querying.ParsedQuery;
 import querying.QueryInterpreter;
-import querying.adapters.memory.BaseMemory;
+import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
 import querying.tools.EnumTools;
 
@@ -27,7 +27,7 @@ public class GraphQueryModel {
 		} catch (Exception ex) {
 		}
 
-		BaseMemory mem = BaseMemory.getSignleton();
+		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
 
 		return mem.getSubGraph(query);
 	}

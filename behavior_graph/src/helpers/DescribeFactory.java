@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import classes.AccessCall;
-import querying.adapters.memory.BaseMemory;
+import querying.adapters.memory.InMemoryAdapter;
 
 /***
  * 
@@ -19,7 +19,7 @@ import querying.adapters.memory.BaseMemory;
 
 public class DescribeFactory {
 	public static void doDescribe(String FilePath, boolean isAggregated, String sortBy) {
-		ArrayList<AccessCall> theList = BaseMemory.edges_for_describe;
+		ArrayList<AccessCall> theList = InMemoryAdapter.edges_for_describe;
 
 		// describe Magic :
 		Collections.sort(theList, new Comparator<AccessCall>() {

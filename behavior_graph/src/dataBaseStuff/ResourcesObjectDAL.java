@@ -9,7 +9,7 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import dataBaseStuff.*;
 import helpers.*;
-import querying.adapters.memory.BaseMemory;
+import querying.adapters.memory.InMemoryAdapter;
 
 /**
  * @author omido
@@ -60,7 +60,7 @@ public class ResourcesObjectDAL {
 		ret.Type = ResourceType.valueOf(inp.getString("Type"));
 
 		if (saveToMem) {
-			BaseMemory mem = BaseMemory.getSignleton();
+			InMemoryAdapter mem = InMemoryAdapter.getSignleton();
 			mem.addResourceItem(ret);
 		}
 		return ret;

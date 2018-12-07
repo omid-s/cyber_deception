@@ -15,7 +15,7 @@ import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
 import helpers.GraphQueryModel;
-import querying.adapters.memory.BaseMemory;
+import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
 
 import java.awt.Color;
@@ -278,7 +278,7 @@ public class MainClass {
 		// ArrayList<ResourceItem>(),
 		// new ArrayList<AccessCall>());
 
-		BaseMemory mem = BaseMemory.getSignleton();
+		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
 		for (ResourceItem pick : theGraph.getVertices()) {
 			mem.addResourceItem(pick);
 		}
