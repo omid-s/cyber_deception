@@ -103,7 +103,6 @@ public class MainClass {
 			return;
 		}
 
-		ArrayList<SysdigRecordObject> items = new ArrayList<SysdigRecordObject>();
 		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat, false);
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
@@ -140,7 +139,6 @@ public class MainClass {
 					if (SaveFormated)
 						output_file_writer.write(tempObj.toString() + "\n");
 
-					// items.add(tempObj);
 					if (Thread.currentThread().getId() == Long.parseLong(tempObj.thread_tid)) {
 						skipped++;
 						System.out.println(".");
@@ -155,11 +153,9 @@ public class MainClass {
 
 					if (ShowVerbose) {
 						VerboseHelper.AddRowToGraph(theGraph, tempObj);
-						// VerboseGraphWindow.vv.repaint();
 					}
 					if (ShowGraph) {
 						ClearHelper.AddRowToGraph(theGraph, tempObj);
-						// ClearGraphWindow.vv.repaint();
 					}
 
 				} else {
@@ -177,7 +173,6 @@ public class MainClass {
 			} catch (NumberFormatException ex) {
 				inError++;
 			} catch (Exception e) {
-				// e.printStackTrace();
 				System.out.println("Error");
 			}
 		}
@@ -189,7 +184,7 @@ public class MainClass {
 				// int counter = 0;
 				GraphDBDal db = new GraphDBDal();
 				String multipleRecords = "";
-				String currentRecord = "";
+
 				while (test.hasNextLine()) {
 					try {
 						SysdigRecordObject tempObj;
@@ -199,15 +194,12 @@ public class MainClass {
 							multipleRecords += test.nextLine();
 							tempObj = temp.GetObjectFromTextLine(multipleRecords);
 
-							currentRecord = "";
-
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
 							System.out.println(multipleRecords);
-							currentRecord = "";
 							continue;
 						} catch (HighFieldNumberException ex) {
 							multipleRecords = "";
@@ -215,12 +207,9 @@ public class MainClass {
 						}
 
 						multipleRecords = "";
-						// SysdigRecordObject tempObj =
-						// temp.GetObjectFromTextLine(test.nextLine());
-						items.add(tempObj);
+
 						counter++;
-						// System.out.println ( "show graph : " + ShowGraph);
-						// db.Save(tempObj, true);
+
 						if (SaveToDB)
 							temp.Insert(tempObj);
 
@@ -229,19 +218,12 @@ public class MainClass {
 
 						if (ShowVerbose) {
 							VerboseHelper.AddRowToGraph(theGraph, tempObj);
-							// VerboseHelper.AddRowToGraph(VerboseGraphWindow.graph,
-							// tempObj);
-							// VerboseGraphWindow.vv.repaint();
+
 						}
 						if (ShowGraph) {
 							ClearHelper.AddRowToGraph(theGraph, tempObj);
-							// ClearGraphWindow.vv.repaint();
+
 						}
-						// GraphObjectHelper tempHelper = new
-						// GraphObjectHelper(false);
-						// tempHelper.AddRowToGraph(VerboseGraphWindow.graph,
-						// tempObj);
-						// VerboseGraphWindow.vv.repaint();
 
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
@@ -253,6 +235,7 @@ public class MainClass {
 					}
 
 				}
+				test.close();
 				db.closeConnections();
 			} catch (Exception ex) {
 				ex.printStackTrace();

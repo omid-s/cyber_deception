@@ -147,8 +147,10 @@ public class InMemoryAdapter  extends BaseAdapter{
 	public static ArrayList<AccessCall> edges_for_describe = new ArrayList<AccessCall>();
 
 	
-	
-	public Graph<ResourceItem, AccessCall> getSubGraph( ParsedQuery theQuery ) throws QueryFormatException{
+	/**
+	 * This method runs the query and returns the filtered query from the in memory object
+	 */
+	@Override public Graph<ResourceItem, AccessCall> getSubGraph( ParsedQuery theQuery ) throws QueryFormatException{
 		
 		return this.getSubGraph(
 				theQuery.getVerticeTypes(),
