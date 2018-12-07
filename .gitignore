@@ -1,3 +1,4 @@
 # ignore built classes
 *.class
 *.log
+oql.conf
