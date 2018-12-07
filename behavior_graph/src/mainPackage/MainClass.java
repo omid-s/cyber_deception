@@ -14,7 +14,9 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
-import helpers.GraphQueryModel;
+import querying.BaseAdapter;
+import querying.ParsedQuery;
+import querying.QueryInterpreter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
 
@@ -41,7 +43,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.jfree.ui.RefineryUtilities;
-import org.omg.DynamicAny.DynAnyFactoryPackage.InconsistentTypeCodeHelper;
 
 import classes.AccessCall;
 import classes.ResourceItem;
@@ -57,7 +58,7 @@ public class MainClass {
 		String pid = "";
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
-				InShortFormat = false, SaveFormated = false;
+				InShortFormat = false, SaveFormated = false, MemQuery = true;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -89,6 +90,8 @@ public class MainClass {
 				InShortFormat = true;
 			if (pick.equals("sf"))
 				SaveFormated = true;
+			if (pick.equals("rq"))
+				MemQuery = true;
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -159,9 +162,7 @@ public class MainClass {
 					}
 
 				} else {
-
 					break;
-
 				}
 				counter++;
 				System.out.print("\033[H\033[2J");
@@ -252,23 +253,16 @@ public class MainClass {
 			output_file_writer.flush();
 			output_file_writer.close();
 		}
-		JFrame frame2 = new JFrame();
-		frame2.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		// frame2.setSize(800, 600); // Container content =
 
-		frame2.getContentPane();
-		// EdgeLabelDemo VerboseGraphWindow = new EdgeLabelDemo(new
-		// ArrayList<ResourceItem>(),
-		// new ArrayList<AccessCall>());
-
-		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
-		for (ResourceItem pick : theGraph.getVertices()) {
-			mem.addResourceItem(pick);
+		if (MemQuery) {
+			InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+			for (ResourceItem pick : theGraph.getVertices()) {
+				mem.addResourceItem(pick);
+			}
+			for (AccessCall pick : theGraph.getEdges()) {
+				mem.addAccessCall(pick);
+			}
 		}
-		for (AccessCall pick : theGraph.getEdges()) {
-			mem.addAccessCall(pick);
-		}
-
 		int num_edges = theGraph.getEdgeCount();
 		int num_vertex = theGraph.getVertexCount();
 
@@ -280,8 +274,14 @@ public class MainClass {
 		ClearHelper = null;
 
 		System.gc();
-		GraphQueryModel qt = new GraphQueryModel();
 
+		BaseAdapter queryMachine = null;
+
+		/// set the query adapter
+		if (MemQuery)
+			queryMachine = InMemoryAdapter.getSignleton();
+
+		/// setup GUI window
 		EdgeLabelDemo theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 
@@ -330,7 +330,14 @@ public class MainClass {
 				Instant start = Instant.now();
 
 				try {
-					theGraph = qt.RunQuety(command, theGraph);
+
+					ParsedQuery query = null;
+					try {
+						query = QueryInterpreter.interpret(command, theGraph);
+					} catch (Exception ex) {
+					}
+
+					theGraph = queryMachine.runQuery(query);
 				} catch (Exception ex) {
 					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
 					continue;
@@ -358,8 +365,6 @@ public class MainClass {
 					frame1.setTitle(fileAdr + ": " + pid);
 				}
 
-				// System.out.print("\033[H\033[2J >");
-
 				System.out.flush();
 				System.gc();
 
@@ -373,7 +378,7 @@ public class MainClass {
 		}
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
-		ColorHelpers.PrintGreen("\nGood Luck from DroidForensics Team!\r\n");
+		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
 
 	}
 }

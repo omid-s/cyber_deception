@@ -150,7 +150,7 @@ public class InMemoryAdapter  extends BaseAdapter{
 	/**
 	 * This method runs the query and returns the filtered query from the in memory object
 	 */
-	@Override public Graph<ResourceItem, AccessCall> getSubGraph( ParsedQuery theQuery ) throws QueryFormatException{
+	@Override public Graph<ResourceItem, AccessCall> runQuery( ParsedQuery theQuery ) throws QueryFormatException{
 		
 		return this.getSubGraph(
 				theQuery.getVerticeTypes(),
