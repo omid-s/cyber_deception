@@ -29,37 +29,42 @@ public class ParsedQuery {
 	private String queryString = null;
 	private boolean doesAppend = false;
 
-	
-/**
- * creates an instance of the parsed query class 
- * @param verticeTypes type of verties to include in returned graph
- * @param edgeTypes types of edges to inlude in the returning graph 
- * @param iVerbose is the returning result graph supposed to be verbose? 
- * @param isBackTracked if it's a back track query 
- * @param isForwardTracked if it's a forward track query
- * @param criterias the parsed criterias to be applied
- * @param originalGraph the old graph if adding to a previous graph is desired 
- * @param doesAppend is this a query that is supposed to be appened to a previous graph?
- */
+	/**
+	 * creates an instance of the parsed query class
+	 * 
+	 * @param verticeTypes     type of verties to include in returned graph
+	 * @param edgeTypes        types of edges to inlude in the returning graph
+	 * @param iVerbose         is the returning result graph supposed to be verbose?
+	 * @param isBackTracked    if it's a back track query
+	 * @param isForwardTracked if it's a forward track query
+	 * @param criterias        the parsed criterias to be applied
+	 * @param originalGraph    the old graph if adding to a previous graph is
+	 *                         desired
+	 * @param doesAppend       is this a query that is supposed to be appened to a
+	 *                         previous graph?
+	 */
 	public ParsedQuery(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeTypes, boolean iVerbose,
 			boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
-			Graph<ResourceItem, AccessCall> originalGraph , boolean doesAppend) {
+			Graph<ResourceItem, AccessCall> originalGraph, boolean doesAppend) {
 
-		this(verticeTypes, edgeTypes, iVerbose, isBackTracked, isForwardTracked, criterias, originalGraph, "", doesAppend);
+		this(verticeTypes, edgeTypes, iVerbose, isBackTracked, isForwardTracked, criterias, originalGraph, "",
+				doesAppend);
 	}
 
-	
 	/**
-	 * creates an instance of the parsed query class 
-	 * @param verticeTypes type of verties to include in returned graph
-	 * @param edgeTypes types of edges to inlude in the returning graph 
-	 * @param iVerbose is the returning result graph supposed to be verbose? 
-	 * @param isBackTracked if it's a back track query 
+	 * creates an instance of the parsed query class
+	 * 
+	 * @param verticeTypes     type of verties to include in returned graph
+	 * @param edgeTypes        types of edges to inlude in the returning graph
+	 * @param iVerbose         is the returning result graph supposed to be verbose?
+	 * @param isBackTracked    if it's a back track query
 	 * @param isForwardTracked if it's a forward track query
-	 * @param criterias the parsed criterias to be applied
-	 * @param originalGraph the old graph if adding to a previous graph is desired 
-	 * @param queryString the original query as entered by the user
-	 * @param doesAppend is this a query that is supposed to be appended to a previous graph?
+	 * @param criterias        the parsed criterias to be applied
+	 * @param originalGraph    the old graph if adding to a previous graph is
+	 *                         desired
+	 * @param queryString      the original query as entered by the user
+	 * @param doesAppend       is this a query that is supposed to be appended to a
+	 *                         previous graph?
 	 */
 	public ParsedQuery(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeTypes, boolean iVerbose,
 			boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
@@ -76,11 +81,10 @@ public class ParsedQuery {
 		this.doesAppend = doesAppend;
 	}
 
-	
 	public ParsedQuery() {
 		super();
 	}
-	
+
 	public boolean isDoesAppend() {
 		return doesAppend;
 	}
@@ -88,7 +92,7 @@ public class ParsedQuery {
 	public void setDoesAppend(boolean doesAppend) {
 		this.doesAppend = doesAppend;
 	}
-	
+
 	public String getQueryString() {
 		return queryString;
 	}
@@ -111,6 +115,12 @@ public class ParsedQuery {
 
 	public void setEdgeTypes(ArrayList<String> edgeTypes) {
 		this.edgeTypes = edgeTypes;
+
+		// if no appending is desired, clean the old graph so it can be garbage
+		// collected.
+		if (!doesAppend) {
+			this.originalGraph = null;
+		}
 	}
 
 	public boolean isVerbose() {

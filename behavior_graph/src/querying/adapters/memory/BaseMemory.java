@@ -156,15 +156,16 @@ public class BaseMemory {
 				theQuery.isBackTracked(),
 				theQuery.isForwardTracked(),
 				theQuery.getCriterias(),
-				theQuery.getOriginalGraph()
+				theQuery.getOriginalGraph(),
+				theQuery.isDoesAppend()
 				);
 	}
 	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes,
 ArrayList<String> edgeType,
 			boolean isVerbose, boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
-			Graph<ResourceItem, AccessCall> originalGraph) throws QueryFormatException {
+			Graph<ResourceItem, AccessCall> originalGraph ,boolean doesAppend ) throws QueryFormatException {
 
-		Graph<ResourceItem, AccessCall> ret = (originalGraph == null)
+		Graph<ResourceItem, AccessCall> ret = (!doesAppend)
 				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>()
 				: originalGraph;
 
