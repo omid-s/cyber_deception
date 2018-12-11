@@ -1,6 +1,8 @@
 package dataBaseStuff;
 
 import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringJoiner;
@@ -21,7 +23,7 @@ public class SysdigObjectDAL {
 	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid",
 			"evt_dir", "evt_type", "fd_typechar", "evt_args" };
 
-	public SysdigObjectDAL(boolean shortList, boolean android) throws Exception {
+	public SysdigObjectDAL(boolean shortList, boolean android) throws NoSuchFieldException, SecurityException   {
 		// region Set Class fields
 		Class<?> c = new SysdigRecordObject().getClass();
 		if (!shortList && !android)
@@ -101,6 +103,20 @@ private static StringJoiner items = new StringJoiner(" " );
 		}
 	}
 
+	
+	public SysdigRecordObject LoadFromResultSet( ResultSet input ) throws SQLException, IllegalArgumentException, IllegalAccessException{
+		SysdigRecordObject ret  = new SysdigRecordObject();
+		
+		for (Field pick : ClassFields) {
+			
+			String value = input.getString(pick.getName());
+			pick.set(ret, value);
+		}
+		
+		return ret;
+		
+	}
+	
 	public void flushRows() {
 		try {
 			DataBaseLayer DL = new DataBaseLayer();
