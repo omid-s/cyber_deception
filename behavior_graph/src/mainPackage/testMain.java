@@ -34,22 +34,32 @@ public class testMain {
 		
 //		System.out.println("12940|sshd".split("\\|")[0]);
 		
-		System.out.println(  Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME));
+//		System.out.println(  Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME));
+//		
+//		Connection theConnection = DataBaseLayer.getConnection();
+//		
+//		String Query = "select * from sysdigoutput limit 5";
+//		Statement st  = theConnection.createStatement();
+//		ResultSet resutls =  st.executeQuery(Query);
+//		
+//		
+//		SysdigObjectDAL objectDAL = new SysdigObjectDAL(false);
+//		
+//		while( resutls.next() ){
+//			SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
+//			System.out.println(temp.toString());
+//		}
+//		
+		String Fields = "";
 		
-		Connection theConnection = DataBaseLayer.getConnection();
+		for ( String x : Configurations.getShortFieldList() ) {
+			if (Fields.length() > 0)
+				Fields+= ",";
 		
-		String Query = "select * from sysdigoutput limit 5";
-		Statement st  = theConnection.createStatement();
-		ResultSet resutls =  st.executeQuery(Query);
-		
-		
-		SysdigObjectDAL objectDAL = new SysdigObjectDAL(false);
-		
-		while( resutls.next() ){
-			SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
-			System.out.println(temp.toString());
+			Fields+=x;
 		}
 		
+		System.out.println( Fields );
 		
 	}
 }
