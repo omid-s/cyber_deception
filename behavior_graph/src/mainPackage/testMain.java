@@ -3,9 +3,15 @@
  */
 package mainPackage;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 import classes.ResourceType;
+import classes.SysdigRecordObject;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
+import dataBaseStuff.SysdigObjectDAL;
 import helpers.Configurations;
 
 /**
@@ -29,6 +35,21 @@ public class testMain {
 //		System.out.println("12940|sshd".split("\\|")[0]);
 		
 		System.out.println(  Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME));
+		
+		Connection theConnection = DataBaseLayer.getConnection();
+		
+		String Query = "select * from sysdigoutput limit 5";
+		Statement st  = theConnection.createStatement();
+		ResultSet resutls =  st.executeQuery(Query);
+		
+		
+		SysdigObjectDAL objectDAL = new SysdigObjectDAL(false);
+		
+		while( resutls.next() ){
+			SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
+			System.out.println(temp.toString());
+		}
+		
 		
 	}
 }

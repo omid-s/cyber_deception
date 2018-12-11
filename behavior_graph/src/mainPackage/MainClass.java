@@ -106,7 +106,7 @@ public class MainClass {
 			return;
 		}
 
-		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat, false);
+		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat);
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
