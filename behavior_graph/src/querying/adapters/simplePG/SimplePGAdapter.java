@@ -93,20 +93,40 @@ public class SimplePGAdapter extends BaseAdapter {
 			criterias.add(TempCriteria);
 			TempCriteria = "";
 
+			for (Criteria pick : theQuery.getCriterias()) {
+				if (TempCriteria.length() != 0)
+					TempCriteria += " and ";
 
-			
-			//TODO : implement the process case! 
-			
-			
+				String field = "fd_name";
+				if (pick.getFieldType().contains(ResourceType.Process) && pick.getFieldName().equals("pid"))
+					field = "proc_pid";
+				else if (pick.getFieldType().contains(ResourceType.Process) && pick.getFieldName().equals("name"))
+					field = "proc_name";
+				else if (pick.getFieldName().equals("pid") && !pick.getFieldType().contains(ResourceType.Process))
+					field = "fd_num";
+				else
+					field = "fd_name";
+
+				TempCriteria += String.format(" %s %s '%s'  ", field, pick.getOp().equals("is") ? "=" : "like",
+						pick.getValue());
+
+			}
+			criterias.add(TempCriteria);
+			TempCriteria = "";
+
+			// TODO : implement the process case!
+
 			String where_clause = "";
 			for (String pick : criterias) {
 				if (where_clause.length() != 0)
 					where_clause += " and ";
-				
-				where_clause += String.format( "(%s)", pick);
+
+				where_clause += String.format("(%s)", pick);
 			}
-			
+
 			String Query = String.format("select %s from sysdigoutput  where %s", Fields, where_clause);
+			
+			System.out.println(Query);
 			Statement st = theConnection.createStatement();
 			ResultSet resutls = st.executeQuery(Query);
 
