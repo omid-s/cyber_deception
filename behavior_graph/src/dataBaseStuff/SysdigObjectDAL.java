@@ -77,6 +77,7 @@ public class SysdigObjectDAL {
 			Query = String.format(InsertTemplate, PickString);
 
 			items.add(Query);
+			
 			// big_query += Query;
 			big_query_counter++;
 
@@ -84,6 +85,7 @@ public class SysdigObjectDAL {
 				// StringJoiner j = new StringJoiner(' ');
 				DL.runUpdateQuery(items.toString());
 				big_query = "";
+				items = new StringJoiner(" ");
 				System.out.println("Running!");
 			}
 		} catch (Exception ex) {
