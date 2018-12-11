@@ -1,7 +1,7 @@
 /**
  * 
  */
-package querying;
+package querying.parsing;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,6 @@ import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
 import edu.uci.ics.jung.graph.Graph;
-import querying.parsing.Criteria;
 
 /**
  * @author omid

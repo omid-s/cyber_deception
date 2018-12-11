@@ -14,11 +14,11 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
-import querying.BaseAdapter;
-import querying.ParsedQuery;
 import querying.QueryInterpreter;
+import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
+import querying.parsing.ParsedQuery;
 
 import java.awt.Color;
 import java.awt.Container;

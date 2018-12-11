@@ -16,9 +16,9 @@ import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
-import querying.BaseAdapter;
-import querying.ParsedQuery;
+import querying.adapters.BaseAdapter;
 import querying.parsing.Criteria;
+import querying.parsing.ParsedQuery;
 
 /**
  * @author omido

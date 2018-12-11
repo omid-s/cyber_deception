@@ -1,12 +1,13 @@
 /**
  * 
  */
-package querying;
+package querying.adapters;
 
 import classes.AccessCall;
 import classes.ResourceItem;
 import edu.uci.ics.jung.graph.Graph;
 import exceptions.QueryFormatException;
+import querying.parsing.ParsedQuery;
 
 /**
  * @author omid
