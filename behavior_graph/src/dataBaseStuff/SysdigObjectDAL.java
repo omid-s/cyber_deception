@@ -10,37 +10,24 @@ import java.util.StringJoiner;
 import classes.*;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
+import helpers.Configurations;
 
 public class SysdigObjectDAL {
 	private Field[] ClassFields;
 	private String InsertTemplate;
 
-	private final String[] shortFieldsList = { "evt_datetime", "evt_type", "thread_tid", "proc_name", "proc_args",
-			"proc_cwd", "proc_cmdline", "proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory",
-			"fd_filename", "fd_ip", "fd_name", "fd_num", "fd_sip", "fd_sockfamily", "fd_sport", "fd_type",
-			"fd_typechar", "user_name", "user_uid", "evt_num", "evt_args", "user_shell" };
-
-	private final String[] androidFieldsList = { "evt_time", "proc_name", "proc_pid", "thread_tid", "proc_ppid",
-			"evt_dir", "evt_type", "fd_typechar", "evt_args" };
-
-	public SysdigObjectDAL(boolean shortList, boolean android) throws NoSuchFieldException, SecurityException   {
+	public SysdigObjectDAL(boolean shortList) throws NoSuchFieldException, SecurityException {
 		// region Set Class fields
 		Class<?> c = new SysdigRecordObject().getClass();
-		if (!shortList && !android)
+		if (!shortList)
 			ClassFields = c.getFields();
-		else if (shortList && !android) {
+		else {
 			ArrayList<Field> temp = new ArrayList<Field>();
-			for (String pick : shortFieldsList)
+			for (String pick : Configurations.getShortFieldList())
 				temp.add(c.getField(pick));
 
 			ClassFields = temp.toArray(new Field[temp.size()]);
-		} else if (android) {
-			ArrayList<Field> temp = new ArrayList<Field>();
-			for (String pick : androidFieldsList)
-				temp.add(c.getField(pick));
-
-			ClassFields = temp.toArray(new Field[temp.size()]);
-		}
+		}  
 
 		// endregion
 
@@ -62,11 +49,13 @@ public class SysdigObjectDAL {
 
 	private static String big_query = "";
 	private static int big_query_counter = 0;
-private static StringJoiner items = new StringJoiner(" " );
+	private static StringJoiner items = new StringJoiner(" ");
+
 	/**
 	 * Insets the record into the Database
 	 * 
-	 * @param inp the object to be inseted
+	 * @param inp
+	 *            the object to be inseted
 	 */
 	public void Insert(SysdigRecordObject inp) {
 		String Query = "";
@@ -88,13 +77,13 @@ private static StringJoiner items = new StringJoiner(" " );
 			Query = String.format(InsertTemplate, PickString);
 
 			items.add(Query);
-//			big_query += Query;
+			// big_query += Query;
 			big_query_counter++;
 
 			if (big_query_counter % 1000 == 0) {
-//				StringJoiner j = new StringJoiner(' ');
+				// StringJoiner j = new StringJoiner(' ');
 				DL.runUpdateQuery(items.toString());
-				big_query= "";
+				big_query = "";
 				System.out.println("Running!");
 			}
 		} catch (Exception ex) {
@@ -103,20 +92,33 @@ private static StringJoiner items = new StringJoiner(" " );
 		}
 	}
 
-	
-	public SysdigRecordObject LoadFromResultSet( ResultSet input ) throws SQLException, IllegalArgumentException, IllegalAccessException{
-		SysdigRecordObject ret  = new SysdigRecordObject();
-		
+	/**
+	 * Loads the SysdigRecordObject from a sql resultset
+	 * 
+	 * @param input
+	 *            the resultset to load the object from
+	 * @return created sysdoigobject based on the row
+	 * @throws SQLException
+	 *             if row is not well formed
+	 * @throws IllegalArgumentException
+	 *             is value is not compatible with the record's expectation
+	 * @throws IllegalAccessException
+	 *             should not be thrown!
+	 */
+	public SysdigRecordObject LoadFromResultSet(ResultSet input)
+			throws SQLException, IllegalArgumentException, IllegalAccessException {
+		SysdigRecordObject ret = new SysdigRecordObject();
+
 		for (Field pick : ClassFields) {
-			
+
 			String value = input.getString(pick.getName());
-			pick.set(ret, value);
+			if (!value.isEmpty())
+				pick.set(ret, value);
 		}
-		
+
 		return ret;
-		
 	}
-	
+
 	public void flushRows() {
 		try {
 			DataBaseLayer DL = new DataBaseLayer();

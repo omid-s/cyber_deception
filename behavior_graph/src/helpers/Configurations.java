@@ -158,6 +158,19 @@ public class Configurations {
 	}
 
 	/**
+	 * Returns a list of fields that are considered in the short format
+	 * @return the list of fields in short format
+	 */
+	public static String[] getShortFieldList() {
+		final String[] ret = { "evt_datetime", "evt_type", "thread_tid", "proc_name", "proc_args", "proc_cwd",
+				"proc_cmdline", "proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory",
+				"fd_filename", "fd_ip", "fd_name", "fd_num", "fd_sip", "fd_sockfamily", "fd_sport", "fd_type",
+				"fd_typechar", "user_name", "user_uid", "evt_num", "evt_args", "user_shell" };
+
+		return ret;
+	}
+
+	/**
 	 * Constant definitions
 	 */
 	// neo4j stuff
