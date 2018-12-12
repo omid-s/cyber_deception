@@ -1,5 +1,6 @@
-package controlClasses;
+package querying.tools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,10 +14,11 @@ import classes.ResourceType;
 import classes.SysdigRecordObject;
 import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.Graph;
+import querying.parsing.ParsedQuery;
 
 public class GraphObjectHelper {
 	private final boolean isInVerboseMode;
-	private String pid; 
+	private String pid;
 	private HashSet<String> vectorPid;
 	private HashSet<String> vectorFile;
 	private HashMap<String, String> currentActivity;
@@ -24,8 +26,8 @@ public class GraphObjectHelper {
 	private HashSet<String> blacklist;
 	private int count = 0;
 
-	private long sequenceCounter=0;
-	
+	private long sequenceCounter = 0;
+
 	private HashMap<ResourceType, HashMap<String, ResourceItem>> resourcesMap;
 	private HashMap<String, AccessCall> EdgeMap;
 
@@ -65,19 +67,17 @@ public class GraphObjectHelper {
 	}
 
 	/**
-	 * Based on process and file descriptor fields create nodes and vertices
-	 * that correspond to the call record then add them to the graph supplied
+	 * Based on process and file descriptor fields create nodes and vertices that
+	 * correspond to the call record then add them to the graph supplied
 	 * 
-	 * @param theGraph
-	 *            the graph to add nodes and edges to
-	 * @param pick
-	 *            the row object to be processed
+	 * @param theGraph the graph to add nodes and edges to
+	 * @param pick     the row object to be processed
 	 */
 	public void AddRowToGraph(Graph<ResourceItem, AccessCall> theGraph, SysdigRecordObject pick) {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
-		 
+
 		// is process new ?
 
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
@@ -96,7 +96,7 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getProcPID();
 			tempItem.Title = pick.proc_name;
 			tempItem.Description = pick.proc_args;
-			
+
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
 			// resourcesMap.get(ResourceType.Process).put(pick.getProcPID(),
@@ -124,7 +124,7 @@ public class GraphObjectHelper {
 			ResourceItem tp = TheProc;
 			// if (!theGraph.getEdges().stream().anyMatch(x ->
 			// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
-			if (!EdgeMap.containsKey(parentP.getID() + tp.getID()+"exec")) {
+			if (!EdgeMap.containsKey(parentP.getID() + tp.getID() + "exec")) {
 
 				// add the connection to the process
 				AccessCall tempCallItem = new AccessCall();
@@ -135,9 +135,9 @@ public class GraphObjectHelper {
 				tempCallItem.user_name = pick.user_name;
 
 				tempCallItem.sequenceNumber = sequenceCounter++;
-				
+
 				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
-				EdgeMap.put(parentP.getID() + tp.getID()+ tempCallItem.Command, tempCallItem);
+				EdgeMap.put(parentP.getID() + tp.getID() + tempCallItem.Command, tempCallItem);
 			}
 
 		}
@@ -178,8 +178,7 @@ public class GraphObjectHelper {
 		}
 
 		// is there an fd resource ?
-		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID()))
-		{
+		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID())) {
 			ResourceItem tempItem = new ResourceItem();
 			// / find type, field types come from SYSDIG fd type definition
 
@@ -213,12 +212,11 @@ public class GraphObjectHelper {
 			final ResourceItem TT = ToItem;
 
 			/*
-			 * if there already is an instance of this edge, look to VERBOSE
-			 * flag, if verbose flag is set, create a new edge anyways, other
-			 * wise check if it exists raise the occirance factor otherwisde
-			 * insert it
+			 * if there already is an instance of this edge, look to VERBOSE flag, if
+			 * verbose flag is set, create a new edge anyways, other wise check if it exists
+			 * raise the occirance factor otherwisde insert it
 			 */
-			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID()+ pick.evt_type))
+			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID() + pick.evt_type))
 			// if (!isInVerboseMode &&
 			//
 			// theGraph.getEdges().stream()
@@ -232,10 +230,10 @@ public class GraphObjectHelper {
 //						.findFirst().get().OccuranceFactor++;
 //
 //				
-				
-				EdgeMap.get( FF.getID() + TT.getID()+ pick.evt_type ).OccuranceFactor++;
-			
-				int  a = 12; 
+
+				EdgeMap.get(FF.getID() + TT.getID() + pick.evt_type).OccuranceFactor++;
+
+				int a = 12;
 			} else {
 				// create the edge between resources of start and end
 				AccessCall theCall = new AccessCall();
@@ -248,14 +246,14 @@ public class GraphObjectHelper {
 				theCall.user_id = pick.user_uid;
 				theCall.user_name = pick.user_name;
 				theCall.sequenceNumber = sequenceCounter++;
-				
+
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 //
-				EdgeMap.put(theCall.From.getID() + theCall.To.getID()+ theCall.Command, theCall);
+				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}
 		}
-		
+
 	}
 
 	public void release_maps() {
@@ -265,6 +263,83 @@ public class GraphObjectHelper {
 		this.EdgeMap = null;
 		System.gc();
 		System.runFinalization();
+	}
+
+	/**
+	 * 
+	 * @param theGraph
+	 * @param theQuery
+	 * @return
+	 */
+	public Graph<ResourceItem, AccessCall> pruneByType(Graph<ResourceItem, AccessCall> theGraph, ParsedQuery theQuery) {
+
+		if (theQuery.getVerticeTypes().size() != 0) {
+			// TODO : filter by node type
+			pruneVertexType(theGraph, theQuery);
+		}
+		if (theQuery.getEdgeTypes().size() != 0) {
+			// TODO : filter by edge type
+			pruneEdgeType(theGraph, theQuery);
+		}
+
+		return theGraph;
+	}
+
+	/**
+	 * removes the nodes that do not cokmply with fiokterd types
+	 * 
+	 * @param theGraph the graph to run the filter on
+	 * @param theQuery the Query from which the filters are comming
+	 * @return the graph with pruned types
+	 */
+	public void pruneVertexType(Graph<ResourceItem, AccessCall> theGraph, ParsedQuery theQuery) {
+
+		ArrayList<ResourceItem> toRemove = new ArrayList<ResourceItem>();
+		for (ResourceItem pick : theGraph.getVertices()) {
+			if (!theQuery.getVerticeTypes().contains(pick.Type))
+				toRemove.add(pick);
+		}
+		for (ResourceItem pick : toRemove)
+			theGraph.removeVertex(pick);
+
+//		return theGraph;
+	}
+
+	/**
+	 * removes the edges which do not comply to the givenh query
+	 * 
+	 * @param theGraph the graph on which the matching happens
+	 * @param theQuery the query where filters are comming from
+	 */
+	public void pruneEdgeType(Graph<ResourceItem, AccessCall> theGraph, ParsedQuery theQuery) {
+
+		ArrayList<AccessCall> toRemove = new ArrayList<AccessCall>();
+		for (AccessCall pick : theGraph.getEdges()) {
+			if (!theQuery.getEdgeTypes().contains(pick.Command))
+				toRemove.add(pick);
+		}
+		for (AccessCall pick : toRemove)
+			theGraph.removeEdge(pick);
+
+//		return theGraph;
+	}
+
+	/**
+	 * merges the second graph into the first one
+	 * 
+	 * @param to   the graph in which the other one will be merged
+	 * @param from the graph which will be merged into the other one
+	 */
+	public void mergeGraphs(Graph<ResourceItem, AccessCall> to, Graph<ResourceItem, AccessCall> from) {
+
+		for (ResourceItem pick : from.getVertices()) {
+			to.addVertex(pick);
+		}
+		for (AccessCall pick : EdgeMap.values()) {
+			if (to.containsVertex(pick.From) && to.containsVertex(pick.To))
+				to.addEdge(pick, pick.From, pick.To);
+		}
+
 	}
 
 }

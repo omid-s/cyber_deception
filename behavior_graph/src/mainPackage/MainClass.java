@@ -1,6 +1,5 @@
 package mainPackage;
 
-import controlClasses.GraphObjectHelper;
 import controlClasses.RecordInterpretorFactory;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
@@ -20,6 +19,7 @@ import querying.adapters.memory.InMemoryAdapter;
 import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
+import querying.tools.GraphObjectHelper;
 
 import java.awt.Color;
 import java.awt.Container;

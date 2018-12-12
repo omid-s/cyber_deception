@@ -13,7 +13,6 @@ import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
-import controlClasses.GraphObjectHelper;
 import dataBaseStuff.DataBaseLayer;
 import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
@@ -24,6 +23,7 @@ import querying.adapters.BaseAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
+import querying.tools.GraphObjectHelper;
 import querying.tools.GraphQueryTools;
 
 /**
@@ -39,6 +39,7 @@ public class SimplePGAdapter extends BaseAdapter {
 	private static SimplePGAdapter _instance = null;
 
 	private SimplePGAdapter() {
+		graphHelper = new GraphObjectHelper(false, "");
 	}
 
 	/**
@@ -54,6 +55,8 @@ public class SimplePGAdapter extends BaseAdapter {
 		return _instance;
 	}
 
+	ArrayList<AccessCall> globalEdges = new ArrayList<AccessCall>();
+	GraphObjectHelper graphHelper = null;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -63,9 +66,9 @@ public class SimplePGAdapter extends BaseAdapter {
 	public Graph<ResourceItem, AccessCall> runQuery(ParsedQuery theQuery) throws QueryFormatException {
 
 		// create the return graph
-		Graph<ResourceItem, AccessCall> ret = (!theQuery.isDoesAppend())
-				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>()
-				: theQuery.getOriginalGraph();
+		Graph<ResourceItem, AccessCall> ret = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
+
+		GraphQueryTools gt = new GraphQueryTools();
 
 		try {
 			// get the connection
@@ -88,9 +91,11 @@ public class SimplePGAdapter extends BaseAdapter {
 
 				if (TempCriteria.length() != 0)
 					TempCriteria += " or ";
-//				if (pick == ResourceType.Process)
-//					TempCriteria += "1==1";
-//				else
+
+				// for the sake of proess to be over writing the filters from others
+				if (pick == ResourceType.Process)
+					TempCriteria += "1=1";
+				else
 					TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
 
 			}
@@ -120,8 +125,6 @@ public class SimplePGAdapter extends BaseAdapter {
 				criterias.add(TempCriteria);
 			TempCriteria = "";
 
-			// TODO : implement the process case!
-
 			String where_clause = "";
 			for (String pick : criterias) {
 				if (where_clause.length() != 0)
@@ -137,7 +140,7 @@ public class SimplePGAdapter extends BaseAdapter {
 			ResultSet resutls = st.executeQuery(Query);
 
 			SysdigObjectDAL objectDAL = new SysdigObjectDAL(true);
-			GraphObjectHelper graphHelper = new GraphObjectHelper(theQuery.isVerbose(), "");
+			
 
 			while (resutls.next()) {
 				try {
@@ -151,8 +154,7 @@ public class SimplePGAdapter extends BaseAdapter {
 				}
 			}
 
-			GraphQueryTools gt = new GraphQueryTools();
-			gt.pruneByType(ret, theQuery);
+			graphHelper.pruneByType(ret, theQuery);
 
 		} catch (SQLException ex) {
 			ex.printStackTrace();
@@ -161,6 +163,10 @@ public class SimplePGAdapter extends BaseAdapter {
 		} catch (SecurityException ex) {
 			ex.printStackTrace();
 		}
+
+		// if merge is desired merge the Graphs
+		if (theQuery.isDoesAppend())
+			graphHelper.mergeGraphs(ret, theQuery.getOriginalGraph());
 
 		return ret;
 	}
