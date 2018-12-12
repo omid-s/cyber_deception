@@ -85,10 +85,13 @@ public class SimplePGAdapter extends BaseAdapter {
 			// create criterias bvased on node types ( exckuysing process )
 			String TempCriteria = "";
 			for (ResourceType pick : theQuery.getVerticeTypes()) {
+
 				if (TempCriteria.length() != 0)
 					TempCriteria += " or ";
-
-				TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
+//				if (pick == ResourceType.Process)
+//					TempCriteria += "1==1";
+//				else
+					TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
 
 			}
 			if (TempCriteria.length() > 0)
@@ -146,7 +149,6 @@ public class SimplePGAdapter extends BaseAdapter {
 					ex.printStackTrace();
 					continue;
 				}
-
 			}
 
 			GraphQueryTools gt = new GraphQueryTools();
