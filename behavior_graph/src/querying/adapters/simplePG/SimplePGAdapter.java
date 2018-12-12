@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import org.apache.commons.collections15.iterators.ArrayListIterator;
+
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
@@ -25,6 +27,8 @@ import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
 import querying.tools.GraphObjectHelper;
 import querying.tools.GraphQueryTools;
+
+//TODO : deal with per query verbosity
 
 /**
  * @author omid
@@ -69,8 +73,11 @@ public class SimplePGAdapter extends BaseAdapter {
 		// create the return graph
 		Graph<ResourceItem, AccessCall> ret = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 
-		if (!theQuery.isDoesAppend())
+		// free up memory if adding to previous graph is not desired
+		if (!theQuery.isDoesAppend()) {
+			graphHelper.release_maps();
 			graphHelper = new GraphObjectHelper(theQuery.isVerbose(), "");
+		}
 
 		GraphQueryTools gt = new GraphQueryTools();
 
@@ -89,7 +96,7 @@ public class SimplePGAdapter extends BaseAdapter {
 			/// create the seed node fetch
 			ArrayList<String> criterias = new ArrayList<String>();
 
-			// create criterias bvased on node types ( exckuysing process )
+			// create criterias based on node types ( exckuysing process )
 			String TempCriteria = "";
 			for (ResourceType pick : theQuery.getVerticeTypes()) {
 
@@ -157,7 +164,60 @@ public class SimplePGAdapter extends BaseAdapter {
 				}
 			}
 
+			st.close();
+
 			graphHelper.pruneByType(ret, theQuery);
+
+			// TODO :Hadnle Backtrack
+			if (theQuery.isBackTracked()) {
+				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
+				stack.addAll(ret.getVertices());
+				criterias.clear();
+
+				for (ResourceItem pick : stack) {
+					if (pick.Type == ResourceType.Process) {
+						criterias.add(String.format("select %s from sysdigoutput  where proc_pid='%s' limit 1 ", Fields,
+								pick.Number));
+					} else {
+						criterias.add(
+								String.format("select %s from sysdigoutput  where fd_name='%s'", Fields, pick.Title));
+					}
+				}
+
+				where_clause = "";
+				for (String pick : criterias) {
+					if (where_clause.length() != 0)
+						where_clause += "\nunion all\n";
+					where_clause += pick;
+				}
+
+				Query = where_clause; // String.format("select %s from sysdigoutput  where %s", Fields, where_clause);
+
+				System.out.println(Query);
+				st = theConnection.createStatement();
+				resutls = st.executeQuery(Query);
+
+				while (resutls.next()) {
+					try {
+						SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
+
+						graphHelper.AddRowToGraph(ret, temp);
+
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						continue;
+					}
+				}
+
+				st.close();
+
+//				while (stack.size() > 0) {
+//
+//				}
+
+			}
+
+			// TODO : handle forward track
 
 		} catch (SQLException ex) {
 			ex.printStackTrace();
