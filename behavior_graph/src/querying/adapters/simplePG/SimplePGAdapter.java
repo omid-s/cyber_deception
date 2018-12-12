@@ -24,6 +24,7 @@ import querying.adapters.BaseAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
+import querying.tools.GraphQueryTools;
 
 /**
  * @author omid
@@ -90,7 +91,8 @@ public class SimplePGAdapter extends BaseAdapter {
 				TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
 
 			}
-			criterias.add(TempCriteria);
+			if (TempCriteria.length() > 0)
+				criterias.add(TempCriteria);
 			TempCriteria = "";
 
 			for (Criteria pick : theQuery.getCriterias()) {
@@ -107,11 +109,12 @@ public class SimplePGAdapter extends BaseAdapter {
 				else
 					field = "fd_name";
 
-				TempCriteria += String.format(" %s %s '%s'  ", field, pick.getOp().equals("is") ? "=" : "like",
-						pick.getValue());
+				TempCriteria += String.format(" %s %s '%4$s%s%4$s'  ", field, pick.getOp().equals("is") ? "=" : "like",
+						pick.getValue(), pick.getOp().equals("is") ? "" : "%");
 
 			}
-			criterias.add(TempCriteria);
+			if (TempCriteria.length() > 0)
+				criterias.add(TempCriteria);
 			TempCriteria = "";
 
 			// TODO : implement the process case!
@@ -125,7 +128,7 @@ public class SimplePGAdapter extends BaseAdapter {
 			}
 
 			String Query = String.format("select %s from sysdigoutput  where %s", Fields, where_clause);
-			
+
 			System.out.println(Query);
 			Statement st = theConnection.createStatement();
 			ResultSet resutls = st.executeQuery(Query);
@@ -145,6 +148,9 @@ public class SimplePGAdapter extends BaseAdapter {
 				}
 
 			}
+
+			GraphQueryTools gt = new GraphQueryTools();
+			gt.pruneByType(ret, theQuery);
 
 		} catch (SQLException ex) {
 			ex.printStackTrace();

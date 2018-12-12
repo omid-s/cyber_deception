@@ -341,6 +341,7 @@ public class MainClass {
 					try {
 						query = QueryInterpreter.interpret(command, theGraph);
 					} catch (Exception ex) {
+						ex.printStackTrace();
 					}
 
 					theGraph = queryMachine.runQuery(query);
