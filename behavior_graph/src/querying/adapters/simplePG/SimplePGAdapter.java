@@ -57,6 +57,7 @@ public class SimplePGAdapter extends BaseAdapter {
 
 	ArrayList<AccessCall> globalEdges = new ArrayList<AccessCall>();
 	GraphObjectHelper graphHelper = null;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -67,6 +68,9 @@ public class SimplePGAdapter extends BaseAdapter {
 
 		// create the return graph
 		Graph<ResourceItem, AccessCall> ret = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
+
+		if (!theQuery.isDoesAppend())
+			graphHelper = new GraphObjectHelper(theQuery.isVerbose(), "");
 
 		GraphQueryTools gt = new GraphQueryTools();
 
@@ -140,7 +144,6 @@ public class SimplePGAdapter extends BaseAdapter {
 			ResultSet resutls = st.executeQuery(Query);
 
 			SysdigObjectDAL objectDAL = new SysdigObjectDAL(true);
-			
 
 			while (resutls.next()) {
 				try {
