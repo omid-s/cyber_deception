@@ -169,7 +169,7 @@ public class SimplePGAdapter extends BaseAdapter {
 			graphHelper.pruneByType(ret, theQuery);
 
 			// TODO :Hadnle Backtrack
-			if (theQuery.isBackTracked()) {
+			if ( theQuery.isBackTracked()) {
 				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
 				stack.addAll(ret.getVertices());
 				criterias.clear();
