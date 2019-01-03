@@ -129,8 +129,18 @@ public class SimplePGAdapter extends BaseAdapter {
 				else
 					field = "fd_name";
 
-				TempCriteria += String.format(" %s %s '%4$s%s%4$s'  ", field, pick.getOp().equals("is") ? "=" : "like",
-						pick.getValue(), pick.getOp().equals("is") ? "" : "%");
+				if (!pick.getFieldType().contains(ResourceType.Process))
+					TempCriteria += String.format(" %s %s '%4$s%s%4$s'  ", field,
+							pick.getOp().equals("is") ? "=" : "like", pick.getValue(),
+							pick.getOp().equals("is") ? "" : "%");
+				else {
+
+					TempCriteria += String.format(" %1$s %2$s '%4$s%3$s%4$s' or %5$s %2$s '%4$s%3$s%4$s'  ", field,
+							pick.getOp().equals("is") ? "=" : "like", pick.getValue(),
+							pick.getOp().equals("is") ? "" : "%", field.equals("proc_pid") ? "proc_ppid" : "proc_pname"
+
+					);
+				}
 
 			}
 			if (TempCriteria.length() > 0)
@@ -255,8 +265,9 @@ public class SimplePGAdapter extends BaseAdapter {
 					for (ResourceItem pick : stack) {
 						dones.add(pick.getID());
 						if (pick.Type == ResourceType.Process) {
-							criterias.add(String.format("(select %s from sysdigoutput  where proc_pid='%s' )", Fields,
-									pick.Number));
+							criterias.add(String.format(
+									"(select %s from sysdigoutput  where proc_pid='%s' or proc_ppid='%s'  )", Fields,
+									pick.Number, pick.Number));
 						} else {
 //							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
 //									pick.Title));
@@ -270,35 +281,42 @@ public class SimplePGAdapter extends BaseAdapter {
 							where_clause += "\nunion all\n";
 						where_clause += pick;
 					}
+					try {
+						Query = where_clause;
+						st = theConnection.createStatement();
+						resutls = st.executeQuery(Query);
 
-					Query = where_clause;
-					System.out.println(Query);
-					st = theConnection.createStatement();
-					resutls = st.executeQuery(Query);
+						// add the newly added items to the graph
+						while (resutls.next()) {
+							try {
+								SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
 
-					// add the newly added items to the graph
-					while (resutls.next()) {
-						try {
-							SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
+								graphHelper.AddRowToGraph(ret, temp);
 
-							graphHelper.AddRowToGraph(ret, temp);
-
-						} catch (Exception ex) {
-							System.out.println(ex.getMessage());
-							ex.printStackTrace();
-							continue;
+							} catch (Exception ex) {
+								System.out.println(ex.getMessage());
+								ex.printStackTrace();
+								continue;
+							}
 						}
-					}
 
-					st.close();
+						st.close();
+
+					} catch (SQLException ex) {
+						// ignore if there is a sql error (most commonly, no result found!)
+						// TODO : arrange better error handling here!
+						continue;
+					}
 
 					for (ResourceItem pick : ret.getVertices()) {
 						if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
 							stack.add(pick);
 					}
+
 					depthCounter++;
+
 				} while (stack.size() > 0 && depthCounter <= Integer
-						.parseInt(Configurations.getInstance().getSetting(Configurations.BACKWARD_STEPS)));
+						.parseInt(Configurations.getInstance().getSetting(Configurations.FORWARD_STEPS)));
 			}
 
 		} catch (SQLException ex) {
