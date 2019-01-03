@@ -135,7 +135,7 @@ public class GraphObjectHelper {
 		
 		theGraph.addVertex(parentP);
 
-		resourcesMap.get(ResourceType.Process).put(parentP.getID(), parentP);
+		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
 		// theGraph.getVertices().stream()
 		// .filter(x -> x.Type == ResourceType.Process &&
 		// x.id.equals(pick.getParentProcID())).findFirst()

@@ -70,7 +70,7 @@ public class InMemoryAdapter extends BaseAdapter {
 	public void addResourceItem(ResourceItem inp) {
 		V.put(inp.id.toLowerCase(), inp);
 		if (inp.Type == ResourceType.Process) {
-			ProcessMap.put(inp.Number.toLowerCase(), inp);
+			ProcessMap.put(inp.id.toLowerCase(), inp);
 
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());

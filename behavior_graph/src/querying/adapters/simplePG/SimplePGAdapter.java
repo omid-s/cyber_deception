@@ -167,15 +167,14 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			st.close();
 
-			graphHelper.pruneByType(ret, theQuery);
+//			graphHelper.pruneByType(ret, theQuery);
 
 			// TODO :Handle Backtrack
+			int depthCounter = 0;
 			if (theQuery.isBackTracked()) {
 
 				ArrayList<String> dones = new ArrayList<String>();
 				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
-//				
-				criterias.clear();
 
 				// in each iteration find the heads and fetch from there
 				for (ResourceItem pick : ret.getVertices()) {
@@ -183,8 +182,9 @@ public class SimplePGAdapter extends BaseAdapter {
 						stack.add(pick);
 				}
 
-				// while there is a back tracable item, back trace it 
+				// while there is a back tracable item, back trace it
 				do {
+					criterias.clear();
 
 					for (ResourceItem pick : stack) {
 						dones.add(pick.getID());
@@ -205,12 +205,12 @@ public class SimplePGAdapter extends BaseAdapter {
 						where_clause += pick;
 					}
 
-					Query = where_clause;  
+					Query = where_clause;
 
 					st = theConnection.createStatement();
 					resutls = st.executeQuery(Query);
 
-					// add the newly added items to the graph 
+					// add the newly added items to the graph
 					while (resutls.next()) {
 						try {
 							SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
@@ -230,13 +230,76 @@ public class SimplePGAdapter extends BaseAdapter {
 						if (ret.inDegree(pick) == 0 && !dones.contains(pick.getID()))
 							stack.add(pick);
 					}
-
-				} while (stack.size() > 0);
-
+					depthCounter++;
+				} while (stack.size() > 0 && depthCounter <= Integer
+						.parseInt(Configurations.getInstance().getSetting(Configurations.BACKWARD_STEPS)));
 
 			}
 
 			// TODO : handle forward track
+
+			if (theQuery.isForwardTracked()) {
+				ArrayList<String> dones = new ArrayList<String>();
+				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
+
+				// in each iteration find the heads and fetch from there
+				for (ResourceItem pick : ret.getVertices()) {
+					if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
+						stack.add(pick);
+				}
+
+				// while there is a back tracable item, back trace it
+				do {
+					criterias.clear();
+
+					for (ResourceItem pick : stack) {
+						dones.add(pick.getID());
+						if (pick.Type == ResourceType.Process) {
+							criterias.add(String.format("(select %s from sysdigoutput  where proc_pid='%s' )", Fields,
+									pick.Number));
+						} else {
+//							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
+//									pick.Title));
+						}
+					}
+					stack.clear();
+
+					where_clause = "";
+					for (String pick : criterias) {
+						if (where_clause.length() != 0)
+							where_clause += "\nunion all\n";
+						where_clause += pick;
+					}
+
+					Query = where_clause;
+					System.out.println(Query);
+					st = theConnection.createStatement();
+					resutls = st.executeQuery(Query);
+
+					// add the newly added items to the graph
+					while (resutls.next()) {
+						try {
+							SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
+
+							graphHelper.AddRowToGraph(ret, temp);
+
+						} catch (Exception ex) {
+							System.out.println(ex.getMessage());
+							ex.printStackTrace();
+							continue;
+						}
+					}
+
+					st.close();
+
+					for (ResourceItem pick : ret.getVertices()) {
+						if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
+							stack.add(pick);
+					}
+					depthCounter++;
+				} while (stack.size() > 0 && depthCounter <= Integer
+						.parseInt(Configurations.getInstance().getSetting(Configurations.BACKWARD_STEPS)));
+			}
 
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
