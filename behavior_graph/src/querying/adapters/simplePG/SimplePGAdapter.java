@@ -174,7 +174,7 @@ public class SimplePGAdapter extends BaseAdapter {
 
 				ArrayList<String> dones = new ArrayList<String>();
 				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
-//				stack.addAll(ret.getVertices());
+//				
 				criterias.clear();
 
 				// in each iteration find the heads and fetch from there
@@ -183,6 +183,7 @@ public class SimplePGAdapter extends BaseAdapter {
 						stack.add(pick);
 				}
 
+				// while there is a back tracable item, back trace it 
 				do {
 
 					for (ResourceItem pick : stack) {
@@ -204,13 +205,12 @@ public class SimplePGAdapter extends BaseAdapter {
 						where_clause += pick;
 					}
 
-					Query = where_clause; // String.format("select %s from sysdigoutput where %s", Fields,
-											// where_clause);
+					Query = where_clause;  
 
-					System.out.println(Query);
 					st = theConnection.createStatement();
 					resutls = st.executeQuery(Query);
 
+					// add the newly added items to the graph 
 					while (resutls.next()) {
 						try {
 							SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
@@ -232,9 +232,7 @@ public class SimplePGAdapter extends BaseAdapter {
 					}
 
 				} while (stack.size() > 0);
-//				while (stack.size() > 0) {
-//
-//				}
+
 
 			}
 
