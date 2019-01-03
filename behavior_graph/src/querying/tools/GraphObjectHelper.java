@@ -13,6 +13,7 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import dataBaseStuff.SysdigObjectDAL;
+import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import querying.parsing.ParsedQuery;
 
@@ -132,7 +133,7 @@ public class GraphObjectHelper {
 			parentP.Description = "";
 
 		}
-		
+
 		theGraph.addVertex(parentP);
 
 		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
@@ -542,15 +543,46 @@ public class GraphObjectHelper {
 	 * @param from the graph which will be merged into the other one
 	 */
 	public void mergeGraphs(Graph<ResourceItem, AccessCall> to, Graph<ResourceItem, AccessCall> from) {
-
+//to.getEdges().clear();
 		for (ResourceItem pick : from.getVertices()) {
 			to.addVertex(pick);
 		}
+
 		for (AccessCall pick : EdgeMap.values()) {
+//			to.removeEdge(pick);
+
 			if (to.containsVertex(pick.From) && to.containsVertex(pick.To))
 				to.addEdge(pick, pick.From, pick.To);
+
+//			if (to.containsVertex(pick.From) && to.containsVertex(pick.To)
+//					&& !to.getEdges().stream().anyMatch(x -> x.From.getID().equals(pick.From.getID())
+//							&& x.To.getID().equals(pick.To.getID()) && x.Command.equals(pick.Command)
+//
+//					))
+//				to.addEdge(pick, pick.From, pick.To);
 		}
 
 	}
 
+	public Graph<ResourceItem, AccessCall> mergeGraphs2(Graph<ResourceItem, AccessCall> to,
+			Graph<ResourceItem, AccessCall> from) {
+		// to.getEdges().clear();
+		Graph<ResourceItem, AccessCall> ret = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
+
+		for (ResourceItem pick : from.getVertices()) {
+			ret.addVertex(pick);
+		}
+		for (ResourceItem pick : to.getVertices()) {
+			ret.addVertex(pick);
+		}
+
+		for (AccessCall pick : EdgeMap.values()) {
+
+			if (ret.containsVertex(pick.From) && ret.containsVertex(pick.To))
+				ret.addEdge(pick, pick.From, pick.To);
+
+		}
+		return ret;
+
+	}
 }

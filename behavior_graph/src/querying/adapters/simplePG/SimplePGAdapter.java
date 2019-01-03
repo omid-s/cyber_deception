@@ -349,7 +349,7 @@ public class SimplePGAdapter extends BaseAdapter {
 		}
 		// if merge is desired merge the Graphs
 		if (theQuery.isDoesAppend())
-			graphHelper.mergeGraphs(ret, theQuery.getOriginalGraph());
+			ret = graphHelper.mergeGraphs2(ret, theQuery.getOriginalGraph());
 
 		return ret;
 	}
