@@ -113,40 +113,54 @@ public class GraphObjectHelper {
 
 		theGraph.addVertex(TheProc);
 
+		ResourceItem parentP = null;
+
 		if (resourcesMap.get(ResourceType.Process).containsKey(pick.getParentProcID()))
 		// if (theGraph.getVertices().stream()
 		// .anyMatch(x -> x.Type == ResourceType.Process &&
 		// x.id.equals(pick.getParentProcID())))
 		{
-			ResourceItem parentP = resourcesMap.get(ResourceType.Process).get(pick.getParentProcID());
+			parentP = resourcesMap.get(ResourceType.Process).get(pick.getParentProcID());
+		} else {
 
-			// theGraph.getVertices().stream()
-			// .filter(x -> x.Type == ResourceType.Process &&
-			// x.id.equals(pick.getParentProcID())).findFirst()
-			// .get();
-			ResourceItem tp = TheProc;
-			// if (!theGraph.getEdges().stream().anyMatch(x ->
-			// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
-			if (!EdgeMap.containsKey(parentP.getID() + tp.getID() + "exec")) {
+			parentP = new ResourceItem();
 
-				// add the connection to the process
-				AccessCall tempCallItem = new AccessCall();
-				tempCallItem.From = parentP;
-				tempCallItem.To = TheProc;
-				tempCallItem.Command = "exec";
-				tempCallItem.user_id = pick.user_uid;
-				tempCallItem.user_name = pick.user_name;
+			parentP.Type = ResourceType.Process;
+			parentP.Number = pick.proc_ppid;
+			parentP.id = pick.getParentProcID();
+			parentP.Title = pick.proc_pname;
+			parentP.Description = "";
 
-				tempCallItem.sequenceNumber = sequenceCounter++;
+		}
+		
+		theGraph.addVertex(parentP);
 
-				theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
-				EdgeMap.put(parentP.getID() + tp.getID() + tempCallItem.Command, tempCallItem);
-			} else {
-				AccessCall t = EdgeMap.get(parentP.getID() + tp.getID() + "exec");
-				theGraph.addVertex(t.From);
-				theGraph.addEdge(t, t.From, t.To);
-			}
+		resourcesMap.get(ResourceType.Process).put(parentP.getID(), parentP);
+		// theGraph.getVertices().stream()
+		// .filter(x -> x.Type == ResourceType.Process &&
+		// x.id.equals(pick.getParentProcID())).findFirst()
+		// .get();
+		ResourceItem tp = TheProc;
+		// if (!theGraph.getEdges().stream().anyMatch(x ->
+		// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
+		if (!EdgeMap.containsKey(parentP.getID() + tp.getID() + "exec")) {
 
+			// add the connection to the process
+			AccessCall tempCallItem = new AccessCall();
+			tempCallItem.From = parentP;
+			tempCallItem.To = TheProc;
+			tempCallItem.Command = "exec";
+			tempCallItem.user_id = pick.user_uid;
+			tempCallItem.user_name = pick.user_name;
+
+			tempCallItem.sequenceNumber = sequenceCounter++;
+
+			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			EdgeMap.put(parentP.getID() + tp.getID() + tempCallItem.Command, tempCallItem);
+		} else {
+			AccessCall t = EdgeMap.get(parentP.getID() + tp.getID() + "exec");
+			theGraph.addVertex(t.From);
+			theGraph.addEdge(t, t.From, t.To);
 		}
 
 		ResourceType ItemType = ResourceType.File;

@@ -22,6 +22,7 @@ import edu.uci.ics.jung.graph.Graph;
 import exceptions.QueryFormatException;
 import helpers.Configurations;
 import querying.adapters.BaseAdapter;
+import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
@@ -168,49 +169,69 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			graphHelper.pruneByType(ret, theQuery);
 
-			// TODO :Hadnle Backtrack
-			if ( theQuery.isBackTracked()) {
+			// TODO :Handle Backtrack
+			if (theQuery.isBackTracked()) {
+
+				ArrayList<String> dones = new ArrayList<String>();
 				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
-				stack.addAll(ret.getVertices());
+//				stack.addAll(ret.getVertices());
 				criterias.clear();
 
-				for (ResourceItem pick : stack) {
-					if (pick.Type == ResourceType.Process) {
-						criterias.add(String.format("select %s from sysdigoutput  where proc_pid='%s' limit 1 ", Fields,
-								pick.Number));
-					} else {
-						criterias.add(
-								String.format("select %s from sysdigoutput  where fd_name='%s'", Fields, pick.Title));
+				// in each iteration find the heads and fetch from there
+				for (ResourceItem pick : ret.getVertices()) {
+					if (ret.inDegree(pick) == 0 && !dones.contains(pick.getID()))
+						stack.add(pick);
+				}
+
+				do {
+
+					for (ResourceItem pick : stack) {
+						dones.add(pick.getID());
+						if (pick.Type == ResourceType.Process) {
+							criterias.add(String.format("(select %s from sysdigoutput  where proc_pid='%s' limit 1 )",
+									Fields, pick.Number));
+						} else {
+							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
+									pick.Title));
+						}
 					}
-				}
+					stack.clear();
 
-				where_clause = "";
-				for (String pick : criterias) {
-					if (where_clause.length() != 0)
-						where_clause += "\nunion all\n";
-					where_clause += pick;
-				}
-
-				Query = where_clause; // String.format("select %s from sysdigoutput  where %s", Fields, where_clause);
-
-				System.out.println(Query);
-				st = theConnection.createStatement();
-				resutls = st.executeQuery(Query);
-
-				while (resutls.next()) {
-					try {
-						SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
-
-						graphHelper.AddRowToGraph(ret, temp);
-
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						continue;
+					where_clause = "";
+					for (String pick : criterias) {
+						if (where_clause.length() != 0)
+							where_clause += "\nunion all\n";
+						where_clause += pick;
 					}
-				}
 
-				st.close();
+					Query = where_clause; // String.format("select %s from sysdigoutput where %s", Fields,
+											// where_clause);
 
+					System.out.println(Query);
+					st = theConnection.createStatement();
+					resutls = st.executeQuery(Query);
+
+					while (resutls.next()) {
+						try {
+							SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
+
+							graphHelper.AddRowToGraph(ret, temp);
+
+						} catch (Exception ex) {
+							System.out.println(ex.getMessage());
+							ex.printStackTrace();
+							continue;
+						}
+					}
+
+					st.close();
+
+					for (ResourceItem pick : ret.getVertices()) {
+						if (ret.inDegree(pick) == 0 && !dones.contains(pick.getID()))
+							stack.add(pick);
+					}
+
+				} while (stack.size() > 0);
 //				while (stack.size() > 0) {
 //
 //				}
@@ -220,13 +241,33 @@ public class SimplePGAdapter extends BaseAdapter {
 			// TODO : handle forward track
 
 		} catch (SQLException ex) {
+			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 		} catch (NoSuchFieldException ex) {
+			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 		} catch (SecurityException ex) {
+			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 		}
 
+		// create and clean the memory object
+		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+		mem.ClearAll();
+
+		try {
+			// add nodes and edges :
+			for (ResourceItem pick : ret.getVertices())
+				mem.addResourceItem(pick);
+			for (AccessCall pick : ret.getEdges())
+				mem.addAccessCall(pick);
+
+			ret = mem.runQuery(theQuery);
+		} catch (Exception ex) {
+			System.out.println(ex.getCause() + "\n" + ex.getMessage());
+
+			ex.printStackTrace();
+		}
 		// if merge is desired merge the Graphs
 		if (theQuery.isDoesAppend())
 			graphHelper.mergeGraphs(ret, theQuery.getOriginalGraph());

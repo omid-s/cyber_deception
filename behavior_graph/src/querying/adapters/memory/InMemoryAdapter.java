@@ -52,6 +52,11 @@ public class InMemoryAdapter extends BaseAdapter {
 	public void ClearAll() {
 		V.clear();
 		E.clear();
+		fromsMap.clear();
+		tosMap.clear();
+		fromAndTosMap.clear();
+		ProcessMap.clear();
+		FDMap.clear();
 	}
 
 	public boolean hasAccessCall(String key) {
@@ -78,6 +83,8 @@ public class InMemoryAdapter extends BaseAdapter {
 //		}
 		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
 				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
+			
+			inp.Title = String.valueOf(inp.Title);
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
