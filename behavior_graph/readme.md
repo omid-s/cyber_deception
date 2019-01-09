@@ -25,7 +25,7 @@ Program runs on two modes of logs for now,
 
 to collect logs to be used with the short format, use the following invocation for sysdig 
 
-	 sudo sysdig -p *"%evt.datetime=&amin&=%evt.type=&amin&=%thread.tid=&amin&=%proc.name=&amin&=%proc.args=&amin&=%proc.cwd=&amin&=%proc.cmdline=&amin&=%proc.pname=&amin&=%proc.pid=&amin&=%proc.ppid=&amin&=%fd.cip=&amin&=%fd.cport=&amin&=%fd.directory=&amin&=%fd.filename=&amin&=%fd.ip=&amin&=%fd.name=&amin&=%fd.num=&amin&=%fd.sip=&amin&=%fd.sockfamily=&amin&=%fd.sport=&amin&=%fd.type=&amin&=%fd.typechar=&amin&=%user.name=&amin&=%user.uid=&amin&=%evt.num=&amin&=%evt.args=&amin&=%user.shell" "(evt.type=read or evt.type=write or evt.type=open or evt.type=close or evt.type=pwrite64 or evt.type=writev or evt.type=pwritev or evt.type=socket or evt.type=connect or evt.type=accept or  evt.type=sendto or evt.type=recvfrom or  evt.type=sendmsg or evt.type=recvmsg or evt.type=clone or evt.type=fork or evt.type=vfork or evt.type=execve or evt.type=pipe2 or evt.type=pipe or evt.type=accept4 or evt.type=pread64 or evt.type=readv or evt.type=preadv or  evt.type=rename or evt.type=renameat or evt.type=unlink or evt.type=link or evt.type=kill) and evt.failed!=true and not proc.name contains gnome and evt.dir=<"
+	 sudo sysdig -p *"%evt.datetime=&amin&=%evt.type=&amin&=%thread.tid=&amin&=%proc.name=&amin&=%proc.args=&amin&=%proc.cwd=&amin&=%proc.cmdline=&amin&=%proc.pname=&amin&=%proc.pid=&amin&=%proc.ppid=&amin&=%fd.cip=&amin&=%fd.cport=&amin&=%fd.directory=&amin&=%fd.filename=&amin&=fd.ip=&amin&=%fd.name=&amin&=%fd.num=&amin&=%fd.sip=&amin&=%fd.sockfamily=&amin&=%fd.sport=&amin&=%fd.type=&amin&=%fd.typechar=&amin&=%user.name=&amin&=%user.uid=&amin&=%evt.num=&amin&=%evt.args=&amin&=%user.shell" "(evt.type=read or evt.type=write or evt.type=open or evt.type=close or evt.type=pwrite64 or evt.type=writev or evt.type=pwritev or evt.type=socket or evt.type=connect or evt.type=accept or  evt.type=sendto or evt.type=recvfrom or  evt.type=sendmsg or evt.type=recvmsg or evt.type=clone or evt.type=fork or evt.type=vfork or evt.type=execve or evt.type=pipe2 or evt.type=pipe or evt.type=accept4 or evt.type=pread64 or evt.type=readv or evt.type=preadv or  evt.type=rename or evt.type=renameat or evt.type=unlink or evt.type=link or evt.type=kill) and evt.failed!=true and not proc.name contains gnome and evt.dir=<"
 	 
 	 
 	
@@ -43,8 +43,10 @@ arguments :
 	* file : sets the source of logs to be file, if this key is used path= has to be provided ; if this key is not provided , stdin will be assumed the source of logs 
 	*  sf : saves the formated out put to be used in other tools (should be used with outpath= to choose where to save)
 	* path=[path to input file] : path to input file
-	* outpath=[path to file] : path to which the formated output is supposed to be stored. 
-	
+	* outpath=[path to file] : path to which the formated output is supposed to be stored.
+	* rm to select in memory query adapter
+	* rspg  to select simple postgress query adapter
+	* short tp enable short format logs being read from input 
 	
 ## Query model 
 
@@ -60,7 +62,11 @@ The general structure of our query language is as follows :
 	
 	2- [verbose] [back] [forward] select {* ,[ projection of Access Types ]} from {*,[ projection of Resource Types ]} [where [[field] [operator] [value]]^ ] [;]
 	
-	3- describe [verbose] [path=/path/to/file]
+	3- describe [verbose] [orderby={pid|pname|fname|seq}] [path=/path/to/file]
+	
+	4- {exit|quit}
+	
+	5- info
 
 ### Variable setting/ Getting query
 
@@ -79,7 +85,18 @@ The parts in the query account for the followings :
 [projection of access types]  : this option is either * for all, or is a selection of system calls including read, write, open, exec, etc. NOTE : because we do not capture starting of all processes, `exec` denotes an execution of a process by it's parent but time stamp will be the first time it has been executed which might or might not be when it was started.
 [projection of Resource types] : this option is either * for all, or is a selection of “file”, "process", "soc" for all types of socket calls, "pipe" or "unix"
 , ..
-Criteria : criterias are formated as `[field] [operator] [value]` . The “field” is one of the options : “pid” for process id, “tid” for thread Id and “activity.name” is the name of activity. The “operator” is either “is” or “has” which account for exact match and the contains operator. Different criterions can be added in the query using the separator “,also,”; “or” logical operator would be applied to these criterias. we have used this format to minimize the parsing efforts.  
+Criteria : criterias are formated as `[type] field operator value` . 
+type parameter can be any of resource types described in projection of resources section. This part is optional, skipping it or putting `any` means matching of all types is desired. 
+
+
+The “field” is one of the options :
+*  pid : for process id.
+*  name : searches in titles of resources 
+*  user_name : to search fir activities done by the user
+*  user_id : to search fir activities done by the user
+
+
+ The “operator” is either “is” or “has” which account for exact match and the contains operator. Different criterions can be added in the query using the separator “,also,”; “or” logical operator would be applied to these criterias. we have used this format to minimize the parsing efforts.  
 
 The “;” in the end indicates whether to add the results of the current query to the graph which is already present in the window; so we can have results of multiple queries create the whole picture piece by piece. 
 
@@ -88,3 +105,20 @@ The “;” in the end indicates whether to add the results of the current query
 This keyword is to be used for creating a textuall representation of the graph. When this keyword is used a textual representation of the graph in the window will be presented. This can also be printed to a file with use of optional `path=` parameter. 
 
 by default describe, flattens the similar calls after eachother into a signle record. if seperate row for each call is desired user should use the optional verbose keyword.  
+
+to order the items in the list one can use `orderby=` with one the given arguments as follows : 
+
+* seq : sorts by sequence number 
+* pname : sorts by process name 
+* pid : sorts by processid 
+* fname : sorts by file ( edge's destination ) name 
+
+*NOTE* : sort filed will also control how the merger of rows happens, eg. if sort by seq is selected the tow records which come after each other having same user,from, to, commands will be merged. if sorted by processid , the same will happen except they will be dealt with based on the order of processid .
+
+### Exiting
+
+to exit the program gracefully, one the commands `exit` or `quit` can be used- both case insensetive. 
+
+### Getting graph info and stats
+
+to get information ( for now, edge and vertex counts ) use `info` keyword.
