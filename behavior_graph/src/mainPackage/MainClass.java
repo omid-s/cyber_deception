@@ -59,7 +59,8 @@ public class MainClass {
 		String pid = "";
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
-				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false, ReadStream = false;
+				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
+				ReadStream = false, SimpleNeo4JQuery = false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -95,6 +96,8 @@ public class MainClass {
 				MemQuery = true;
 			if (pick.equals("rspg"))
 				SimplePGQuery = true;
+			if (pick.equals("rsn4j"))
+				SimpleNeo4JQuery = true;
 
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
