@@ -51,5 +51,4 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

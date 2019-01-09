@@ -585,4 +585,113 @@ public class GraphObjectHelper {
 		return ret;
 
 	}
+
+	/**
+	 * This method turns a sysdig record object into a small graph represnting the ojecrt
+	 * this graph can have from 2 to 3 nodes and one or two edges
+	 * 
+	 * @param input the sysdig record objec tto create nodes or
+	 * @return the graph containng the graph represntation of the object
+	 */
+	public Graph<ResourceItem, AccessCall> getGraphFromRecord(SysdigRecordObject pick) {
+
+		Graph<ResourceItem, AccessCall> ret = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
+
+		// create the main process
+		ResourceItem tempItem = new ResourceItem();
+
+		tempItem.Type = ResourceType.Process;
+		tempItem.Number = pick.proc_pid;
+		tempItem.id = pick.getProcPID();
+		tempItem.Title = pick.proc_name;
+		tempItem.Description = pick.proc_args;
+
+		ResourceItem TheProc = tempItem;
+		ret.addVertex(tempItem);
+
+		ResourceItem parentP = new ResourceItem();
+		parentP.Number = pick.proc_ppid;
+		parentP.id = pick.getParentProcID();
+		parentP.Title = pick.proc_pname;
+
+		ret.addVertex(parentP);
+
+		// add the call between process and process parent
+		AccessCall tempCallItem = new AccessCall();
+		tempCallItem.From = parentP;
+		tempCallItem.To = TheProc;
+		tempCallItem.Command = "exec";
+		tempCallItem.user_id = pick.user_uid;
+		tempCallItem.user_name = pick.user_name;
+
+		tempCallItem.sequenceNumber = sequenceCounter++;
+
+		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+
+		// is there an fd resource ? if so add it the graph, other wise skip it
+		if (pick.fd_num != "<NA>") {
+
+			// find out the fd type
+			ResourceType ItemType = ResourceType.File;
+			switch (pick.fd_typechar.toLowerCase()) {
+			case "f":
+				ItemType = ResourceType.File;
+				break;
+			case "4":
+				ItemType = ResourceType.NetworkIPV4;
+				break;
+			case "6":
+				ItemType = ResourceType.NetworkIPV6;
+				break;
+			case "u":
+				ItemType = ResourceType.Unix;
+				break;
+			case "s":
+				ItemType = ResourceType.SignalFDs;
+				break;
+			case "e":
+				ItemType = ResourceType.EventFDs;
+				break;
+			case "i":
+				ItemType = ResourceType.iNotifyFDS;
+				break;
+			case "t":
+				ItemType = ResourceType.TimerFDs;
+				break;
+			case "p":
+				ItemType = ResourceType.Pipe;
+				break;
+			}
+
+			// add the fd item
+			ResourceItem ToItem = new ResourceItem();
+
+			ToItem.Type = ItemType;
+			ToItem.Number = pick.fd_num;
+			ToItem.id = pick.getFD_ID();
+			ToItem.Path = pick.fd_directory;
+			ToItem.Title = pick.fd_name;
+
+			ret.addVertex(ToItem);
+
+			// add the edge connecting the FD and the process
+			AccessCall theCall = new AccessCall();
+			theCall.From = TheProc;
+			theCall.To = ToItem;
+			theCall.Command = pick.evt_type;
+			theCall.DateTime = pick.evt_time_s;
+			theCall.Description = pick.evt_rawres;
+			theCall.Info = pick.evt_args;
+			theCall.user_id = pick.user_uid;
+			theCall.user_name = pick.user_name;
+			theCall.sequenceNumber = sequenceCounter++;
+
+			ret.addEdge(theCall, theCall.From, theCall.To);
+
+		}
+
+		return ret;
+
+	}
+
 }
