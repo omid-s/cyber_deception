@@ -8,10 +8,13 @@ import java.util.Vector;
 
 import javax.vecmath.GVector;
 
+import org.neo4j.driver.internal.shaded.io.netty.channel.ThreadPerChannelEventLoop;
+
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
+import classes.SysdigRecordObjectGraph;
 import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -587,15 +590,16 @@ public class GraphObjectHelper {
 	}
 
 	/**
-	 * This method turns a sysdig record object into a small graph represnting the ojecrt
-	 * this graph can have from 2 to 3 nodes and one or two edges
+	 * This method turns a sysdig record object into a small graph represnting the
+	 * ojecrt this graph can have from 2 to 3 nodes and one or two edges
 	 * 
 	 * @param input the sysdig record objec tto create nodes or
 	 * @return the graph containng the graph represntation of the object
 	 */
-	public Graph<ResourceItem, AccessCall> getGraphFromRecord(SysdigRecordObject pick) {
-
-		Graph<ResourceItem, AccessCall> ret = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
+	public static SysdigRecordObjectGraph getGraphFromRecord(SysdigRecordObject pick) {
+//TODO : fix the seqCounters
+		ResourceItem ToItem = null;
+		AccessCall theCall = null;
 
 		// create the main process
 		ResourceItem tempItem = new ResourceItem();
@@ -607,14 +611,14 @@ public class GraphObjectHelper {
 		tempItem.Description = pick.proc_args;
 
 		ResourceItem TheProc = tempItem;
-		ret.addVertex(tempItem);
+//		ret.addVertex(tempItem);
 
 		ResourceItem parentP = new ResourceItem();
 		parentP.Number = pick.proc_ppid;
 		parentP.id = pick.getParentProcID();
 		parentP.Title = pick.proc_pname;
 
-		ret.addVertex(parentP);
+//		ret.addVertex(parentP);
 
 		// add the call between process and process parent
 		AccessCall tempCallItem = new AccessCall();
@@ -624,9 +628,9 @@ public class GraphObjectHelper {
 		tempCallItem.user_id = pick.user_uid;
 		tempCallItem.user_name = pick.user_name;
 
-		tempCallItem.sequenceNumber = sequenceCounter++;
+		tempCallItem.sequenceNumber = 0;
 
-		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+//		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
 		// is there an fd resource ? if so add it the graph, other wise skip it
 		if (pick.fd_num != "<NA>") {
@@ -664,7 +668,7 @@ public class GraphObjectHelper {
 			}
 
 			// add the fd item
-			ResourceItem ToItem = new ResourceItem();
+			ToItem = new ResourceItem();
 
 			ToItem.Type = ItemType;
 			ToItem.Number = pick.fd_num;
@@ -672,10 +676,10 @@ public class GraphObjectHelper {
 			ToItem.Path = pick.fd_directory;
 			ToItem.Title = pick.fd_name;
 
-			ret.addVertex(ToItem);
+//			ret.addVertex(ToItem);
 
 			// add the edge connecting the FD and the process
-			AccessCall theCall = new AccessCall();
+			theCall = new AccessCall();
 			theCall.From = TheProc;
 			theCall.To = ToItem;
 			theCall.Command = pick.evt_type;
@@ -684,13 +688,13 @@ public class GraphObjectHelper {
 			theCall.Info = pick.evt_args;
 			theCall.user_id = pick.user_uid;
 			theCall.user_name = pick.user_name;
-			theCall.sequenceNumber = sequenceCounter++;
+			theCall.sequenceNumber = 0;
 
-			ret.addEdge(theCall, theCall.From, theCall.To);
+//			ret.addEdge(theCall, theCall.From, theCall.To);
 
 		}
 
-		return ret;
+		return new SysdigRecordObjectGraph(TheProc, parentP, tempCallItem, theCall, ToItem);
 
 	}
 
