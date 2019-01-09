@@ -12,6 +12,7 @@ import classes.ResourceType;
 import edu.uci.ics.jung.graph.Graph;
 import exceptions.MissingValuesException;
 import querying.parsing.Criteria;
+import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
 
 /**

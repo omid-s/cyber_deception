@@ -100,7 +100,7 @@ public class SysdigRecordObject {
 
 	public String getFD_ID() {
 		if (RuntimeVariables.getInstance().getIgnoreFDNumber())
-			return this.fd_name;
+			return String.valueOf( this.fd_name );
 		else
 			return fd_num + "|" + fd_name;
 	}

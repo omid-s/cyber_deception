@@ -1,6 +1,5 @@
 package mainPackage;
 
-import controlClasses.GraphObjectHelper;
 import controlClasses.RecordInterpretorFactory;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
@@ -14,11 +13,13 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
-import querying.BaseAdapter;
-import querying.ParsedQuery;
 import querying.QueryInterpreter;
+import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
+import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.Criteria;
+import querying.parsing.ParsedQuery;
+import querying.tools.GraphObjectHelper;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -58,7 +59,7 @@ public class MainClass {
 		String pid = "";
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
-				InShortFormat = false, SaveFormated = false, MemQuery = true;
+				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false, ReadStream = false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -90,8 +91,11 @@ public class MainClass {
 				InShortFormat = true;
 			if (pick.equals("sf"))
 				SaveFormated = true;
-			if (pick.equals("rq"))
+			if (pick.equals("rm"))
 				MemQuery = true;
+			if (pick.equals("rspg"))
+				SimplePGQuery = true;
+
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -106,7 +110,7 @@ public class MainClass {
 			return;
 		}
 
-		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat, false);
+		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat);
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
@@ -125,58 +129,58 @@ public class MainClass {
 			output_file_writer = new FileWriter(new File(output_file));
 		}
 
-		while (true) {
-			if (ReadFromFile)
-				break;
-			try {
-				String inputStr = null;
-				if ((inputStr = bufReader.readLine()) != null) {
-					// System.out.print("+");
-					counterr++;
-					if (counterr == 1 || counterr == 100000)
-						System.out.println(inputStr);
-					// if(true) continue;
-					SysdigRecordObject tempObj = temp.GetObjectFromTextLine(inputStr);
+		if (ReadStream)
+			while (true) {
 
-					/// if desired write the formated file
-					if (SaveFormated)
-						output_file_writer.write(tempObj.toString() + "\n");
+				try {
+					String inputStr = null;
+					if ((inputStr = bufReader.readLine()) != null) {
+						// System.out.print("+");
+						counterr++;
+						if (counterr == 1 || counterr == 100000)
+							System.out.println(inputStr);
+						// if(true) continue;
+						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(inputStr);
 
-					if (Thread.currentThread().getId() == Long.parseLong(tempObj.thread_tid)) {
-						skipped++;
-						System.out.println(".");
-						continue;
+						/// if desired write the formated file
+						if (SaveFormated)
+							output_file_writer.write(tempObj.toString() + "\n");
+
+						if (Thread.currentThread().getId() == Long.parseLong(tempObj.thread_tid)) {
+							skipped++;
+							System.out.println(".");
+							continue;
+						}
+
+						if (SaveToDB)
+							temp.Insert(tempObj);
+
+						if (SaveToGraph)
+							GraphActionFactory.Save(tempObj, Neo4JVerbose);
+
+						if (ShowVerbose) {
+							VerboseHelper.AddRowToGraph(theGraph, tempObj);
+						}
+						if (ShowGraph) {
+							ClearHelper.AddRowToGraph(theGraph, tempObj);
+						}
+
+					} else {
+						break;
 					}
+					counter++;
+					System.out.print("\033[H\033[2J");
+					System.out.print(String.format("%c[%d;%df Total : %d", 0x1B, 15, 25, counter));
+					System.out.print(String.format("%c[%d;%df With Error : %d %d", 0x1B, 16, 25, inError,
+							Thread.currentThread().getId()));
+					System.out.flush();
 
-					if (SaveToDB)
-						temp.Insert(tempObj);
-
-					if (SaveToGraph)
-						GraphActionFactory.Save(tempObj, Neo4JVerbose);
-
-					if (ShowVerbose) {
-						VerboseHelper.AddRowToGraph(theGraph, tempObj);
-					}
-					if (ShowGraph) {
-						ClearHelper.AddRowToGraph(theGraph, tempObj);
-					}
-
-				} else {
-					break;
+				} catch (NumberFormatException ex) {
+					inError++;
+				} catch (Exception e) {
+					System.out.println("Error");
 				}
-				counter++;
-				System.out.print("\033[H\033[2J");
-				System.out.print(String.format("%c[%d;%df Total : %d", 0x1B, 15, 25, counter));
-				System.out.print(String.format("%c[%d;%df With Error : %d %d", 0x1B, 16, 25, inError,
-						Thread.currentThread().getId()));
-				System.out.flush();
-
-			} catch (NumberFormatException ex) {
-				inError++;
-			} catch (Exception e) {
-				System.out.println("Error");
 			}
-		}
 		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
@@ -280,6 +284,8 @@ public class MainClass {
 		/// set the query adapter
 		if (MemQuery)
 			queryMachine = InMemoryAdapter.getSignleton();
+		else if (SimplePGQuery)
+			queryMachine = SimplePGAdapter.getSignleton();
 
 		/// setup GUI window
 		EdgeLabelDemo theGraphWindow = null;
@@ -335,6 +341,7 @@ public class MainClass {
 					try {
 						query = QueryInterpreter.interpret(command, theGraph);
 					} catch (Exception ex) {
+						ex.printStackTrace();
 					}
 
 					theGraph = queryMachine.runQuery(query);

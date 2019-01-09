@@ -16,15 +16,15 @@ import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.QueryFormatException;
-import querying.BaseAdapter;
-import querying.ParsedQuery;
+import querying.adapters.BaseAdapter;
 import querying.parsing.Criteria;
+import querying.parsing.ParsedQuery;
 
 /**
  * @author omido
  *
  */
-public class InMemoryAdapter  extends BaseAdapter{
+public class InMemoryAdapter extends BaseAdapter {
 	private InMemoryAdapter() {
 	}
 
@@ -52,6 +52,11 @@ public class InMemoryAdapter  extends BaseAdapter{
 	public void ClearAll() {
 		V.clear();
 		E.clear();
+		fromsMap.clear();
+		tosMap.clear();
+		fromAndTosMap.clear();
+		ProcessMap.clear();
+		FDMap.clear();
 	}
 
 	public boolean hasAccessCall(String key) {
@@ -65,7 +70,7 @@ public class InMemoryAdapter  extends BaseAdapter{
 	public void addResourceItem(ResourceItem inp) {
 		V.put(inp.id.toLowerCase(), inp);
 		if (inp.Type == ResourceType.Process) {
-			ProcessMap.put(inp.Number.toLowerCase(), inp);
+			ProcessMap.put(inp.id.toLowerCase(), inp);
 
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
@@ -78,6 +83,8 @@ public class InMemoryAdapter  extends BaseAdapter{
 //		}
 		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
 				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
+			
+			inp.Title = String.valueOf(inp.Title);
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
@@ -146,27 +153,21 @@ public class InMemoryAdapter  extends BaseAdapter{
 
 	public static ArrayList<AccessCall> edges_for_describe = new ArrayList<AccessCall>();
 
-	
 	/**
-	 * This method runs the query and returns the filtered query from the in memory object
+	 * This method runs the query and returns the filtered query from the in memory
+	 * object
 	 */
-	@Override public Graph<ResourceItem, AccessCall> runQuery( ParsedQuery theQuery ) throws QueryFormatException{
-		
-		return this.getSubGraph(
-				theQuery.getVerticeTypes(),
-				theQuery.getEdgeTypes(),
-				theQuery.isVerbose(),
-				theQuery.isBackTracked(),
-				theQuery.isForwardTracked(),
-				theQuery.getCriterias(),
-				theQuery.getOriginalGraph(),
-				theQuery.isDoesAppend()
-				);
+	@Override
+	public Graph<ResourceItem, AccessCall> runQuery(ParsedQuery theQuery) throws QueryFormatException {
+
+		return this.getSubGraph(theQuery.getVerticeTypes(), theQuery.getEdgeTypes(), theQuery.isVerbose(),
+				theQuery.isBackTracked(), theQuery.isForwardTracked(), theQuery.getCriterias(),
+				theQuery.getOriginalGraph(), theQuery.isDoesAppend());
 	}
-	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes,
-ArrayList<String> edgeType,
+
+	public Graph<ResourceItem, AccessCall> getSubGraph(ArrayList<ResourceType> verticeTypes, ArrayList<String> edgeType,
 			boolean isVerbose, boolean isBackTracked, boolean isForwardTracked, ArrayList<Criteria> criterias,
-			Graph<ResourceItem, AccessCall> originalGraph ,boolean doesAppend ) throws QueryFormatException {
+			Graph<ResourceItem, AccessCall> originalGraph, boolean doesAppend) throws QueryFormatException {
 
 		Graph<ResourceItem, AccessCall> ret = (!doesAppend)
 				? new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>()
@@ -214,7 +215,9 @@ ArrayList<String> edgeType,
 					case "is":
 						if (FDMap.containsKey(pick.getValue()))
 							for (ResourceItem x : FDMap.get(pick.getValue())) {
-								if (pick.getFieldType().contains(x.Type) || pick.getFieldType().size() == 0)// cehck for filter type
+								if (pick.getFieldType().contains(x.Type) || pick.getFieldType().size() == 0)// cehck for
+																											// filter
+																											// type
 									temp.add(x);
 							}
 						break;
@@ -222,7 +225,10 @@ ArrayList<String> edgeType,
 						for (String x : FDMap.keySet()) {
 							if (x.contains(pick.getValue()))
 								for (ResourceItem y : FDMap.get(x)) {
-									if (pick.getFieldType().contains(y.Type) || pick.getFieldType().size() == 0) // cehck for filter type
+									if (pick.getFieldType().contains(y.Type) || pick.getFieldType().size() == 0) // cehck
+																													// for
+																													// filter
+																													// type
 										temp.add(y);
 								}
 						}
