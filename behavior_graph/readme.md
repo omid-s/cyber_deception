@@ -25,7 +25,7 @@ Program runs on two modes of logs for now,
 
 to collect logs to be used with the short format, use the following invocation for sysdig 
 
-	 sudo sysdig -p *"%evt.datetime=&amin&=%evt.type=&amin&=%thread.tid=&amin&=%proc.name=&amin&=%proc.args=&amin&=%proc.cwd=&amin&=%proc.cmdline=&amin&=%proc.pname=&amin&=%proc.pid=&amin&=%proc.ppid=&amin&=%fd.cip=&amin&=%fd.cport=&amin&=%fd.directory=&amin&=%fd.filename=&amin&=%fd.ip=&amin&=%fd.name=&amin&=%fd.num=&amin&=%fd.sip=&amin&=%fd.sockfamily=&amin&=%fd.sport=&amin&=%fd.type=&amin&=%fd.typechar=&amin&=%user.name=&amin&=%user.uid=&amin&=%evt.num=&amin&=%evt.args=&amin&=%user.shell" "(evt.type=read or evt.type=write or evt.type=open or evt.type=close or evt.type=pwrite64 or evt.type=writev or evt.type=pwritev or evt.type=socket or evt.type=connect or evt.type=accept or  evt.type=sendto or evt.type=recvfrom or  evt.type=sendmsg or evt.type=recvmsg or evt.type=clone or evt.type=fork or evt.type=vfork or evt.type=execve or evt.type=pipe2 or evt.type=pipe or evt.type=accept4 or evt.type=pread64 or evt.type=readv or evt.type=preadv or  evt.type=rename or evt.type=renameat or evt.type=unlink or evt.type=link or evt.type=kill) and evt.failed!=true and not proc.name contains gnome and evt.dir=<"
+	 sudo sysdig -p *"%evt.datetime=&amin&=%evt.type=&amin&=%thread.tid=&amin&=%proc.name=&amin&=%proc.args=&amin&=%proc.cwd=&amin&=%proc.cmdline=&amin&=%proc.pname=&amin&=%proc.pid=&amin&=%proc.ppid=&amin&=%fd.cip=&amin&=%fd.cport=&amin&=%fd.directory=&amin&=%fd.filename=&amin&=fd.ip=&amin&=%fd.name=&amin&=%fd.num=&amin&=%fd.sip=&amin&=%fd.sockfamily=&amin&=%fd.sport=&amin&=%fd.type=&amin&=%fd.typechar=&amin&=%user.name=&amin&=%user.uid=&amin&=%evt.num=&amin&=%evt.args=&amin&=%user.shell" "(evt.type=read or evt.type=write or evt.type=open or evt.type=close or evt.type=pwrite64 or evt.type=writev or evt.type=pwritev or evt.type=socket or evt.type=connect or evt.type=accept or  evt.type=sendto or evt.type=recvfrom or  evt.type=sendmsg or evt.type=recvmsg or evt.type=clone or evt.type=fork or evt.type=vfork or evt.type=execve or evt.type=pipe2 or evt.type=pipe or evt.type=accept4 or evt.type=pread64 or evt.type=readv or evt.type=preadv or  evt.type=rename or evt.type=renameat or evt.type=unlink or evt.type=link or evt.type=kill) and evt.failed!=true and not proc.name contains gnome and evt.dir=<"
 	 
 	 
 	
@@ -43,8 +43,10 @@ arguments :
 	* file : sets the source of logs to be file, if this key is used path= has to be provided ; if this key is not provided , stdin will be assumed the source of logs 
 	*  sf : saves the formated out put to be used in other tools (should be used with outpath= to choose where to save)
 	* path=[path to input file] : path to input file
-	* outpath=[path to file] : path to which the formated output is supposed to be stored. 
-	
+	* outpath=[path to file] : path to which the formated output is supposed to be stored.
+	* rm to select in memory query adapter
+	* rspg  to select simple postgress query adapter
+	* short tp enable short format logs being read from input 
 	
 ## Query model 
 
