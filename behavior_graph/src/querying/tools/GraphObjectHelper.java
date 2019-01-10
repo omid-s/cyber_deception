@@ -617,6 +617,7 @@ public class GraphObjectHelper {
 		parentP.Number = pick.proc_ppid;
 		parentP.id = pick.getParentProcID();
 		parentP.Title = pick.proc_pname;
+		parentP.Type = ResourceType.Process;
 
 //		ret.addVertex(parentP);
 

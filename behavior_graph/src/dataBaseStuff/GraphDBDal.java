@@ -42,32 +42,36 @@ public class GraphDBDal {
 		
 		temp += "\r\n" + String.format(" merge ( newProc:%s ) ", tempGraph.getProc().toN4JObjectString() );
 		temp += "\r\n" + String.format(" merge ( parentProc:%s ) ", tempGraph.getParentProc().toN4JObjectString() );
-		temp += "\r\n" + String.format(" merge (parentProc)<-[call:IsChildOf]-(newProc) ", tempGraph.getProc().toN4JObjectString() );
+		temp += "\r\n" + String.format(" merge (parentProc)-[:%s]->(newProc) ", tempGraph.getExec().toN4JObjectString() );
+		if( tempGraph.getItem() != null ) {
+			temp += "\r\n" + String.format(" merge ( item:%s ) ", tempGraph.getItem().toN4JObjectString() );
+			temp += "\r\n" + String.format(" merge (newProc)-[:%s]->(item) ", tempGraph.getSyscall().toN4JObjectString() );
+		}
 		
 		
-		temp += "\n\r" + String.format("merge ( newProc:Process{name:\"%1s\",pid:%2s} ) ", tempGraph. , inp.proc_pid);
-		if (!inp.proc_ppid.toLowerCase().equals("<na>") || inp.evt_type.toLowerCase().equals("fork")) {
-			// add the parent proec
-			temp += "\n\r" + String.format("merge ( parentProc:Process{name:\"%1s\",pid:%2s} ) ", inp.proc_pname,
-					inp.proc_ppid);
-			temp += "\n\r"
-					+ String.format("merge (parentProc)<-[:IsChildOf]-(newProc) ", inp.proc_pname, inp.proc_ppid);
-
-		}
-		if (!inp.fd_num.toLowerCase().equals("<na>")) {
-			temp += "\r\n" + String.format(
-					" merge  (resource:Resource{ type:\"%1s\", number:%2s, name:\"%3s\", fileName:\"%4s\",port:\"%5s\"  } )",
-					inp.fd_type, inp.fd_num, inp.fd_name, inp.fd_filename, inp.fd_port);
-			if (SaveVerbose)
-				temp += "\r\n" + String.format(
-						" create (newProc) -[call:%1s{time:\"%2s\",info:\"%3s\", args:\"%4s\",rawtimens:\"%5s\" }]-> (resource)",
-						inp.evt_type, inp.evt_time, "-", "-", inp.evt_rawtime_ns);
-			else
-				temp += "\r\n" + String.format(
-						" merge (newProc) -[call:%1s]-> (resource) on create set call.time=\"%2s\",call.info=\"%3s\", call.args=\"%4s\",call.rawtimens=\"%5s\" ",
-						inp.evt_type, inp.evt_time, "-", "-", inp.evt_rawtime_ns);
-
-		}
+//		temp += "\n\r" + String.format("merge ( newProc:Process{name:\"%1s\",pid:%2s} ) ", inp.proc_apid , inp.proc_pid);
+//		if (!inp.proc_ppid.toLowerCase().equals("<na>") || inp.evt_type.toLowerCase().equals("fork")) {
+//			// add the parent proec
+//			temp += "\n\r" + String.format("merge ( parentProc:Process{name:\"%1s\",pid:%2s} ) ", inp.proc_pname,
+//					inp.proc_ppid);
+//			temp += "\n\r"
+//					+ String.format("merge (parentProc)<-[:IsChildOf]-(newProc) ", inp.proc_pname, inp.proc_ppid);
+//
+//		}
+//		if (!inp.fd_num.toLowerCase().equals("<na>")) {
+//			temp += "\r\n" + String.format(
+//					" merge  (resource:Resource{ type:\"%1s\", number:%2s, name:\"%3s\", fileName:\"%4s\",port:\"%5s\"  } )",
+//					inp.fd_type, inp.fd_num, inp.fd_name, inp.fd_filename, inp.fd_port);
+//			if (SaveVerbose)
+//				temp += "\r\n" + String.format(
+//						" create (newProc) -[call:%1s{time:\"%2s\",info:\"%3s\", args:\"%4s\",rawtimens:\"%5s\" }]-> (resource)",
+//						inp.evt_type, inp.evt_time, "-", "-", inp.evt_rawtime_ns);
+//			else
+//				temp += "\r\n" + String.format(
+//						" merge (newProc) -[call:%1s]-> (resource) on create set call.time=\"%2s\",call.info=\"%3s\", call.args=\"%4s\",call.rawtimens=\"%5s\" ",
+//						inp.evt_type, inp.evt_time, "-", "-", inp.evt_rawtime_ns);
+//
+//		}
 		// find the type
 		temp += ";";
 		// System.out.println(temp);

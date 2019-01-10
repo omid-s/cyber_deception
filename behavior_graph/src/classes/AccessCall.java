@@ -36,9 +36,18 @@ public class AccessCall extends Object {
 	 */
 	public String toN4JObjectString() {
 		return String.format(
-				"call:%s{command:\"%s\",date:\"%s\", description:\"%s\" , "
+				"%s{command:\"%s\",date:\"%s\", description:\"%s\" , "
 						+ "args:\"%s\", info:\"%s\", user_id:\"%s\" , user_name:\"%s\"  }",
-				Command, Command, DateTime, Description, args, Info, user_id, user_name);
+						String.valueOf(Command), 
+						String.valueOf(Command), 
+						String.valueOf(DateTime), 
+						"",//String.valueOf(Description), 
+						"",//String.valueOf(args), 
+						String.valueOf(Info), 
+						String.valueOf(user_id), 
+						String.valueOf(user_name)
+				
+				);
 
 	}
 

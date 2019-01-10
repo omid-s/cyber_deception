@@ -32,7 +32,13 @@ public class ResourceItem {
 
 		return String.format(
 				"%s{id:\"%s\", title:\"%s\" , path:\"%s\", " + "number: \"%s\", description:\"%s\" , type:\"%s\"  }",
-				Type.toString(), id, Title, Path, Number, Description, Type.toString());
+				Type.toString(), 
+				String.valueOf(id), 
+				String.valueOf(Title), 
+				String.valueOf(Path), 
+				String.valueOf(Number), 
+				"",//String.valueOf(Description), 
+				Type.toString());
 	}
 
 	@Override
