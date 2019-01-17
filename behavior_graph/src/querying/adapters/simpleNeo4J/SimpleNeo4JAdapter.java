@@ -117,11 +117,21 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 				if (typeCriteria.length() > 0)
 					typeCriteria += " or ";
 
-				String.format(" (a:%1$s or c:%1$ ) ", p.toString());
+				typeCriteria += String.format(" (a:%1$s or c:%1$ ) ", p.toString());
 			}
 
-			TempCriteria = String.format("( a.%1$s%2$s\"%3$s%4$s%3$s\" or c.%1$s%2$s\"%3$s%4$s%3$s\" )", field,
-					pick.getOp().equals("is") ? " = " : " =~ ", pick.getOp().equals("is") ? "" : ".*", pick.getValue());
+			if (!theQuery.isBackTracked() && !theQuery.isForwardTracked())
+				TempCriteria = String.format("( a.%1$s%2$s\"%3$s%4$s%3$s\" or c.%1$s%2$s\"%3$s%4$s%3$s\" )", field,
+						pick.getOp().equals("is") ? " = " : " =~ ", pick.getOp().equals("is") ? "" : ".*",
+						pick.getValue());
+			else if (theQuery.isBackTracked())
+				TempCriteria = String.format("( y.%1$s%2$s\"%3$s%4$s%3$s\")", field,
+						pick.getOp().equals("is") ? " = " : " =~ ", pick.getOp().equals("is") ? "" : ".*",
+						pick.getValue());
+			else if (theQuery.isForwardTracked())
+				TempCriteria = String.format("( x.%1$s%2$s\"%3$s%4$s%3$s\")", field,
+						pick.getOp().equals("is") ? " = " : " =~ ", pick.getOp().equals("is") ? "" : ".*",
+						pick.getValue());
 
 			if (typeCriteria.length() > 0)
 				TempCriteria += " and " + typeCriteria;
@@ -138,12 +148,18 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 			where_clause += String.format("(%s)", pick);
 		}
 
-		String Query = String.format("match (a)-[b]->(c) where %s return a,b,c ", where_clause);
-//
-//		System.out.println(Query);
-//		String Query = "match (a)-[b]->(c) wheren";
+		String Query;
 
-//		String Query = "match (a)-[b]->(c) where (a:File or a:Process) and  a.title =~ \".*nano.*\" return a,b,c";
+		if (!theQuery.isBackTracked() && !theQuery.isForwardTracked())
+			Query = String.format("match (a)-[b]->(c) where %s return a,b,c ", where_clause);
+		else if (theQuery.isBackTracked())
+			Query = String.format(
+					"match (x)-[*]->(y) match (a)-[b]->(c) where %s and  (c.id=y.id or c.id=x.id)  return a,b,c",
+					where_clause);
+		else
+			Query = String.format(
+					"match (x)-[*]->(y) match (a)-[b]->(c) where %s and  (a.id=y.id or a.id=x.id)  return a,b,c",
+					where_clause);
 
 		try {
 			Connection theConnection = DataBaseLayer.getNeo4JConnection();
