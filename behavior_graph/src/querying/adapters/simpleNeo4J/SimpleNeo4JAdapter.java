@@ -20,6 +20,7 @@ import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import exceptions.QueryFormatException;
 import querying.adapters.BaseAdapter;
+import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
@@ -183,6 +184,27 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 		}
+
+		// create and clean the memory object
+		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+		mem.ClearAll();
+
+		try {
+			// add nodes and edges :
+			for (ResourceItem pick : ret.getVertices())
+				mem.addResourceItem(pick);
+			for (AccessCall pick : ret.getEdges())
+				mem.addAccessCall(pick);
+
+			ret = mem.runQuery(theQuery);
+		} catch (Exception ex) {
+			System.out.println(ex.getCause() + "\n" + ex.getMessage());
+
+			ex.printStackTrace();
+		}
+		// if merge is desired merge the Graphs
+		if (theQuery.isDoesAppend())
+			ret = graphHelper.mergeGraphs2(ret, theQuery.getOriginalGraph());
 
 		return ret;
 	}
