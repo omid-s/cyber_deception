@@ -20,6 +20,7 @@ import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import exceptions.QueryFormatException;
 import querying.adapters.BaseAdapter;
+import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
 import querying.tools.GraphObjectHelper;
@@ -75,33 +76,83 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 		/// create the seed node fetch
 		ArrayList<String> criterias = new ArrayList<String>();
 
+		// create criterias based on node types ( exckuysing process )
+		String TempCriteria = "";
+
+		for (ResourceType pick : theQuery.getVerticeTypes()) {
+
+			if (TempCriteria.length() != 0)
+				TempCriteria += " or ";
+
+			TempCriteria += String.format("(a:%s or c:%s)", pick.toString(), pick.toString());
+		}
+		if (TempCriteria.length() > 0)
+			criterias.add(TempCriteria);
+
+		TempCriteria = "";
+		for (String pick : theQuery.getEdgeTypes()) {
+
+			if (TempCriteria.length() != 0)
+				TempCriteria += " or ";
+
+			TempCriteria += String.format("(b.command=\"%s\")", pick);
+		}
+		if (TempCriteria.length() > 0)
+			criterias.add(TempCriteria);
+
+		TempCriteria = "";
+		for (Criteria pick : theQuery.getCriterias()) {
+			if (TempCriteria.length() != 0)
+				TempCriteria += " and ";
+
+			String field = "fd_name";
+			if (pick.getFieldName().equals("pid"))
+				field = "id";
+			else if (pick.getFieldName().equals("name"))
+				field = "title";
+
+			String typeCriteria = "";
+			for (ResourceType p : pick.getFieldType()) {
+
+				if (typeCriteria.length() > 0)
+					typeCriteria += " or ";
+
+				String.format(" (a:%1$s or c:%1$ ) ", p.toString());
+			}
+
+			TempCriteria = String.format("( a.%1$s%2$s\"%3$s%4$s%3$s\" or c.%1$s%2$s\"%3$s%4$s%3$s\" )", field,
+					pick.getOp().equals("is") ? " = " : " =~ ", pick.getOp().equals("is") ? "" : ".*", pick.getValue());
+
+			if (typeCriteria.length() > 0)
+				TempCriteria += " and " + typeCriteria;
+
+		}
+		if (TempCriteria.length() > 0)
+			criterias.add(TempCriteria);
+
+		String where_clause = "";
+		for (String pick : criterias) {
+			if (where_clause.length() != 0)
+				where_clause += " and ";
+
+			where_clause += String.format("(%s)", pick);
+		}
+
+		String Query = String.format("match (a)-[b]->(c) where %s return a,b,c ", where_clause);
+//
+//		System.out.println(Query);
 //		String Query = "match (a)-[b]->(c) wheren";
 
-		String Query = "match (a)-[b]->(c) where (a:File or a:Process) and  a.title =~ \".*nano.*\" return a,b,c";
+//		String Query = "match (a)-[b]->(c) where (a:File or a:Process) and  a.title =~ \".*nano.*\" return a,b,c";
 
 		try {
 			Connection theConnection = DataBaseLayer.getNeo4JConnection();
 			Statement st = theConnection.createStatement();
 
 			ResultSet resutls = st.executeQuery(Query);
-			ResultSetMetaData metadata = resutls.getMetaData();
-			int columnCount = metadata.getColumnCount();
-			for (int i = 1; i <= columnCount; i++) {
-				System.out.println(metadata.getColumnName(i) + "|| ");
-			}
+
 			while (resutls.next()) {
 
-//				System.out.println(resutls.getObject("a.title"));
-//
-//				System.out.println();
-
-//					String row = "";
-//				for (int i = 1; i <= columnCount; i++) {
-//					row += resutls.getString(i) + ", ";
-//				}
-//				System.out.println(row);
-
-				
 				try {
 					SysdigRecordObjectGraph temp = getSysdigObjectGraphFromResultSet(resutls);
 
@@ -111,115 +162,65 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 					ex.printStackTrace();
 					continue;
 				}
-				
-				
-			
-				
 			}
 		} catch (Exception ex) {
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 		}
-		// create criterias based on node types ( exckuysing process )
-//		String TempCriteria = "";
-//		for (ResourceType pick : theQuery.getVerticeTypes()) {
-//
-//			if (TempCriteria.length() != 0)
-//				TempCriteria += " or ";
-//
-//			// for the sake of proess to be over writing the filters from others
-//			if (pick == ResourceType.Process)
-//				TempCriteria += "1=1";
-//			else
-//				TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
-//
-//		}
 
 		return ret;
 	}
 
+	/**
+	 * turns a neo4j record to a sysdig objectRecord Graph
+	 * 
+	 * @param inp
+	 * @return
+	 * @throws Exception
+	 */
 	private SysdigRecordObjectGraph getSysdigObjectGraphFromResultSet(ResultSet inp) throws Exception {
 
-	
-		Map<String, Object> _r1 =(Map<String, Object> ) inp.getObject("a");
+		Map<String, Object> _r1 = (Map<String, Object>) inp.getObject("a");
 
 		ResourceItem r1 = new ResourceItem();
-		r1.id = (String)_r1.get("id");
-		r1.Description = (String)_r1.get("description");
-		r1.Number = (String)_r1.get("number");
-		r1.Path = (String)_r1.get("path");
-		r1.Title =(String)_r1.get("title");
-		r1.Type = EnumTools.searchEnum(ResourceType.class, (String)_r1.get("type"));
+		r1.id = (String) _r1.get("id");
+		r1.Description = (String) _r1.get("description");
+		r1.Number = (String) _r1.get("number");
+		r1.Path = (String) _r1.get("path");
+		r1.Title = (String) _r1.get("title");
+		r1.Type = EnumTools.searchEnum(ResourceType.class, (String) _r1.get("type"));
 
-		Map<String, Object> _r2 =(Map<String, Object> ) inp.getObject("c");
+		Map<String, Object> _r2 = (Map<String, Object>) inp.getObject("c");
 
 		ResourceItem r2 = new ResourceItem();
-		r2.id = (String)_r2.get("id");
-		r2.Description = (String)_r2.get("description");
-		r2.Number = (String)_r2.get("number");
-		r2.Path = (String)_r2.get("path");
-		r2.Title =(String)_r2.get("title");
-		r2.Type = EnumTools.searchEnum(ResourceType.class, (String)_r2.get("type"));
+		r2.id = (String) _r2.get("id");
+		r2.Description = (String) _r2.get("description");
+		r2.Number = (String) _r2.get("number");
+		r2.Path = (String) _r2.get("path");
+		r2.Title = (String) _r2.get("title");
+		r2.Type = EnumTools.searchEnum(ResourceType.class, (String) _r2.get("type"));
 
-		
-//		 
-		Map<String, Object> _call =(Map<String, Object> ) inp.getObject("b");
-		
+		Map<String, Object> _call = (Map<String, Object>) inp.getObject("b");
+
 		AccessCall call = new AccessCall();
-		call.args = (String)_call.get("args");
-		call.Command = (String)_call.get("command");
-		call.DateTime = (String)_call.get("date");
-		call.Description = (String)_call.get("description");
+		call.args = (String) _call.get("args");
+		call.Command = (String) _call.get("command");
+		call.DateTime = (String) _call.get("date");
+		call.Description = (String) _call.get("description");
 		call.From = r1;
 		call.To = r2;
-		call.id = (String)_call.get("id");
-		call.Info = (String)_call.get("info");
+		call.id = (String) _call.get("id");
+		call.Info = (String) _call.get("info");
 		call.OccuranceFactor = 1;
-		call.sequenceNumber= 1;///1/inp.getLong("b.id");
-		call.user_id = (String)_call.get("user_id");
-		call.user_name= (String)_call.get("user_name");
-		
-		SysdigRecordObjectGraph ret= new SysdigRecordObjectGraph();
+		call.sequenceNumber = 1;/// 1/inp.getLong("b.id");
+		call.user_id = (String) _call.get("user_id");
+		call.user_name = (String) _call.get("user_name");
+
+		SysdigRecordObjectGraph ret = new SysdigRecordObjectGraph();
 		ret.setProc(r1);
 		ret.setItem(r2);
 		ret.setSyscall(call);
 
-		
-//		ResourceItem r1 = new ResourceItem();
-//		r1.id = inp.getString("a.number") + "|"+inp.getString("a.title"); //  inp.getString("a.id");
-//		r1.Description = inp.getString("a.description");
-//		r1.Number = inp.getString("a.number");
-//		r1.Path = inp.getString("a.path");
-//		r1.Title = inp.getString("a.title");
-//		r1.Type = EnumTools.searchEnum(ResourceType.class, inp.getString("a.type"));
-//
-//		ResourceItem r2 = new ResourceItem();
-//		r2.id =  inp.getString("c.number") + "|"+inp.getString("c.title"); //inp.getString("c.id");
-//		r2.Description = inp.getString("c.description");
-//		r2.Number = inp.getString("c.number");
-//		r2.Path = inp.getString("c.path");
-//		r2.Title = inp.getString("c.title");
-//		r2.Type = EnumTools.searchEnum(ResourceType.class, inp.getString("c.type"));
-//
-//		AccessCall call = new AccessCall();
-//		call.args = inp.getString("b.args");
-//		call.Command = inp.getString("b.command");
-//		call.DateTime = inp.getString("b.date");
-//		call.Description = inp.getString("b.description");
-//		call.From = r1;
-//		call.To = r2;
-//		call.id = inp.getString("b.id");
-//		call.Info = inp.getString("b.info");
-//		call.OccuranceFactor = 1;
-//		call.sequenceNumber= inp.getLong("b.id");
-//		call.user_id = inp.getString("b.user_id");
-//		call.user_name= inp.getString("b.user_name");
-//		
-//		SysdigRecordObjectGraph ret= new SysdigRecordObjectGraph();
-//		ret.setProc(r1);
-//		ret.setItem(r2);
-//		ret.setSyscall(call);
-		
 		return ret;
 	}
 
