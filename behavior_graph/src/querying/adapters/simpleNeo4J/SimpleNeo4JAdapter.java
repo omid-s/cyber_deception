@@ -8,10 +8,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Map;
 
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
+import classes.SysdigRecordObject;
+import classes.SysdigRecordObjectGraph;
 import dataBaseStuff.DataBaseLayer;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -88,39 +91,136 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 			}
 			while (resutls.next()) {
 
-				int a = 12;
-//				System.out.println(resutls.getObject("a"));
+//				System.out.println(resutls.getObject("a.title"));
 //
 //				System.out.println();
 
-				String row = "";
-				for (int i = 1; i <= columnCount; i++) {
-					row += resutls.getString(i) + ", ";
+//					String row = "";
+//				for (int i = 1; i <= columnCount; i++) {
+//					row += resutls.getString(i) + ", ";
+//				}
+//				System.out.println(row);
+
+				
+				try {
+					SysdigRecordObjectGraph temp = getSysdigObjectGraphFromResultSet(resutls);
+
+					graphHelper.AddRowToGraph(ret, temp);
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					continue;
 				}
-				System.out.println(row);
-
+				
+				
+			
+				
 			}
-
 		} catch (Exception ex) {
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();
-
 		}
 		// create criterias based on node types ( exckuysing process )
-		String TempCriteria = "";
-		for (ResourceType pick : theQuery.getVerticeTypes()) {
+//		String TempCriteria = "";
+//		for (ResourceType pick : theQuery.getVerticeTypes()) {
+//
+//			if (TempCriteria.length() != 0)
+//				TempCriteria += " or ";
+//
+//			// for the sake of proess to be over writing the filters from others
+//			if (pick == ResourceType.Process)
+//				TempCriteria += "1=1";
+//			else
+//				TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
+//
+//		}
 
-			if (TempCriteria.length() != 0)
-				TempCriteria += " or ";
-
-			// for the sake of proess to be over writing the filters from others
-			if (pick == ResourceType.Process)
-				TempCriteria += "1=1";
-			else
-				TempCriteria += String.format("fd_typechar='%s'", EnumTools.resourceTypeToChar(pick));
-
-		}
-
-		return null;
+		return ret;
 	}
+
+	private SysdigRecordObjectGraph getSysdigObjectGraphFromResultSet(ResultSet inp) throws Exception {
+
+	
+		Map<String, Object> _r1 =(Map<String, Object> ) inp.getObject("a");
+
+		ResourceItem r1 = new ResourceItem();
+		r1.id = (String)_r1.get("id");
+		r1.Description = (String)_r1.get("description");
+		r1.Number = (String)_r1.get("number");
+		r1.Path = (String)_r1.get("path");
+		r1.Title =(String)_r1.get("title");
+		r1.Type = EnumTools.searchEnum(ResourceType.class, (String)_r1.get("type"));
+
+		Map<String, Object> _r2 =(Map<String, Object> ) inp.getObject("c");
+
+		ResourceItem r2 = new ResourceItem();
+		r2.id = (String)_r2.get("id");
+		r2.Description = (String)_r2.get("description");
+		r2.Number = (String)_r2.get("number");
+		r2.Path = (String)_r2.get("path");
+		r2.Title =(String)_r2.get("title");
+		r2.Type = EnumTools.searchEnum(ResourceType.class, (String)_r2.get("type"));
+
+		
+//		 
+		Map<String, Object> _call =(Map<String, Object> ) inp.getObject("b");
+		
+		AccessCall call = new AccessCall();
+		call.args = (String)_call.get("args");
+		call.Command = (String)_call.get("command");
+		call.DateTime = (String)_call.get("date");
+		call.Description = (String)_call.get("description");
+		call.From = r1;
+		call.To = r2;
+		call.id = (String)_call.get("id");
+		call.Info = (String)_call.get("info");
+		call.OccuranceFactor = 1;
+		call.sequenceNumber= 1;///1/inp.getLong("b.id");
+		call.user_id = (String)_call.get("user_id");
+		call.user_name= (String)_call.get("user_name");
+		
+		SysdigRecordObjectGraph ret= new SysdigRecordObjectGraph();
+		ret.setProc(r1);
+		ret.setItem(r2);
+		ret.setSyscall(call);
+
+		
+//		ResourceItem r1 = new ResourceItem();
+//		r1.id = inp.getString("a.number") + "|"+inp.getString("a.title"); //  inp.getString("a.id");
+//		r1.Description = inp.getString("a.description");
+//		r1.Number = inp.getString("a.number");
+//		r1.Path = inp.getString("a.path");
+//		r1.Title = inp.getString("a.title");
+//		r1.Type = EnumTools.searchEnum(ResourceType.class, inp.getString("a.type"));
+//
+//		ResourceItem r2 = new ResourceItem();
+//		r2.id =  inp.getString("c.number") + "|"+inp.getString("c.title"); //inp.getString("c.id");
+//		r2.Description = inp.getString("c.description");
+//		r2.Number = inp.getString("c.number");
+//		r2.Path = inp.getString("c.path");
+//		r2.Title = inp.getString("c.title");
+//		r2.Type = EnumTools.searchEnum(ResourceType.class, inp.getString("c.type"));
+//
+//		AccessCall call = new AccessCall();
+//		call.args = inp.getString("b.args");
+//		call.Command = inp.getString("b.command");
+//		call.DateTime = inp.getString("b.date");
+//		call.Description = inp.getString("b.description");
+//		call.From = r1;
+//		call.To = r2;
+//		call.id = inp.getString("b.id");
+//		call.Info = inp.getString("b.info");
+//		call.OccuranceFactor = 1;
+//		call.sequenceNumber= inp.getLong("b.id");
+//		call.user_id = inp.getString("b.user_id");
+//		call.user_name= inp.getString("b.user_name");
+//		
+//		SysdigRecordObjectGraph ret= new SysdigRecordObjectGraph();
+//		ret.setProc(r1);
+//		ret.setItem(r2);
+//		ret.setSyscall(call);
+		
+		return ret;
+	}
+
 }
