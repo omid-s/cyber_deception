@@ -84,16 +84,12 @@ public class GraphObjectHelper {
 		ResourceItem TheProc = null;
 
 		// is process new ?
-
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
 			resourcesMap.put(ResourceType.Process, new HashMap<String, ResourceItem>());
 		}
 
 		if (!resourcesMap.get(ResourceType.Process).containsKey(pick.getProcPID())) {
-			// if (!theGraph.getVertices().stream()
-			// .anyMatch(x -> x.Type == ResourceType.Process &&
-			// x.id.equals(pick.getProcPID()))) {
-			// add the process
+
 			ResourceItem tempItem = new ResourceItem();
 
 			tempItem.Type = ResourceType.Process;
@@ -104,13 +100,10 @@ public class GraphObjectHelper {
 
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
-			// resourcesMap.get(ResourceType.Process).put(pick.getProcPID(),
-			// TheProc);
+
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
-			// TheProc = theGraph.getVertices().stream()
-			// .filter(x -> x.Type == ResourceType.Process &&
-			// x.id.equals(pick.getProcPID())).findFirst().get();
+
 			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProcPID());
 
 		}
@@ -120,9 +113,6 @@ public class GraphObjectHelper {
 		ResourceItem parentP = null;
 
 		if (resourcesMap.get(ResourceType.Process).containsKey(pick.getParentProcID()))
-		// if (theGraph.getVertices().stream()
-		// .anyMatch(x -> x.Type == ResourceType.Process &&
-		// x.id.equals(pick.getParentProcID())))
 		{
 			parentP = resourcesMap.get(ResourceType.Process).get(pick.getParentProcID());
 		} else {
@@ -140,13 +130,9 @@ public class GraphObjectHelper {
 		theGraph.addVertex(parentP);
 
 		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
-		// theGraph.getVertices().stream()
-		// .filter(x -> x.Type == ResourceType.Process &&
-		// x.id.equals(pick.getParentProcID())).findFirst()
-		// .get();
+
 		ResourceItem tp = TheProc;
-		// if (!theGraph.getEdges().stream().anyMatch(x ->
-		// x.From.isEqual(parentP) && x.To.isEqual(tp))) {
+
 		if (!EdgeMap.containsKey(parentP.getID() + tp.getID() + "exec")) {
 
 			// add the connection to the process
@@ -205,10 +191,7 @@ public class GraphObjectHelper {
 		// is there an fd resource ?
 		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID())) {
 			ResourceItem tempItem = new ResourceItem();
-			// / find type, field types come from SYSDIG fd type definition
-
-			// /end of find type
-
+			
 			tempItem.Type = ItemType;
 			tempItem.Number = pick.fd_num;
 			tempItem.id = pick.getFD_ID();
@@ -217,9 +200,7 @@ public class GraphObjectHelper {
 			// tempItem.Description = pick.fd_
 
 			theGraph.addVertex(tempItem);
-
 			resourcesMap.get(ItemType).put(pick.getFD_ID(), tempItem);
-
 			ToItem = tempItem;
 		}
 
@@ -229,8 +210,6 @@ public class GraphObjectHelper {
 
 			if (ToItem == null)
 				ToItem = resourcesMap.get(ItemType).get(pick.getFD_ID());
-			// ToItem = theGraph.getVertices().stream().filter(x ->
-			// x.id.equals(pick.getFD_ID())).findFirst().get();
 
 			// create the link item :
 			final ResourceItem FF = FromItem;
@@ -242,19 +221,8 @@ public class GraphObjectHelper {
 			 * raise the occirance factor otherwisde insert it
 			 */
 			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID() + pick.evt_type))
-			// if (!isInVerboseMode &&
-			//
-			// theGraph.getEdges().stream()
-			// .anyMatch(x -> x.Command.equals(pick.evt_type) &&
-			// x.From.equals(FF) && x.To.equals(TT))) {
 
 			{
-
-//				theGraph.getEdges().stream()
-//						.filter(x -> x.Command.equals(pick.evt_type) && x.From.equals(FF) && x.To.equals(TT))
-//						.findFirst().get().OccuranceFactor++;
-//
-//				
 
 				AccessCall t = EdgeMap.get(FF.getID() + TT.getID() + pick.evt_type);
 				t.OccuranceFactor++;
@@ -281,6 +249,112 @@ public class GraphObjectHelper {
 				theGraph.addVertex(theCall.To);
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 //
+				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
+
+			}
+		}
+
+	}
+
+	/**
+	 * Based on process and file descriptor fields create nodes and vertices that
+	 * correspond to the call record then add them to the graph supplied
+	 * 
+	 * @param theGraph the graph to add nodes and edges to
+	 * @param pick     the row object to be processed
+	 */
+
+	public void AddRowToGraph(Graph<ResourceItem, AccessCall> theGraph, SysdigRecordObjectGraph pick) {
+		ResourceItem FromItem = null;
+		ResourceItem ToItem = null;
+		ResourceItem TheProc = null;
+
+		// is process new ?
+		if (!resourcesMap.containsKey(ResourceType.Process)) {
+			resourcesMap.put(ResourceType.Process, new HashMap<String, ResourceItem>());
+		}
+
+		if (!resourcesMap.get(ResourceType.Process).containsKey(pick.getProc().id)) {
+			TheProc = pick.getProc();
+			theGraph.addVertex(TheProc);
+			resourcesMap.get(ResourceType.Process).put(pick.getProc().id, TheProc);
+		} else {
+			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProc().id);
+		}
+
+		theGraph.addVertex(TheProc);
+		
+		ResourceItem parentP = null;
+		if (resourcesMap.get(ResourceType.Process).containsKey(pick.getParentProc().id)) {
+			parentP = resourcesMap.get(ResourceType.Process).get(pick.getParentProc().id);
+		} else {
+
+			parentP = pick.getParentProc();
+		}
+		theGraph.addVertex(parentP);
+		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
+
+		if (!EdgeMap.containsKey(parentP.getID() + TheProc.getID() + "exec")) {
+			pick.getExec().From = parentP;
+			pick.getExec().To = TheProc;
+			theGraph.addEdge(pick.getExec(), parentP, TheProc);
+			EdgeMap.put(parentP.getID() + TheProc.getID() + pick.getExec().Command, pick.getExec());
+		} else {
+			AccessCall t = EdgeMap.get(parentP.getID() + TheProc.getID() + "exec");
+			theGraph.addVertex(t.From);
+			theGraph.addEdge(t, t.From, t.To);
+		}
+
+		if (!resourcesMap.containsKey(pick.getItem().Type)) {
+			resourcesMap.put(pick.getItem().Type, new HashMap<String, ResourceItem>());
+		}
+
+		// is there an fd resource ?
+		if (pick.getItem() != null && !resourcesMap.get(pick.getItem().Type).containsKey(pick.getItem().id)) {
+			theGraph.addVertex(pick.getItem());
+
+			resourcesMap.get(pick.getItem().Type).put(pick.getItem().id, pick.getItem());
+
+			ToItem = pick.getItem();
+		}
+
+		// assert pick.thread_tid != "<NA>";
+		if (pick.getItem() != null) {
+			FromItem = TheProc;
+
+			if (ToItem == null)
+				ToItem = resourcesMap.get(pick.getItem().Type).get(pick.getItem().id);
+
+			// create the link item :
+			final ResourceItem FF = FromItem;
+			final ResourceItem TT = ToItem;
+
+			/*
+			 * if there already is an instance of this edge, look to VERBOSE flag, if
+			 * verbose flag is set, create a new edge anyways, other wise check if it exists
+			 * raise the occirance factor otherwisde insert it
+			 */
+			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID() + pick.getSyscall().Command)) {
+
+				AccessCall t = EdgeMap.get(FF.getID() + TT.getID() + pick.getSyscall().Command);
+				t.OccuranceFactor++;
+
+				theGraph.addVertex(t.From);
+				theGraph.addVertex(t.To);
+				theGraph.addEdge(t, t.From, t.To);
+
+				int a = 12;
+			} else {
+				// create the edge between resources of start and end
+				AccessCall theCall = pick.getSyscall();
+
+				theCall.From = TheProc;
+				theCall.To = ToItem;
+
+				theGraph.addVertex(theCall.From);
+				theGraph.addVertex(theCall.To);
+				theGraph.addEdge(theCall, theCall.From, theCall.To);
+
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}

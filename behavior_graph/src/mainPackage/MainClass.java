@@ -16,6 +16,7 @@ import helpers.DescribeFactory;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
+import querying.adapters.simpleNeo4J.SimpleNeo4JAdapter;
 import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
@@ -289,6 +290,8 @@ public class MainClass {
 			queryMachine = InMemoryAdapter.getSignleton();
 		else if (SimplePGQuery)
 			queryMachine = SimplePGAdapter.getSignleton();
+		else if ( SimpleNeo4JQuery)
+			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		/// setup GUI window
 		EdgeLabelDemo theGraphWindow = null;
