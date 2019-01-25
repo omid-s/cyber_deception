@@ -61,6 +61,7 @@ public class Record {
 
         }
         System.out.println("Error token not found!");
+        System.out.println(this.getId());
         return null;
     }
 

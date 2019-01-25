@@ -2,6 +2,7 @@ package Classes;
 
 import com.mysql.fabric.xmlrpc.base.Array;
 
+import javax.print.DocFlavor;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
@@ -22,6 +23,7 @@ public class AuditParse {
     HashMap<String, String> processHashMap = new HashMap<>();
     HashMap<String, String> sysCallTable = new HashMap<>();
     HashMap<String, String> fileDescriptorMap = new HashMap<>();
+    HashMap<String, Record> hierarchyMap = new HashMap<>();
     List<SysdigRecordObject> sysDigList  = new ArrayList<>();
 
     /**
@@ -44,106 +46,88 @@ public class AuditParse {
         }
 
         while ((line = buff.readLine()) != null) { //Parses each line of the audit log file
-            List<String> LineSplit = splitString(line); //split string by space
-            if (LineSplit.get(0).equals("type=SYSCALL") || LineSplit.get(0).equals("type=EXECVE") || LineSplit.get(0).equals("type=PATH")) {
-               handleSysCall(LineSplit);
-            }else if(LineSplit.get(0).equals("type=CWD")){
-                Record cwdRec = new Record(LineSplit);
-                recordHashMap.get(cwdRec.getId()).appendToken("cwd="+cwdRec.getToken("cwd").getValue());
-            }
-        }
+           if(line.substring(0, 12).equals("type=SYSCALL") || line.substring(0, 11).equals("type=EXECVE") || line.substring(0, 9).equals("type=PATH")) {
+               List<String> LineSplit = splitString(line); //split string by space
+                    handleSysCall(LineSplit);
+               } else if (line.substring(0, 8).equals("type=CWD")) {
+               List<String> LineSplit = splitString(line);
+                   Record cwdRec = new Record(LineSplit);
+                   recordHashMap.get(cwdRec.getId()).appendToken("cwd=" + cwdRec.getToken("cwd").getValue());
+               }
+
+           //}
+        } //while
         sysDigList = maptoSysDig(recordHashMap.values());
+
         System.out.println((System.currentTimeMillis()-start)/1000.0 + " seconds");
+        Record newrec = recordHashMap.get("7477227");
     }
 
-    /**
-     * This function takes in a line then converts it to the appropriate record of its type
-     *
-     * @param recordLine A string list which contains a single line from the audit.log file.
-     * @throws IOException
-     */
-    void handleSysCall(List<String> recordLine) throws IOException{
-        Record newRec = new Record(recordLine); //create new record
-        if(recordHashMap.containsKey(newRec.getId()) && newRec.getType().equals("SYSCALL")){
+    void handleSysCall(List<String> LineSplit) throws IOException{
 
-            recordHashMap.get(newRec.getId()).tokenList.addAll(newRec.tokenList);
+        Record newRec = new Record(LineSplit); //create new record
 
-        }else if(newRec.getType().equals("SYSCALL")){
+        if (newRec.getType().equals("SYSCALL")) {
             newRec.appendToken("syscall_name=" + sysCallTable.get(newRec.getToken("syscall").getValue()));
             recordHashMap.put(newRec.getId(), newRec);
-
-
-        }else if(newRec.getType().equals("EXECVE")){
-            handleExecVE(newRec);
+            if(sysCallTable.get(newRec.getToken("syscall").getValue()).equals("clone")){
+               handleClone(newRec);
+            }
+        } else if (newRec.getType().equals("EXECVE")) {
+           handleEXECVE(newRec);
         }else if(newRec.getType().equals("PATH")){
             produceFileDescriptorMap(newRec);
         }
 
     }
 
-
     /**
-     * This function takes a record of EXECVE, extracts the info to it, then appends to the syscall record
-     *
-     * @param execRec a record of type=EXECVE which contains the PID and PPID info of the system call
+     * Class for handling syscalls of type clone
+     * @param newRec the record to be processed
      */
-    void handleExecVE(Record execRec){
+    void handleClone(Record newRec){
+        if(newRec.getToken("a1").getValue().equals("0")) {
+            System.out.println("Null clone, no new created");
+        }else{
+            String pid = newRec.getToken("pid").getValue();
+            String clone_pid = newRec.getToken("exit").getValue();
+            String ppid = newRec.getToken("ppid").getValue();
+            hierarchyMap.put(clone_pid+":"+ppid, newRec);
+
+            System.out.println("New created");
+        }
+    }
+
+    void handleEXECVE(Record newRec){
         //Obtain the syscall record from the hashmap
-        Record sysCallRec = recordHashMap.get(execRec.getId());
+        Record sysCallRec = recordHashMap.get(newRec.getId());
 
         //Obtain the pid and ppid values from the syscall record
         String pid = sysCallRec.getToken("pid").getValue();
         String ppid = sysCallRec.getToken("ppid").getValue();
 
         //check to see if the pid is already mapped to a name or not.
-        if(!processHashMap.containsKey(ppid)){
+        if (!processHashMap.containsKey(ppid)) {
             String ppid_name = sysCallRec.getToken("comm").getValue().replaceAll("^\"|\"$", "");
             processHashMap.put(ppid, ppid_name);
-            sysCallRec.appendToken("ppid_name"+"="+ppid_name);
+            sysCallRec.appendToken("pid_name" + "=" + ppid_name);
 
         }
-        if(!processHashMap.containsKey(pid)){
-            String pid_name = execRec.tokenList.get(1).getValue();
+        if (!processHashMap.containsKey(pid)) {
+            String pid_name = newRec.tokenList.get(1).getValue();
             processHashMap.put(pid, pid_name);
-            sysCallRec.appendToken("pid_name=" + pid_name);
+            sysCallRec.appendToken("ppid_name=" + pid_name);
         }
-
     }
 
-    /**
-     * Takes a record containing of type=PATH and then using the shared ID, retrieves the syscall of that ID, and uses info from both
-     * adds a new entry to the file descriptor hashmap
-     *
-     * @param pathRec The PATH record containing the file info
-     */
-    void produceFileDescriptorMap(Record pathRec){
-        Record oldRec = recordHashMap.get(pathRec.getId()); //The syscall record containing the pid and CWD
-        String pid = oldRec.getToken("pid").getValue(); // PID of the process
-        String returnVal = oldRec.getToken("exit").getValue();
-        String filePath = pathRec.getToken("name").getValue();
-        String cwd = oldRec.getToken("cwd").getValue();
-        String syscall = oldRec.getToken("syscall").getValue();
 
-        //If openat is utilized (meaning the file path is relative) append the current working directory to the relative file path
-        if(syscall.equals("257")) {
-            fileDescriptorMap.put(pid.replace("\"", "") + ":" + returnVal, cwd.replace("\"", "")+"/"+filePath.replace("\"", ""));
-        }else{ //Otherwise simply used the full file path
-            fileDescriptorMap.put(pid.replace("\"", "") + ":" + returnVal, filePath.replace("\"", ""));
-        }
-
-    }
-
-    /**
-     *
-     * @param collection A collection composed of record objects, this contains all the values of the record hashmap
-     * @return returns a list of sysDigRecordObjects with the appropriate values mapped to it
-     */
     List<SysdigRecordObject> maptoSysDig(Collection<Record> collection){
         ArrayList<SysdigRecordObject> sysdigList = new ArrayList<>();
         ArrayList<Record> arrRec = new ArrayList<>(collection);
         for(int i = 0; i<arrRec.size(); i++){
+            SysdigRecordObject sysdig = new SysdigRecordObject();
             for(int j = 0; j<arrRec.get(i).tokenList.size(); j++){
-                SysdigRecordObject sysdig = new SysdigRecordObject();
+
                 switch (arrRec.get(i).tokenList.get(j).getKey()){
                     case "pid":
                         sysdig.proc_pid = arrRec.get(i).tokenList.get(j).getValue();
@@ -173,8 +157,8 @@ public class AuditParse {
                         break;
 
                 }
-                sysdigList.add(sysdig);
             }
+            sysdigList.add(sysdig);
         }
 
         return sysdigList;
@@ -196,17 +180,17 @@ public class AuditParse {
 
 
             if(line.substring(i, i+1).equals("\"") && quoteMode == false){
-            quoteMode = true;
+                quoteMode = true;
             }else if(line.substring(i, i+1).equals("\"") && quoteMode == true){
-            quoteMode = false;
-            tempString+="\"";
-            stringList.add(tempString);
-            tempString = "";
-            continue;
+                quoteMode = false;
+                tempString+="\"";
+                stringList.add(tempString);
+                tempString = "";
+                continue;
             }
 
             if(quoteMode == true){
-            tempString+=line.substring(i,i+1);
+                tempString+=line.substring(i,i+1);
             }else if(quoteMode==false){
                 if(!line.substring(i,i+1).equals(" ")){
                     tempString+=line.substring(i,i+1);
@@ -221,7 +205,34 @@ public class AuditParse {
 
         }
 
-    return stringList;
+        return stringList;
+    }
+
+
+    /**
+     * Takes a record containing of type=PATH and then using the shared ID, retrieves the syscall of that ID, and uses info from both
+     * adds a new entry to the file descriptor hashmap
+     *
+     * @param pathRec The PATH record containing the file info
+     */
+    void produceFileDescriptorMap(Record pathRec){
+        String cwd = "";
+        Record oldRec = recordHashMap.get(pathRec.getId()); //The syscall record containing the pid and CWD
+        String pid = oldRec.getToken("pid").getValue(); // PID of the process
+        String returnVal = oldRec.getToken("exit").getValue();
+        String filePath = pathRec.getToken("name").getValue();
+        if(oldRec.getToken("cwd") != null) {
+            cwd = oldRec.getToken("cwd").getValue();
+        }
+        String syscall = oldRec.getToken("syscall").getValue();
+
+        //If openat is utilized (meaning the file path is relative) append the current working directory to the relative file path
+        if(syscall.equals("257")) {
+            fileDescriptorMap.put(pid.replace("\"", "") + ":" + returnVal, cwd.replace("\"", "")+"/"+filePath.replace("\"", ""));
+        }else if(syscall.equals("2")){ //Otherwise simply used the full file path
+            fileDescriptorMap.put(pid.replace("\"", "") + ":" + returnVal, filePath.replace("\"", ""));
+        }
+
     }
 
     /**
@@ -287,10 +298,10 @@ public class AuditParse {
         hash.put("53", "socketpair");
         hash.put("54", "setsockopt");
         hash.put("55", "getsockopt");
-        hash.put("56", "stub_clone");
-        hash.put("57", "stub_fork");
-        hash.put("58", "stub_vfork");
-        hash.put("59", "stub_execve");
+        hash.put("56", "clone");
+        hash.put("57", "fork");
+        hash.put("58", "vfork");
+        hash.put("59", "execve");
         hash.put("60", "exit");
         hash.put("61", "wait4");
         hash.put("62", "kill");
@@ -553,7 +564,7 @@ public class AuditParse {
     public static void main(String[] args){
         AuditParse audit = new AuditParse();
         try {
-            audit.parseAuditLog(new File("audittest.log"));
+            audit.parseAuditLog(new File("testaudit.log"));
         } catch(IOException iox){
             System.out.println("IO Exception Error!");
             System.exit(0);
