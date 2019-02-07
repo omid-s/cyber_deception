@@ -155,11 +155,15 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 			Query = String.format("match (a)-[b]->(c) where %s return a,b,c ", where_clause);
 		else if (theQuery.isBackTracked())
 			Query = String.format(
-					"match (x)-[*]->(y)  match (a)-[b]->(c) where %s and  (c.id=y.id or c.id=x.id)  return distinct a,b,c",
-					where_clause);
-		else
+					"match (x)-[*]->(y)  where %s with distinct x,y   match (a)-[b]->(c) where  (c.id=y.id or c.id=x.id)  return distinct a,b,c",
+					where_clause.replace("a:", "x:").replace("c:", "y:"));
+		else if( theQuery.isForwardTracked() )
 			Query = String.format(
-					"match (x)-[*]->(y)  match (a)-[b]->(c) where %s and  (a.id=y.id or a.id=x.id)  return distinct a,b,c",
+					"match (x)-[*]->(y) where %s with distinct x,y   match (a)-[b]->(c) where (a.id=y.id or a.id=x.id)  return distinct a,b,c",
+					where_clause.replace("a:", "x:").replace("c:", "y:"));
+		else 
+			Query = String.format(
+					"match (a)-[b]->(c) where %s  return distinct a,b,c",
 					where_clause);
 
 		System.out.println(Query);
