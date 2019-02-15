@@ -15,10 +15,10 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
-import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import querying.parsing.ParsedQuery;
+import readers.SysdigObjectDAL;
 
 public class GraphObjectHelper {
 	private final boolean isInVerboseMode;

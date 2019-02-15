@@ -4,7 +4,6 @@ import controlClasses.RecordInterpretorFactory;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
 import dataBaseStuff.GraphDBDal;
-import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
@@ -21,6 +20,7 @@ import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.GraphObjectHelper;
+import readers.SysdigObjectDAL;
 
 import java.awt.Color;
 import java.awt.Container;

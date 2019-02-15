@@ -16,7 +16,6 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import dataBaseStuff.DataBaseLayer;
-import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import exceptions.QueryFormatException;
@@ -28,6 +27,7 @@ import querying.parsing.ParsedQuery;
 import querying.tools.EnumTools;
 import querying.tools.GraphObjectHelper;
 import querying.tools.GraphQueryTools;
+import readers.SysdigObjectDAL;
 
 //TODO : deal with per query verbosity
 

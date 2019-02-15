@@ -1,4 +1,4 @@
-package dataBaseStuff;
+package readers;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -7,14 +7,17 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
+import javax.xml.bind.ValidationException;
+
 import classes.*;
+import dataBaseStuff.DataBaseLayer;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import helpers.Configurations;
 
 public class SysdigObjectDAL {
-	private Field[] ClassFields;
-	private String InsertTemplate;
+	protected Field[] ClassFields;
+	protected String InsertTemplate;
 
 	public SysdigObjectDAL(boolean shortList) throws NoSuchFieldException, SecurityException {
 		// region Set Class fields
@@ -27,10 +30,21 @@ public class SysdigObjectDAL {
 				temp.add(c.getField(pick));
 
 			ClassFields = temp.toArray(new Field[temp.size()]);
-		}  
+		}
 
 		// endregion
 
+	}
+
+	public SysdigObjectDAL() {
+
+	}
+
+	protected void init() {
+//		// validate the classfields has value
+//		if ( ClassFields == null )
+//			throw new Exce("Class Fields are not present");
+//		
 		// region create insert template
 		String Keys = " Insert into SysdigOutPut ( ";
 		String Values = "";
@@ -47,15 +61,14 @@ public class SysdigObjectDAL {
 
 	}
 
-	private static String big_query = "";
-	private static int big_query_counter = 0;
-	private static StringJoiner items = new StringJoiner(" ");
+	protected static String big_query = "";
+	protected static int big_query_counter = 0;
+	protected static StringJoiner items = new StringJoiner(" ");
 
 	/**
 	 * Insets the record into the Database
 	 * 
-	 * @param inp
-	 *            the object to be inseted
+	 * @param inp the object to be inseted
 	 */
 	public void Insert(SysdigRecordObject inp) {
 		String Query = "";
@@ -77,7 +90,7 @@ public class SysdigObjectDAL {
 			Query = String.format(InsertTemplate, PickString);
 
 			items.add(Query);
-			
+
 			// big_query += Query;
 			big_query_counter++;
 
@@ -97,15 +110,12 @@ public class SysdigObjectDAL {
 	/**
 	 * Loads the SysdigRecordObject from a sql resultset
 	 * 
-	 * @param input
-	 *            the resultset to load the object from
+	 * @param input the resultset to load the object from
 	 * @return created sysdoigobject based on the row
-	 * @throws SQLException
-	 *             if row is not well formed
-	 * @throws IllegalArgumentException
-	 *             is value is not compatible with the record's expectation
-	 * @throws IllegalAccessException
-	 *             should not be thrown!
+	 * @throws SQLException             if row is not well formed
+	 * @throws IllegalArgumentException is value is not compatible with the record's
+	 *                                  expectation
+	 * @throws IllegalAccessException   should not be thrown!
 	 */
 	public SysdigRecordObject LoadFromResultSet(ResultSet input)
 			throws SQLException, IllegalArgumentException, IllegalAccessException {
@@ -145,7 +155,8 @@ public class SysdigObjectDAL {
 			throws LowFieldNumberException, HighFieldNumberException, IllegalArgumentException, IllegalAccessException {
 		SysdigRecordObject ret = new SysdigRecordObject();
 
-		String tokens[] = inp.split("=&amin&=");
+//		String tokens[] = inp.split("=&amin&=");
+		String tokens[] = inp.split(Configurations.getInstance().getSetting(Configurations.LINE_SEPERATOR));
 
 		if (tokens.length < ClassFields.length) {
 			throw new LowFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
