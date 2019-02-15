@@ -59,6 +59,32 @@ public class DataBaseLayer {
 		}
 	}
 
+	private static Connection _underlyingNeo4jConenction;
+
+	/**
+	 * returns a connection of neo4j type
+	 * @return
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 */
+	public static Connection getNeo4JConnection()
+			throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+		if (_underlyingNeo4jConenction == null) {
+			_underlyingNeo4jConenction = DriverManager.getConnection(
+					String.format("jdbc:neo4j:bolt://%s/",
+							Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+					Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+					Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+
+			);
+
+		}
+		return _underlyingNeo4jConenction;
+	}
+
 	// private final String ensureDBSql = +
 	// "CREATE TABLE `AccessCalls` (\n" + " `db_id` int(11) NOT NULL
 	// AUTO_INCREMENT,\n"

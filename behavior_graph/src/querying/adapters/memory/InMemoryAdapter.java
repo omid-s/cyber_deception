@@ -83,7 +83,7 @@ public class InMemoryAdapter extends BaseAdapter {
 //		}
 		if (inp.Type == ResourceType.File || inp.Type == ResourceType.Pipe || inp.Type == ResourceType.NetworkIPV4
 				|| inp.Type == ResourceType.NetworkIPV6 || inp.Type == ResourceType.Unix) {
-			
+
 			inp.Title = String.valueOf(inp.Title);
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
 				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
@@ -465,6 +465,7 @@ public class InMemoryAdapter extends BaseAdapter {
 				}
 
 		}
+
 
 		return ret;
 	}

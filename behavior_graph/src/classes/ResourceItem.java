@@ -22,6 +22,25 @@ public class ResourceItem {
 		return id + " | number : " + Number + " | type :" + Type.toString();
 	}
 
+	/**
+	 * returns a string representation of the object 
+	 * in the Neo4J insertion format 
+	 * 
+	 * @return the formated to string
+	 */
+	public String toN4JObjectString() {
+
+		return String.format(
+				"%s{id:\"%s\", title:\"%s\" , path:\"%s\", " + "number: \"%s\", description:\"%s\" , type:\"%s\"  }",
+				Type.toString(), 
+				String.valueOf(id), 
+				String.valueOf(Title), 
+				String.valueOf(Path), 
+				String.valueOf(Number), 
+				"",//String.valueOf(Description), 
+				Type.toString());
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
