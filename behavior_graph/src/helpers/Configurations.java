@@ -24,8 +24,8 @@ public class Configurations {
 	private HashMap<String, String> settings;
 
 	/***
-	 * initialize the object with either default values or the settings read
-	 * form file
+	 * initialize the object with either default values or the settings read form
+	 * file
 	 */
 	private Configurations() {
 		settings = new HashMap<String, String>();
@@ -95,8 +95,8 @@ public class Configurations {
 
 	/**
 	 * 
-	 * creates the sample settings file with default values default values
-	 * should be added the map in this function or they will cause errors!
+	 * creates the sample settings file with default values default values should be
+	 * added the map in this function or they will cause errors!
 	 * 
 	 */
 	private void makeDefaults() {
@@ -137,13 +137,19 @@ public class Configurations {
 		keysOrder.add(BACKWARD_STEPS);
 		keysOrder.add(FORWARD_STEPS);
 
+		// program configurations
+		
+		settings.put(LINE_SEPERATOR, "=&amin&=");
+		
+		keysOrder.add("# Internal program configurations");
+		keysOrder.add(LINE_SEPERATOR);
+
 	}
 
 	/**
 	 * returns the value associated with the key entered
 	 * 
-	 * @param Key
-	 *            the key to get the settings for
+	 * @param Key the key to get the settings for
 	 * @return setting value for the key
 	 */
 	public String getSetting(String Key) {
@@ -159,6 +165,7 @@ public class Configurations {
 
 	/**
 	 * Returns a list of fields that are considered in the short format
+	 * 
 	 * @return the list of fields in short format
 	 */
 	public static String[] getShortFieldList() {
@@ -186,5 +193,8 @@ public class Configurations {
 	// program variables
 	public static final String BACKWARD_STEPS = "backward_steps";
 	public static final String FORWARD_STEPS = "forward_steps";
+
+	// program configuration
+	public static final String LINE_SEPERATOR = "line_seperator";
 
 }
