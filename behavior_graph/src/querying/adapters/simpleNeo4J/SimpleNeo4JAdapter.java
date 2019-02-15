@@ -10,11 +10,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.omg.CORBA.Environment;
+
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
+import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -208,8 +211,10 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 
 			ex.printStackTrace();
 		}
+		
+		
 		// if merge is desired merge the Graphs
-		if (theQuery.isDoesAppend())
+		if ( RuntimeVariables.getInstance().isAutomaticMerge() && theQuery.isDoesAppend())
 			ret = graphHelper.mergeGraphs2(ret, theQuery.getOriginalGraph());
 
 		return ret;
