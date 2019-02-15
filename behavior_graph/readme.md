@@ -44,9 +44,10 @@ arguments :
 	*  sf : saves the formated out put to be used in other tools (should be used with outpath= to choose where to save)
 	* path=[path to input file] : path to input file
 	* outpath=[path to file] : path to which the formated output is supposed to be stored.
-	* rm to select in memory query adapter
-	* rspg  to select simple postgress query adapter
-	* short tp enable short format logs being read from input 
+	* rm: to select in memory query adapter
+	* rspg:  to select simple postgress query adapter
+	* short: to enable short format logs being read from input 
+	* rsn4j: to choose neo4j query adapter 
 	
 ## Query model 
 
