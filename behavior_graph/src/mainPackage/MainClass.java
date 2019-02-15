@@ -61,7 +61,7 @@ public class MainClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -83,21 +83,23 @@ public class MainClass {
 			}
 			if (pick.equals("g"))
 				ShowGraph = true;
-			if (pick.equals("ssql"))
+			if (pick.equals("ssql") || pick.equals("save_sql"))
 				SaveToDB = true;
-			if (pick.equals("sneo4j"))
+			if (pick.equals("sneo4j") || pick.equals("save_neo4j"))
 				SaveToGraph = true;
-			if (pick.equals("neo4jv"))
+			if (pick.equals("neo4jv") || pick.equals("save_neo4j_verbose"))
 				Neo4JVerbose = true;
 			if (pick.equals("short"))
 				InShortFormat = true;
-			if (pick.equals("sf"))
+			if (pick.equals("csv") || pick.equals("read_csv"))
+				ReadCSV = true;
+			if (pick.equals("sf") || pick.equals("save_formatted"))
 				SaveFormated = true;
-			if (pick.equals("rm"))
+			if (pick.equals("rm") || pick.equals("query_memory"))
 				MemQuery = true;
-			if (pick.equals("rspg"))
+			if (pick.equals("rspg") || pick.equals("query_postgres"))
 				SimplePGQuery = true;
-			if (pick.equals("rsn4j"))
+			if (pick.equals("rsn4j") || pick.equals("query_neo4j"))
 				SimpleNeo4JQuery = true;
 
 			if (pick.equals("-h")) {
@@ -290,7 +292,7 @@ public class MainClass {
 			queryMachine = InMemoryAdapter.getSignleton();
 		else if (SimplePGQuery)
 			queryMachine = SimplePGAdapter.getSignleton();
-		else if ( SimpleNeo4JQuery)
+		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		/// setup GUI window
