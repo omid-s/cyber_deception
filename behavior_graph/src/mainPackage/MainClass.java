@@ -20,6 +20,7 @@ import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.GraphObjectHelper;
+import readers.CSVReader;
 import readers.SysdigObjectDAL;
 
 import java.awt.Color;
@@ -116,7 +117,12 @@ public class MainClass {
 			return;
 		}
 
-		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat);
+		SysdigObjectDAL objectDAL = null;
+		if (ReadCSV)
+			objectDAL = new CSVReader();
+		else
+			objectDAL = new SysdigObjectDAL(InShortFormat);
+		
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
@@ -146,7 +152,7 @@ public class MainClass {
 						if (counterr == 1 || counterr == 100000)
 							System.out.println(inputStr);
 						// if(true) continue;
-						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(inputStr);
+						SysdigRecordObject tempObj = objectDAL.GetObjectFromTextLine(inputStr);
 
 						/// if desired write the formated file
 						if (SaveFormated)
@@ -159,7 +165,7 @@ public class MainClass {
 						}
 
 						if (SaveToDB)
-							temp.Insert(tempObj);
+							objectDAL.Insert(tempObj);
 
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
@@ -203,7 +209,7 @@ public class MainClass {
 							int theL = multipleRecords.length();
 
 							multipleRecords += test.nextLine();
-							tempObj = temp.GetObjectFromTextLine(multipleRecords);
+							tempObj = objectDAL.GetObjectFromTextLine(multipleRecords);
 
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
@@ -222,7 +228,7 @@ public class MainClass {
 						counter++;
 
 						if (SaveToDB)
-							temp.Insert(tempObj);
+							objectDAL.Insert(tempObj);
 
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
@@ -253,7 +259,7 @@ public class MainClass {
 			}
 
 		}
-		temp.flushRows();
+		objectDAL.flushRows();
 
 		Instant end2 = Instant.now();
 

@@ -21,10 +21,11 @@ public class CSVReader extends SysdigObjectDAL {
 
 		ClassFields = temp.toArray(new Field[temp.size()]);
 
-		// finilize class creation 
+		// finilize class creation
 		init();
 	}
 
+	@Override
 	public SysdigRecordObject GetObjectFromTextLine(String inp)
 			throws LowFieldNumberException, HighFieldNumberException, IllegalArgumentException, IllegalAccessException {
 
@@ -34,7 +35,7 @@ public class CSVReader extends SysdigObjectDAL {
 				"proc_pid", "proc_ppid", "proc_name", "proc_exepath", "user_uid", "user_euid", "user_gid", "fd_num",
 				"fd_type", "fd_filename", "fd_name", "fd_inode", "fd_ip", "fd_port", "fd_1_num", "fd_1_type",
 				"fd_1_filename", "fd_1_name", "fd_1_inode", "fd_1_ip", "fd_1_port", "proc_cwd", "proc_args",
-				"proc_name", "proc_inode", "dep_tid", "dep_unitid" };
+				"proc_name", "proc_inode", "dep_tid", "dep_unitid", "" };
 
 		String indexes[] = { "evt_datetime", "evt_type", "thread_tid", "proc_name", "proc_args", "proc_cwd",
 				"proc_cmdline", "proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory",
@@ -45,21 +46,29 @@ public class CSVReader extends SysdigObjectDAL {
 
 		String tokens[] = inp.split(Configurations.getInstance().getSetting(Configurations.LINE_SEPERATOR));
 
-		if (tokens.length < ClassFields.length) {
+		if (tokens.length < fields.length) {
 			throw new LowFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 
-		} else if (tokens.length > ClassFields.length) {
+		} else if (tokens.length > fields.length) {
 			throw new HighFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 		}
-		for (int index = 0; index < tokens.length; index++) {
+		for (int index = 0; index < tokens.length - 1; index++) {
 			int i = indexes_list.indexOf(fields[index]);
-
-			ClassFields[i].set(ret, tokens[index].trim());
+//			if (i < 0)
+//				System.out.println(fields[index]);
+			if (i >= 0)
+				ClassFields[i].set(ret, tokens[index].trim());
 		}
 
 		ret.fd_typechar = getFDTypeChar(ret.fd_type);
+		if (ret.fd_name == null)
+			ret.fd_name = "<NA>";
+		if (ret.proc_name == null)
+			ret.proc_name = "<NA>";
+		if (ret.proc_pname == null)
+			ret.proc_pname = "<NA>";
 
 		return ret;
 	}
