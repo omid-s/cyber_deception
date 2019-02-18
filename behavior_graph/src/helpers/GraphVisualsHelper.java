@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections15.Transformer;
+import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 
 import classes.AccessCall;
 import classes.ResourceItem;
@@ -222,10 +223,10 @@ public class GraphVisualsHelper {
 				ret = new Rectangle2D.Float(-2 * size, -1 * size / 2, size * 4, size);
 				break;
 			case Thread:
-				int x_1 = (int)Math.round( Math.cos(18) * 1*size );
-				int x_2 = (int)Math.round( Math.sin(36) * 1*size );
-				int y_1 = (int)Math.round( Math.sin(18) * 1*size );
-				int y_2 = (int)Math.round( Math.cos(36) * 1*size );
+				int x_1 = (int) Math.round(Math.cos(18) * 1 * size);
+				int x_2 = (int) Math.round(Math.sin(36) * 1 * size);
+				int y_1 = (int) Math.round(Math.sin(18) * 1 * size);
+				int y_2 = (int) Math.round(Math.cos(36) * 1 * size);
 
 				Polygon tp = new Polygon();
 				tp.addPoint(0, -1 * (int) size);
@@ -234,15 +235,28 @@ public class GraphVisualsHelper {
 				tp.addPoint(-1 * x_1, -1 * y_1);
 				tp.addPoint(x_2, y_2);
 				ret = tp;
+
+				break;
+			case UBSIUnit:
+
+				Polygon tp3 = new Polygon();
+				tp3.addPoint(-3 * (int) size, -1 * (int) size / 2);
+				tp3.addPoint(1 * (int) size, -1 * (int) size / 2);
+				tp3.addPoint(3 * (int) size, 1 * (int) size / 2);
+				tp3.addPoint(-1 * (int) size, 1 * (int) size / 2);
+				ret = tp3;
+
 				break;
 			case NetworkIPV4:
 			case NetworkIPV6:
+
 				Polygon tp2 = new Polygon();
 				tp2.addPoint(0, -1 * (int) size);
 				tp2.addPoint(-2 * (int) size, 0);
 				tp2.addPoint(0, 1 * (int) size);
 				tp2.addPoint(2 * (int) size, 0);
 				ret = tp2;
+
 				break;
 			default:
 				ret = new Ellipse2D.Float(-1 * size / 2, -1 * size / 2, size, size);
