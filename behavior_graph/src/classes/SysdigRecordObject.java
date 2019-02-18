@@ -100,9 +100,17 @@ public class SysdigRecordObject {
 		return proc_ppid + "|" + proc_pname;
 	}
 
+	public String getTID() {
+		return getProcPID() + "|" + thread_tid;
+	}
+
+	public String getUBSIID() {
+		return proc_pid + "|" + thread_tid + "|" +  ubsi_unit_id;
+	}
+
 	public String getFD_ID() {
 		if (RuntimeVariables.getInstance().getIgnoreFDNumber())
-			return String.valueOf( this.fd_name );
+			return String.valueOf(this.fd_name);
 		else
 			return fd_num + "|" + fd_name;
 	}
@@ -145,10 +153,9 @@ public class SysdigRecordObject {
 				+ "\", user_shell=\"" + user_shell + "\", group_gid=\"" + group_gid.trim() + "\", group_name=\""
 				+ group_name.trim() + "\", syslog_facility_str=\"" + syslog_facility_str.trim()
 				+ "\", syslog_facility=\"" + syslog_facility.trim() + "\", syslog_severity_str=\""
-				+ syslog_severity_str.trim() + "\", syslog_severity=\"" + syslog_severity.trim()
-				+"\", ubsi_unit_id=" + ubsi_unit_id 
-				+" , ubsi_thread_id=" + ubsi_thread_id
-				+ "\", syslog_message=\"" + syslog_message.trim().replace("\n", " ")  ;
+				+ syslog_severity_str.trim() + "\", syslog_severity=\"" + syslog_severity.trim() + "\", ubsi_unit_id="
+				+ ubsi_unit_id + " , ubsi_thread_id=" + ubsi_thread_id + "\", syslog_message=\""
+				+ syslog_message.trim().replace("\n", " ");
 	}
 
 }

@@ -110,6 +110,53 @@ public class GraphObjectHelper {
 
 		theGraph.addVertex(TheProc);
 
+		// is thread new?
+		if (!resourcesMap.containsKey(ResourceType.Thread)) {
+			resourcesMap.put(ResourceType.Thread, new HashMap<String, ResourceItem>());
+		}
+
+		ResourceItem TheThread = null;
+
+		if (!resourcesMap.get(ResourceType.Thread).containsKey(pick.getTID())) {
+
+			ResourceItem tempItem = new ResourceItem();
+
+			tempItem.Type = ResourceType.Thread;
+			tempItem.Number = pick.thread_tid;
+			tempItem.id = pick.getTID();
+			tempItem.Title = "-";
+			tempItem.Description = "-";
+
+			TheThread = tempItem;
+			theGraph.addVertex(tempItem);
+
+			resourcesMap.get(ResourceType.Thread).put(pick.getTID(), TheThread);
+		} else {
+			TheThread = resourcesMap.get(ResourceType.Thread).get(pick.getTID());
+		}
+
+		
+		// add the thread edge if it does not exist already
+		if (!EdgeMap.containsKey(TheProc.getID() + TheThread.getID() + "spawn")) {
+
+			// add the connection to the process
+			AccessCall tempCallItem = new AccessCall();
+			tempCallItem.From = TheProc;
+			tempCallItem.To = TheThread;
+			tempCallItem.Command = "spawn";
+			tempCallItem.user_id = pick.user_uid;
+			tempCallItem.user_name = pick.user_name;
+
+			tempCallItem.sequenceNumber = sequenceCounter++;
+
+			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			EdgeMap.put(TheProc.getID() + TheThread.getID() + "spawn", tempCallItem);
+		} else {
+			AccessCall t = EdgeMap.get(TheProc.getID() + TheThread.getID() + "spawn");
+			theGraph.addVertex(t.From);
+			theGraph.addEdge(t, t.From, t.To);
+		}
+
 		ResourceItem parentP = null;
 
 		if (resourcesMap.get(ResourceType.Process).containsKey(pick.getParentProcID())) {
@@ -205,7 +252,7 @@ public class GraphObjectHelper {
 
 		// assert pick.thread_tid != "<NA>";
 		if (!pick.fd_num.equals("<NA>")) {
-			FromItem = TheProc;
+			FromItem = TheThread;
 
 			if (ToItem == null)
 				ToItem = resourcesMap.get(ItemType).get(pick.getFD_ID());
@@ -305,7 +352,7 @@ public class GraphObjectHelper {
 				theGraph.addEdge(t, t.From, t.To);
 			}
 		}
-		
+
 		if (!resourcesMap.containsKey(pick.getItem().Type)) {
 			resourcesMap.put(pick.getItem().Type, new HashMap<String, ResourceItem>());
 		}
@@ -331,7 +378,8 @@ public class GraphObjectHelper {
 			 * verbose flag is set, create a new edge anyways, other wise check if it exists
 			 * raise the occirance factor otherwisde insert it
 			 */
-			if (!isInVerboseMode && EdgeMap.containsKey(FromItem.getID() + ToItem.getID() + pick.getSyscall().Command)) {
+			if (!isInVerboseMode
+					&& EdgeMap.containsKey(FromItem.getID() + ToItem.getID() + pick.getSyscall().Command)) {
 
 				AccessCall t = EdgeMap.get(FromItem.getID() + ToItem.getID() + pick.getSyscall().Command);
 				t.OccuranceFactor++;
