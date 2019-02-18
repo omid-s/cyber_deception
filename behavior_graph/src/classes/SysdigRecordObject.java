@@ -86,6 +86,8 @@ public class SysdigRecordObject {
 	public String syslog_severity_str;
 	public String syslog_severity;
 	public String syslog_message;
+	public String ubsi_unit_id;
+	public String ubsi_thread_id;
 	// public String arg1;
 	// public String arg2;
 	// public String returnValue;
@@ -144,7 +146,9 @@ public class SysdigRecordObject {
 				+ group_name.trim() + "\", syslog_facility_str=\"" + syslog_facility_str.trim()
 				+ "\", syslog_facility=\"" + syslog_facility.trim() + "\", syslog_severity_str=\""
 				+ syslog_severity_str.trim() + "\", syslog_severity=\"" + syslog_severity.trim()
-				+ "\", syslog_message=\"" + syslog_message.trim().replace("\n", " ");
+				+"\", ubsi_unit_id=" + ubsi_unit_id 
+				+" , ubsi_thread_id=" + ubsi_thread_id
+				+ "\", syslog_message=\"" + syslog_message.trim().replace("\n", " ")  ;
 	}
 
 }
