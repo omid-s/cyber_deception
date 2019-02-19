@@ -613,7 +613,41 @@ public class GraphObjectHelper {
 		tempCallItem.user_id = pick.user_uid;
 		tempCallItem.user_name = pick.user_name;
 
-		tempCallItem.sequenceNumber = 0;
+		tempCallItem.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
+
+		ResourceItem TheThread = new ResourceItem();
+
+		TheThread.Type = ResourceType.Thread;
+		TheThread.Number = pick.thread_tid;
+		TheThread.id = pick.getTID();
+		TheThread.Title = "-";
+		TheThread.Description = "-";
+
+		ResourceItem TheUBSI = new ResourceItem();
+
+		TheUBSI.Type = ResourceType.UBSIUnit;
+		TheUBSI.Number = pick.ubsi_unit_id;
+		TheUBSI.id = pick.getUBSIID();
+		TheUBSI.Title = "-";
+		TheUBSI.Description = "-";
+
+		AccessCall TheSpawn = new AccessCall();
+		TheSpawn.From = TheProc;
+		TheSpawn.To = TheThread;
+		TheSpawn.Command = "spawn";
+		TheSpawn.user_id = pick.user_uid;
+		TheSpawn.user_name = pick.user_name;
+
+		TheSpawn.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
+
+		AccessCall TheUBSIStart = new AccessCall();
+		TheUBSIStart.From = TheThread;
+		TheUBSIStart.To = TheUBSI;
+		TheUBSIStart.Command = "started";
+		TheUBSIStart.user_id = pick.user_uid;
+		TheUBSIStart.user_name = pick.user_name;
+
+		TheUBSIStart.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 //		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
@@ -665,7 +699,7 @@ public class GraphObjectHelper {
 
 			// add the edge connecting the FD and the process
 			theCall = new AccessCall();
-			theCall.From = TheProc;
+			theCall.From = TheUBSI;
 			theCall.To = ToItem;
 			theCall.Command = pick.evt_type;
 			theCall.DateTime = pick.evt_time_s;
@@ -673,13 +707,14 @@ public class GraphObjectHelper {
 			theCall.Info = pick.evt_args;
 			theCall.user_id = pick.user_uid;
 			theCall.user_name = pick.user_name;
-			theCall.sequenceNumber = 0;
+			theCall.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 //			ret.addEdge(theCall, theCall.From, theCall.To);
 
 		}
 
-		return new SysdigRecordObjectGraph(TheProc, parentP, tempCallItem, theCall, ToItem);
+		return new SysdigRecordObjectGraph(TheProc, parentP, tempCallItem, theCall, ToItem, TheThread, TheSpawn,
+				TheUBSI, TheUBSIStart);
 
 	}
 
