@@ -452,10 +452,8 @@ public class InMemoryAdapter extends BaseAdapter {
 							temp.add(pick.From);
 							depthMap.add(depth + 1);
 						}
-
 					}
 				}
-
 		}
 
 		return ret;
@@ -472,5 +470,4 @@ public class InMemoryAdapter extends BaseAdapter {
 		types.add("binder");
 		return !types.contains(inp);
 	}
-
 }

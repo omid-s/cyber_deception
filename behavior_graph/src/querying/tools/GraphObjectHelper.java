@@ -103,9 +103,7 @@ public class GraphObjectHelper {
 
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
-
 			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProcPID());
-
 		}
 
 		theGraph.addVertex(TheProc);
@@ -156,6 +154,56 @@ public class GraphObjectHelper {
 			theGraph.addVertex(t.From);
 			theGraph.addEdge(t, t.From, t.To);
 		}
+		
+		
+		// is UBSI unit new?
+		if (!resourcesMap.containsKey(ResourceType.UBSIUnit)) {
+			resourcesMap.put(ResourceType.UBSIUnit, new HashMap<String, ResourceItem>());
+		}
+
+		ResourceItem TheUBSI = null;
+
+		if (!resourcesMap.get(ResourceType.UBSIUnit).containsKey(pick.getUBSIID())) {
+
+			ResourceItem tempItem = new ResourceItem();
+
+			tempItem.Type = ResourceType.UBSIUnit;
+			tempItem.Number = pick.ubsi_unit_id;
+			tempItem.id = pick.getUBSIID();
+			tempItem.Title = "-";
+			tempItem.Description = "-";
+
+			TheUBSI= tempItem;
+			theGraph.addVertex(tempItem);
+
+			resourcesMap.get(ResourceType.UBSIUnit).put(pick.getUBSIID(), TheUBSI);
+		} else {
+			TheUBSI = resourcesMap.get(ResourceType.UBSIUnit).get(pick.getUBSIID());
+		}
+
+		
+		// add the thread edge if it does not exist already
+		if (!EdgeMap.containsKey(TheThread.getID() + TheUBSI.getID() + "started")) {
+
+			// add the connection to the process
+			AccessCall tempCallItem = new AccessCall();
+			tempCallItem.From = TheThread;
+			tempCallItem.To = TheUBSI;
+			tempCallItem.Command = "started";
+			tempCallItem.user_id = pick.user_uid;
+			tempCallItem.user_name = pick.user_name;
+
+			tempCallItem.sequenceNumber = sequenceCounter++;
+
+			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			EdgeMap.put(TheThread.getID() + TheUBSI.getID() + "started", tempCallItem);
+		} else {
+			AccessCall t = EdgeMap.get(TheThread.getID() + TheUBSI.getID() + "started");
+			theGraph.addVertex(t.From);
+			theGraph.addEdge(t, t.From, t.To);
+		}
+		
+		
 
 		ResourceItem parentP = null;
 
@@ -164,7 +212,6 @@ public class GraphObjectHelper {
 		} else {
 
 			parentP = new ResourceItem();
-
 			parentP.Type = ResourceType.Process;
 			parentP.Number = pick.proc_ppid;
 			parentP.id = pick.getParentProcID();
@@ -252,7 +299,7 @@ public class GraphObjectHelper {
 
 		// assert pick.thread_tid != "<NA>";
 		if (!pick.fd_num.equals("<NA>")) {
-			FromItem = TheThread;
+			FromItem = TheUBSI;
 
 			if (ToItem == null)
 				ToItem = resourcesMap.get(ItemType).get(pick.getFD_ID());

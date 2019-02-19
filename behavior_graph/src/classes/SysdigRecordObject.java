@@ -105,7 +105,10 @@ public class SysdigRecordObject {
 	}
 
 	public String getUBSIID() {
-		return proc_pid + "|" + thread_tid + "|" +  ubsi_unit_id;
+		if (ubsi_unit_id != null)
+			return proc_pid + "|" + thread_tid + "|" + ubsi_unit_id;
+		else
+			return proc_pid + "|" + thread_tid + "|0";
 	}
 
 	public String getFD_ID() {
