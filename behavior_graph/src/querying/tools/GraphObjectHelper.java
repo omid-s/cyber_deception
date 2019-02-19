@@ -104,6 +104,13 @@ public class GraphObjectHelper {
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
 			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProcPID());
+
+			if ((TheProc.Title.isEmpty() || TheProc.Title.equals("<NA>")) && pick.proc_name != null
+					&& !pick.proc_name.equals("<NA>") && !pick.proc_name.isEmpty()) {
+				TheProc.Title = pick.proc_name;
+				System.out.println("*");
+			}
+
 		}
 
 		theGraph.addVertex(TheProc);
@@ -133,7 +140,6 @@ public class GraphObjectHelper {
 			TheThread = resourcesMap.get(ResourceType.Thread).get(pick.getTID());
 		}
 
-		
 		// add the thread edge if it does not exist already
 		if (!EdgeMap.containsKey(TheProc.getID() + TheThread.getID() + "spawn")) {
 
@@ -154,8 +160,7 @@ public class GraphObjectHelper {
 			theGraph.addVertex(t.From);
 			theGraph.addEdge(t, t.From, t.To);
 		}
-		
-		
+
 		// is UBSI unit new?
 		if (!resourcesMap.containsKey(ResourceType.UBSIUnit)) {
 			resourcesMap.put(ResourceType.UBSIUnit, new HashMap<String, ResourceItem>());
@@ -173,7 +178,7 @@ public class GraphObjectHelper {
 			tempItem.Title = "-";
 			tempItem.Description = "-";
 
-			TheUBSI= tempItem;
+			TheUBSI = tempItem;
 			theGraph.addVertex(tempItem);
 
 			resourcesMap.get(ResourceType.UBSIUnit).put(pick.getUBSIID(), TheUBSI);
@@ -181,7 +186,6 @@ public class GraphObjectHelper {
 			TheUBSI = resourcesMap.get(ResourceType.UBSIUnit).get(pick.getUBSIID());
 		}
 
-		
 		// add the thread edge if it does not exist already
 		if (!EdgeMap.containsKey(TheThread.getID() + TheUBSI.getID() + "started")) {
 
@@ -202,8 +206,6 @@ public class GraphObjectHelper {
 			theGraph.addVertex(t.From);
 			theGraph.addEdge(t, t.From, t.To);
 		}
-		
-		
 
 		ResourceItem parentP = null;
 
