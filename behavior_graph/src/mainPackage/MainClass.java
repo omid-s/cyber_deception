@@ -62,7 +62,7 @@ public class MainClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -102,7 +102,9 @@ public class MainClass {
 				SimplePGQuery = true;
 			if (pick.equals("rsn4j") || pick.equals("query_neo4j"))
 				SimpleNeo4JQuery = true;
-
+			if (pick.equals("sj") || pick.equals("save_json"))
+				SaveJSON = true;
+			
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -122,7 +124,7 @@ public class MainClass {
 			objectDAL = new CSVReader();
 		else
 			objectDAL = new SysdigObjectDAL(InShortFormat);
-		
+
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
@@ -137,7 +139,7 @@ public class MainClass {
 		int skipped = 0;
 
 		FileWriter output_file_writer = null;
-		if (SaveFormated) {
+		if (SaveFormated || SaveJSON) {
 			output_file_writer = new FileWriter(new File(output_file));
 		}
 
@@ -193,6 +195,9 @@ public class MainClass {
 					System.out.println("Error");
 				}
 			}
+// if json is desired, create the array
+		if (SaveJSON)
+			output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
@@ -213,6 +218,8 @@ public class MainClass {
 
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
+							if (SaveJSON)
+								output_file_writer.write(tempObj.toJSONString() + ",");
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -266,6 +273,9 @@ public class MainClass {
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
 		/// clsoe the output file
 		if (output_file_writer != null) {
+			// is json is desired, close the array
+			if (SaveJSON)
+				output_file_writer.write("\n]");
 			output_file_writer.flush();
 			output_file_writer.close();
 		}

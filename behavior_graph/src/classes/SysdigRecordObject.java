@@ -1,5 +1,8 @@
 package classes;
 
+import java.lang.reflect.Field;
+import java.util.StringJoiner;
+
 import controlClasses.RuntimeVariables;
 
 public class SysdigRecordObject {
@@ -117,6 +120,28 @@ public class SysdigRecordObject {
 		else
 			return fd_num + "|" + fd_name;
 	}
+	
+	/**
+	 * returns the json representation of the object
+	 * @return the json string of the object
+	 * @throws IllegalArgumentException if internal issue has been seen 
+	 * @throws IllegalAccessException if an internal issue has happened
+	 */
+	public String toJSONString() throws IllegalArgumentException, IllegalAccessException {
+		
+		Class c = this.getClass();
+		
+		StringJoiner jsonObject = new StringJoiner(",");
+        for (Field field : c.getDeclaredFields()) {
+            field.setAccessible(true);
+            String name = field.getName();
+            String value = String.valueOf(field.get(this));
+            jsonObject.add(String.format( " \"%s\": \"%s\"",  name, value.replace("\"", "\'")  ));
+        }
+        
+        return "{"+ jsonObject.toString() +"}";
+        
+	}
 
 	@Override
 	public String toString() {
@@ -160,5 +185,6 @@ public class SysdigRecordObject {
 				+ ubsi_unit_id + " , ubsi_thread_id=" + ubsi_thread_id + "\", syslog_message=\""
 				+ syslog_message.trim().replace("\n", " ");
 	}
+	
 
 }
