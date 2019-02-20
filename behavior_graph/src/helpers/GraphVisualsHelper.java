@@ -148,7 +148,7 @@ public class GraphVisualsHelper {
 		@Override
 		public String transform(ResourceItem I) {
 			// return String.valueOf(i*i + i );
-			String ret = I.toString();
+			String ret = I.toN4JObjectString();
 			/*
 			 * switch (i.) { case "1": ret = "Process \r\n Name : httpd , ID : 12"; break;
 			 * case "2": ret = "Thread \r\n ID : 18 "; break; case "5": ret =
