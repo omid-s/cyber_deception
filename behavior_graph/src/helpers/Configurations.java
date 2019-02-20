@@ -140,10 +140,11 @@ public class Configurations {
 		// program configurations
 		
 		settings.put(LINE_SEPERATOR, "=&amin&=");
+		settings.put(PRINT_QUERY, "false");
 		
 		keysOrder.add("# Internal program configurations");
 		keysOrder.add(LINE_SEPERATOR);
-
+		keysOrder.add(PRINT_QUERY);
 	}
 
 	/**
@@ -196,5 +197,6 @@ public class Configurations {
 
 	// program configuration
 	public static final String LINE_SEPERATOR = "line_seperator";
+	public static final String PRINT_QUERY="print_query";
 
 }

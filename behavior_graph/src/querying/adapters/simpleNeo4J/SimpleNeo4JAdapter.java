@@ -175,6 +175,8 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 			Connection theConnection = DataBaseLayer.getNeo4JConnection();
 			Statement st = theConnection.createStatement();
 
+			
+			
 			ResultSet resutls = st.executeQuery(Query);
 
 			while (resutls.next()) {
