@@ -169,8 +169,6 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 		else
 			Query = String.format("match (a)-[b]->(c) where %s  return distinct a,b,c", where_clause);
 
-//		System.out.println(Query);
-
 		try {
 			Connection theConnection = DataBaseLayer.getNeo4JConnection();
 			Statement st = theConnection.createStatement();
