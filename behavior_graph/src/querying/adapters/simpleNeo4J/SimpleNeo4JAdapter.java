@@ -177,19 +177,23 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 				ColorHelpers.PrintGreen(Query);
 
 			ResultSet resutls = st.executeQuery(Query);
-
+			int counter = 0;
 			while (resutls.next()) {
 
 				try {
 					SysdigRecordObjectGraph temp = getSysdigObjectGraphFromResultSet(resutls);
 
-					graphHelper.AddRowToGraph(ret, temp);
-
+					graphHelper.AddRowToGraph(ret, temp.getProc(), temp.getItem(), temp.getSyscall());
+					counter++;
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					continue;
 				}
 			}
+
+			if (RuntimeVariables.getInstance().getPrint_query())
+				ColorHelpers.PrintGreen(String.format("Rows read from DB : %d\r\n", counter));
+
 		} catch (Exception ex) {
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();

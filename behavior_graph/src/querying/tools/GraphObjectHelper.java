@@ -363,7 +363,7 @@ public class GraphObjectHelper {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
-		ResourceItem TheThread = null; 
+		ResourceItem TheThread = null;
 		ResourceItem TheUBSI = null;
 
 		// is process new ?
@@ -453,6 +453,79 @@ public class GraphObjectHelper {
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}
+		}
+
+	}
+
+	
+	/**
+	 * adds the input triple to the graph 
+	 * @param theGraph the grapoh to add nodes to 
+	 * @param From  starting node
+	 * @param To ending node
+	 * @param call the edge between them 
+	 */
+	public void AddRowToGraph(Graph<ResourceItem, AccessCall> theGraph, ResourceItem From, ResourceItem To,
+			AccessCall call) {
+
+		// is from type new?
+		if (!resourcesMap.containsKey(From.Type)) {
+			resourcesMap.put(From.Type, new HashMap<String, ResourceItem>());
+		}
+
+		if (!resourcesMap.get(From.Type).containsKey(From.id)) {
+			theGraph.addVertex(From);
+			resourcesMap.get(From.Type).put(From.id, From);
+		} else {
+			From = resourcesMap.get(From.Type).get(From.id);
+		}
+
+		theGraph.addVertex(From);
+
+		// is to type new ?
+		if (!resourcesMap.containsKey(To.Type)) {
+			resourcesMap.put(To.Type, new HashMap<String, ResourceItem>());
+		}
+
+		if (!resourcesMap.get(To.Type).containsKey(To.id)) {
+			theGraph.addVertex(To);
+			resourcesMap.get(To.Type).put(To.id, To);
+		} else {
+			To = resourcesMap.get(To.Type).get(To.id);
+		}
+
+		theGraph.addVertex(To);
+
+		/*
+		 * if there already is an instance of this edge, look to VERBOSE flag, if
+		 * verbose flag is set, create a new edge anyways, other wise check if it exists
+		 * raise the occirance factor otherwisde insert it
+		 */
+		if (!isInVerboseMode && EdgeMap.containsKey(From.getID() + To.getID() + call.Command)) {
+
+			AccessCall t = EdgeMap.get(From.getID() + To.getID() + call.Command);
+			t.OccuranceFactor++;
+
+//			t.From = From;
+//			t.To = To;
+
+			theGraph.addVertex(t.From);
+			theGraph.addVertex(t.To);
+			theGraph.addEdge(t, t.From, t.To);
+
+		} else {
+			// create the edge between resources of start and end
+			AccessCall theCall = call;
+
+			theCall.From = From;
+			theCall.To = To;
+
+			theGraph.addVertex(theCall.From);
+			theGraph.addVertex(theCall.To);
+			theGraph.addEdge(theCall, theCall.From, theCall.To);
+
+			EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
+
 		}
 
 	}
