@@ -509,8 +509,8 @@ public class GraphObjectHelper {
 //			t.From = From;
 //			t.To = To;
 
-			theGraph.addVertex(t.From);
-			theGraph.addVertex(t.To);
+//			theGraph.addVertex(t.From);
+//			theGraph.addVertex(t.To);
 			theGraph.addEdge(t, t.From, t.To);
 
 		} else {
@@ -520,8 +520,8 @@ public class GraphObjectHelper {
 			theCall.From = From;
 			theCall.To = To;
 
-			theGraph.addVertex(theCall.From);
-			theGraph.addVertex(theCall.To);
+//			theGraph.addVertex(theCall.From);
+//			theGraph.addVertex(theCall.To);
 			theGraph.addEdge(theCall, theCall.From, theCall.To);
 
 			EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);

@@ -70,7 +70,7 @@ public class GraphVisualsHelper {
 		public String transform(AccessCall e) {
 			String Call = "";
 
-			Call = e.toString(); // e.Command + "(" + e.OccuranceFactor + ")";
+			Call = e.toN4JObjectString(); // e.Command + "(" + e.OccuranceFactor + ")";
 
 			return Call; // "Call ( "+ Call + " ) : "
 							// +graph.getEndpoints(e).toString();
