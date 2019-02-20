@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.TooManyListenersException;
 
 import org.omg.CORBA.Environment;
 
@@ -22,6 +23,7 @@ import dataBaseStuff.DataBaseLayer;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import exceptions.QueryFormatException;
+import helpers.ColorHelpers;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.Criteria;
@@ -160,23 +162,22 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 			Query = String.format(
 					"match (x)-[*]->(y)  where %s with distinct x,y   match (a)-[b]->(c) where  (c.id=y.id or c.id=x.id)  return distinct a,b,c",
 					where_clause.replace("a:", "x:").replace("c:", "y:"));
-		else if( theQuery.isForwardTracked() )
+		else if (theQuery.isForwardTracked())
 			Query = String.format(
 					"match (x)-[*]->(y) where %s with distinct x,y   match (a)-[b]->(c) where (a.id=y.id or a.id=x.id)  return distinct a,b,c",
 					where_clause.replace("a:", "x:").replace("c:", "y:"));
-		else 
-			Query = String.format(
-					"match (a)-[b]->(c) where %s  return distinct a,b,c",
-					where_clause);
+		else
+			Query = String.format("match (a)-[b]->(c) where %s  return distinct a,b,c", where_clause);
 
 //		System.out.println(Query);
-		
+
 		try {
 			Connection theConnection = DataBaseLayer.getNeo4JConnection();
 			Statement st = theConnection.createStatement();
 
-			
-			
+			if (RuntimeVariables.getInstance().getPrint_query())
+				ColorHelpers.PrintGreen(Query);
+
 			ResultSet resutls = st.executeQuery(Query);
 
 			while (resutls.next()) {
@@ -213,10 +214,9 @@ public class SimpleNeo4JAdapter extends BaseAdapter {
 
 			ex.printStackTrace();
 		}
-		
-		
+
 		// if merge is desired merge the Graphs
-		if ( RuntimeVariables.getInstance().isAutomaticMerge() && theQuery.isDoesAppend())
+		if (RuntimeVariables.getInstance().isAutomaticMerge() && theQuery.isDoesAppend())
 			ret = graphHelper.mergeGraphs2(ret, theQuery.getOriginalGraph());
 
 		return ret;
