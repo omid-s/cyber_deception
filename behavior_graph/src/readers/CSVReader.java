@@ -72,6 +72,9 @@ public class CSVReader extends SysdigObjectDAL {
 			pid_to_pname.put(ret.proc_pid, ret.proc_name);
 		}
 
+		if (ret.evt_type.indexOf('(') >= 0)
+			ret.evt_type = ret.evt_type.substring(0, ret.evt_type.indexOf('('));
+
 		ret.fd_typechar = getFDTypeChar(ret.fd_type);
 		if (ret.fd_name == null)
 			ret.fd_name = "<NA>";

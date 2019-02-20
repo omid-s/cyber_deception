@@ -44,9 +44,15 @@ public class GraphDBDal {
 		temp += "\r\n"
 				+ String.format(" merge (parentProc)-[:%s]->(newProc) ", tempGraph.getExec().toN4JObjectString());
 		if (tempGraph.getItem() != null) {
+			
+			temp += "\r\n" + String.format(" merge ( thread:%s ) ", tempGraph.getThread().toN4JObjectString());
+			temp += "\r\n" + String.format(" merge ( ubsi:%s ) ", tempGraph.getUBSIUnit().toN4JObjectString());
+			
+			temp += "\r\n" + String.format(" merge (newProc)-[:%s]->(thread) ", tempGraph.getSpawn().toN4JObjectString());
+			temp += "\r\n" + String.format(" merge (thread)-[:%s]->(ubsi) ", tempGraph.getUbsi_start().toN4JObjectString());
+			
 			temp += "\r\n" + String.format(" merge ( item:%s ) ", tempGraph.getItem().toN4JObjectString());
-			temp += "\r\n"
-					+ String.format(" merge (newProc)-[:%s]->(item) ", tempGraph.getSyscall().toN4JObjectString());
+			temp += "\r\n" + String.format(" merge (ubsi)-[:%s]->(item) ", tempGraph.getSyscall().toN4JObjectString());
 		}
 
 		temp += ";";

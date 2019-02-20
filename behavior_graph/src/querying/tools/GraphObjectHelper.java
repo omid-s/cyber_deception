@@ -363,6 +363,8 @@ public class GraphObjectHelper {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
+		ResourceItem TheThread = null; 
+		ResourceItem TheUBSI = null;
 
 		// is process new ?
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
