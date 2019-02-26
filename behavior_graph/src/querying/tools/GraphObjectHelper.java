@@ -506,11 +506,8 @@ public class GraphObjectHelper {
 			AccessCall t = EdgeMap.get(From.getHashID() + To.getHashID() + call.Command);
 			t.OccuranceFactor++;
 
-//			t.From = From;
-//			t.To = To;
-
-//			theGraph.addVertex(t.From);
-//			theGraph.addVertex(t.To);
+			theGraph.addVertex(t.From);
+			theGraph.addVertex(t.To);
 			theGraph.addEdge(t, t.From, t.To);
 
 		} else {
@@ -519,9 +516,9 @@ public class GraphObjectHelper {
 
 			theCall.From = From;
 			theCall.To = To;
-
-//			theGraph.addVertex(theCall.From);
-//			theGraph.addVertex(theCall.To);
+//
+			theGraph.addVertex(theCall.From);
+			theGraph.addVertex(theCall.To);
 			theGraph.addEdge(theCall, theCall.From, theCall.To);
 
 			EdgeMap.put(theCall.From.getHashID() + theCall.To.getHashID() + theCall.Command, theCall);
