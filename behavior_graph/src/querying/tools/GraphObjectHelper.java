@@ -162,17 +162,17 @@ public class GraphObjectHelper {
 		}
 
 		// is UBSI unit new?
-		if (!resourcesMap.containsKey(ResourceType.UBSIUnit)) {
-			resourcesMap.put(ResourceType.UBSIUnit, new HashMap<String, ResourceItem>());
+		if (!resourcesMap.containsKey(ResourceType.EXEUnit)) {
+			resourcesMap.put(ResourceType.EXEUnit, new HashMap<String, ResourceItem>());
 		}
 
 		ResourceItem TheUBSI = null;
 
-		if (!resourcesMap.get(ResourceType.UBSIUnit).containsKey(pick.getUBSIID())) {
+		if (!resourcesMap.get(ResourceType.EXEUnit).containsKey(pick.getUBSIID())) {
 
 			ResourceItem tempItem = new ResourceItem();
 
-			tempItem.Type = ResourceType.UBSIUnit;
+			tempItem.Type = ResourceType.EXEUnit;
 			tempItem.Number = pick.ubsi_unit_id;
 			tempItem.id = pick.getUBSIID();
 			tempItem.Title = "-";
@@ -181,9 +181,9 @@ public class GraphObjectHelper {
 			TheUBSI = tempItem;
 			theGraph.addVertex(tempItem);
 
-			resourcesMap.get(ResourceType.UBSIUnit).put(pick.getUBSIID(), TheUBSI);
+			resourcesMap.get(ResourceType.EXEUnit).put(pick.getUBSIID(), TheUBSI);
 		} else {
-			TheUBSI = resourcesMap.get(ResourceType.UBSIUnit).get(pick.getUBSIID());
+			TheUBSI = resourcesMap.get(ResourceType.EXEUnit).get(pick.getUBSIID());
 		}
 
 		// add the thread edge if it does not exist already
@@ -697,7 +697,7 @@ public class GraphObjectHelper {
 
 		ResourceItem TheUBSI = new ResourceItem();
 
-		TheUBSI.Type = ResourceType.UBSIUnit;
+		TheUBSI.Type = ResourceType.EXEUnit;
 		TheUBSI.Number = pick.ubsi_unit_id;
 		TheUBSI.id = pick.getUBSIID();
 		TheUBSI.Title = "-";

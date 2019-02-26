@@ -131,7 +131,7 @@ public class GraphVisualsHelper {
 				return colors[11];
 			case Service:
 				return colors[12];
-			case UBSIUnit:
+			case EXEUnit:
 				return colors[6];
 			}
 			return Color.magenta;
@@ -237,7 +237,7 @@ public class GraphVisualsHelper {
 				ret = tp;
 
 				break;
-			case UBSIUnit:
+			case EXEUnit:
 
 				Polygon tp3 = new Polygon();
 				tp3.addPoint(-3 * (int) size, -1 * (int) size / 2);

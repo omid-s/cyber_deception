@@ -15,5 +15,5 @@ public enum ResourceType {
 	TimerFDs,
 	File,
 	Pipe,
-	UBSIUnit,
+	EXEUnit,
 }
