@@ -473,11 +473,11 @@ public class GraphObjectHelper {
 			resourcesMap.put(From.Type, new HashMap<String, ResourceItem>());
 		}
 
-		if (!resourcesMap.get(From.Type).containsKey(From.id)) {
+		if (!resourcesMap.get(From.Type).containsKey(From.getHashID())) {
 			theGraph.addVertex(From);
-			resourcesMap.get(From.Type).put(From.id, From);
+			resourcesMap.get(From.Type).put(From.getHashID(), From);
 		} else {
-			From = resourcesMap.get(From.Type).get(From.id);
+			From = resourcesMap.get(From.Type).get(From.getHashID());
 		}
 
 		theGraph.addVertex(From);
@@ -487,11 +487,11 @@ public class GraphObjectHelper {
 			resourcesMap.put(To.Type, new HashMap<String, ResourceItem>());
 		}
 
-		if (!resourcesMap.get(To.Type).containsKey(To.id)) {
+		if (!resourcesMap.get(To.Type).containsKey(To.getHashID())) {
 			theGraph.addVertex(To);
-			resourcesMap.get(To.Type).put(To.id, To);
+			resourcesMap.get(To.Type).put(To.getHashID(), To);
 		} else {
-			To = resourcesMap.get(To.Type).get(To.id);
+			To = resourcesMap.get(To.Type).get(To.getHashID());
 		}
 
 		theGraph.addVertex(To);
@@ -501,9 +501,9 @@ public class GraphObjectHelper {
 		 * verbose flag is set, create a new edge anyways, other wise check if it exists
 		 * raise the occirance factor otherwisde insert it
 		 */
-		if (!isInVerboseMode && EdgeMap.containsKey(From.getID() + To.getID() + call.Command)) {
+		if (!isInVerboseMode && EdgeMap.containsKey(From.getHashID() + To.getHashID() + call.Command)) {
 
-			AccessCall t = EdgeMap.get(From.getID() + To.getID() + call.Command);
+			AccessCall t = EdgeMap.get(From.getHashID() + To.getHashID() + call.Command);
 			t.OccuranceFactor++;
 
 //			t.From = From;
@@ -524,7 +524,7 @@ public class GraphObjectHelper {
 //			theGraph.addVertex(theCall.To);
 			theGraph.addEdge(theCall, theCall.From, theCall.To);
 
-			EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
+			EdgeMap.put(theCall.From.getHashID() + theCall.To.getHashID() + theCall.Command, theCall);
 
 		}
 
