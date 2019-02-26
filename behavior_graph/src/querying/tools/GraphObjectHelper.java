@@ -103,12 +103,109 @@ public class GraphObjectHelper {
 
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
-
 			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProcPID());
+
+			if ((TheProc.Title.isEmpty() || TheProc.Title.equals("<NA>")) && pick.proc_name != null
+					&& !pick.proc_name.equals("<NA>") && !pick.proc_name.isEmpty()) {
+				TheProc.Title = pick.proc_name;
+				System.out.println("*");
+			}
 
 		}
 
 		theGraph.addVertex(TheProc);
+
+		// is thread new?
+		if (!resourcesMap.containsKey(ResourceType.Thread)) {
+			resourcesMap.put(ResourceType.Thread, new HashMap<String, ResourceItem>());
+		}
+
+		ResourceItem TheThread = null;
+
+		if (!resourcesMap.get(ResourceType.Thread).containsKey(pick.getTID())) {
+
+			ResourceItem tempItem = new ResourceItem();
+
+			tempItem.Type = ResourceType.Thread;
+			tempItem.Number = pick.thread_tid;
+			tempItem.id = pick.getTID();
+			tempItem.Title = "-";
+			tempItem.Description = "-";
+
+			TheThread = tempItem;
+			theGraph.addVertex(tempItem);
+
+			resourcesMap.get(ResourceType.Thread).put(pick.getTID(), TheThread);
+		} else {
+			TheThread = resourcesMap.get(ResourceType.Thread).get(pick.getTID());
+		}
+
+		// add the thread edge if it does not exist already
+		if (!EdgeMap.containsKey(TheProc.getID() + TheThread.getID() + "spawn")) {
+
+			// add the connection to the process
+			AccessCall tempCallItem = new AccessCall();
+			tempCallItem.From = TheProc;
+			tempCallItem.To = TheThread;
+			tempCallItem.Command = "spawn";
+			tempCallItem.user_id = pick.user_uid;
+			tempCallItem.user_name = pick.user_name;
+
+			tempCallItem.sequenceNumber = sequenceCounter++;
+
+			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			EdgeMap.put(TheProc.getID() + TheThread.getID() + "spawn", tempCallItem);
+		} else {
+			AccessCall t = EdgeMap.get(TheProc.getID() + TheThread.getID() + "spawn");
+			theGraph.addVertex(t.From);
+			theGraph.addEdge(t, t.From, t.To);
+		}
+
+		// is UBSI unit new?
+		if (!resourcesMap.containsKey(ResourceType.EXEUnit)) {
+			resourcesMap.put(ResourceType.EXEUnit, new HashMap<String, ResourceItem>());
+		}
+
+		ResourceItem TheUBSI = null;
+
+		if (!resourcesMap.get(ResourceType.EXEUnit).containsKey(pick.getUBSIID())) {
+
+			ResourceItem tempItem = new ResourceItem();
+
+			tempItem.Type = ResourceType.EXEUnit;
+			tempItem.Number = pick.ubsi_unit_id;
+			tempItem.id = pick.getUBSIID();
+			tempItem.Title = "-";
+			tempItem.Description = "-";
+
+			TheUBSI = tempItem;
+			theGraph.addVertex(tempItem);
+
+			resourcesMap.get(ResourceType.EXEUnit).put(pick.getUBSIID(), TheUBSI);
+		} else {
+			TheUBSI = resourcesMap.get(ResourceType.EXEUnit).get(pick.getUBSIID());
+		}
+
+		// add the thread edge if it does not exist already
+		if (!EdgeMap.containsKey(TheThread.getID() + TheUBSI.getID() + "started")) {
+
+			// add the connection to the process
+			AccessCall tempCallItem = new AccessCall();
+			tempCallItem.From = TheThread;
+			tempCallItem.To = TheUBSI;
+			tempCallItem.Command = "started";
+			tempCallItem.user_id = pick.user_uid;
+			tempCallItem.user_name = pick.user_name;
+
+			tempCallItem.sequenceNumber = sequenceCounter++;
+
+			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			EdgeMap.put(TheThread.getID() + TheUBSI.getID() + "started", tempCallItem);
+		} else {
+			AccessCall t = EdgeMap.get(TheThread.getID() + TheUBSI.getID() + "started");
+			theGraph.addVertex(t.From);
+			theGraph.addEdge(t, t.From, t.To);
+		}
 
 		ResourceItem parentP = null;
 
@@ -117,7 +214,6 @@ public class GraphObjectHelper {
 		} else {
 
 			parentP = new ResourceItem();
-
 			parentP.Type = ResourceType.Process;
 			parentP.Number = pick.proc_ppid;
 			parentP.id = pick.getParentProcID();
@@ -205,7 +301,7 @@ public class GraphObjectHelper {
 
 		// assert pick.thread_tid != "<NA>";
 		if (!pick.fd_num.equals("<NA>")) {
-			FromItem = TheProc;
+			FromItem = TheUBSI;
 
 			if (ToItem == null)
 				ToItem = resourcesMap.get(ItemType).get(pick.getFD_ID());
@@ -267,6 +363,8 @@ public class GraphObjectHelper {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
+		ResourceItem TheThread = null;
+		ResourceItem TheUBSI = null;
 
 		// is process new ?
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
@@ -305,7 +403,7 @@ public class GraphObjectHelper {
 				theGraph.addEdge(t, t.From, t.To);
 			}
 		}
-		
+
 		if (!resourcesMap.containsKey(pick.getItem().Type)) {
 			resourcesMap.put(pick.getItem().Type, new HashMap<String, ResourceItem>());
 		}
@@ -331,7 +429,8 @@ public class GraphObjectHelper {
 			 * verbose flag is set, create a new edge anyways, other wise check if it exists
 			 * raise the occirance factor otherwisde insert it
 			 */
-			if (!isInVerboseMode && EdgeMap.containsKey(FromItem.getID() + ToItem.getID() + pick.getSyscall().Command)) {
+			if (!isInVerboseMode
+					&& EdgeMap.containsKey(FromItem.getID() + ToItem.getID() + pick.getSyscall().Command)) {
 
 				AccessCall t = EdgeMap.get(FromItem.getID() + ToItem.getID() + pick.getSyscall().Command);
 				t.OccuranceFactor++;
@@ -354,6 +453,76 @@ public class GraphObjectHelper {
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}
+		}
+
+	}
+
+	
+	/**
+	 * adds the input triple to the graph 
+	 * @param theGraph the grapoh to add nodes to 
+	 * @param From  starting node
+	 * @param To ending node
+	 * @param call the edge between them 
+	 */
+	public void AddRowToGraph(Graph<ResourceItem, AccessCall> theGraph, ResourceItem From, ResourceItem To,
+			AccessCall call) {
+
+		// is from type new?
+		if (!resourcesMap.containsKey(From.Type)) {
+			resourcesMap.put(From.Type, new HashMap<String, ResourceItem>());
+		}
+
+		if (!resourcesMap.get(From.Type).containsKey(From.getHashID())) {
+			theGraph.addVertex(From);
+			resourcesMap.get(From.Type).put(From.getHashID(), From);
+		} else {
+			From = resourcesMap.get(From.Type).get(From.getHashID());
+		}
+
+		theGraph.addVertex(From);
+
+		// is to type new ?
+		if (!resourcesMap.containsKey(To.Type)) {
+			resourcesMap.put(To.Type, new HashMap<String, ResourceItem>());
+		}
+
+		if (!resourcesMap.get(To.Type).containsKey(To.getHashID())) {
+			theGraph.addVertex(To);
+			resourcesMap.get(To.Type).put(To.getHashID(), To);
+		} else {
+			To = resourcesMap.get(To.Type).get(To.getHashID());
+		}
+
+		theGraph.addVertex(To);
+
+		/*
+		 * if there already is an instance of this edge, look to VERBOSE flag, if
+		 * verbose flag is set, create a new edge anyways, other wise check if it exists
+		 * raise the occirance factor otherwisde insert it
+		 */
+		if (!isInVerboseMode && EdgeMap.containsKey(From.getHashID() + To.getHashID() + call.Command)) {
+
+			AccessCall t = EdgeMap.get(From.getHashID() + To.getHashID() + call.Command);
+			t.OccuranceFactor++;
+
+			theGraph.addVertex(t.From);
+			theGraph.addVertex(t.To);
+			theGraph.addEdge(t, t.From, t.To);
+
+		} else {
+			// create the edge between resources of start and end
+			AccessCall theCall = call;
+
+			theCall.From = From;
+			theCall.To = To;
+//
+			theGraph.addVertex(theCall.From);
+			theGraph.addVertex(theCall.To);
+			theGraph.addEdge(theCall, theCall.From, theCall.To);
+
+			EdgeMap.put(theCall.From.getHashID() + theCall.To.getHashID() + theCall.Command, theCall);
+
 		}
 
 	}
@@ -516,7 +685,41 @@ public class GraphObjectHelper {
 		tempCallItem.user_id = pick.user_uid;
 		tempCallItem.user_name = pick.user_name;
 
-		tempCallItem.sequenceNumber = 0;
+		tempCallItem.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
+
+		ResourceItem TheThread = new ResourceItem();
+
+		TheThread.Type = ResourceType.Thread;
+		TheThread.Number = pick.thread_tid;
+		TheThread.id = pick.getTID();
+		TheThread.Title = "-";
+		TheThread.Description = "-";
+
+		ResourceItem TheUBSI = new ResourceItem();
+
+		TheUBSI.Type = ResourceType.EXEUnit;
+		TheUBSI.Number = pick.ubsi_unit_id;
+		TheUBSI.id = pick.getUBSIID();
+		TheUBSI.Title = "-";
+		TheUBSI.Description = "-";
+
+		AccessCall TheSpawn = new AccessCall();
+		TheSpawn.From = TheProc;
+		TheSpawn.To = TheThread;
+		TheSpawn.Command = "spawn";
+		TheSpawn.user_id = pick.user_uid;
+		TheSpawn.user_name = pick.user_name;
+
+		TheSpawn.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
+
+		AccessCall TheUBSIStart = new AccessCall();
+		TheUBSIStart.From = TheThread;
+		TheUBSIStart.To = TheUBSI;
+		TheUBSIStart.Command = "started";
+		TheUBSIStart.user_id = pick.user_uid;
+		TheUBSIStart.user_name = pick.user_name;
+
+		TheUBSIStart.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 //		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
@@ -568,7 +771,7 @@ public class GraphObjectHelper {
 
 			// add the edge connecting the FD and the process
 			theCall = new AccessCall();
-			theCall.From = TheProc;
+			theCall.From = TheUBSI;
 			theCall.To = ToItem;
 			theCall.Command = pick.evt_type;
 			theCall.DateTime = pick.evt_time_s;
@@ -576,13 +779,14 @@ public class GraphObjectHelper {
 			theCall.Info = pick.evt_args;
 			theCall.user_id = pick.user_uid;
 			theCall.user_name = pick.user_name;
-			theCall.sequenceNumber = 0;
+			theCall.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 //			ret.addEdge(theCall, theCall.From, theCall.To);
 
 		}
 
-		return new SysdigRecordObjectGraph(TheProc, parentP, tempCallItem, theCall, ToItem);
+		return new SysdigRecordObjectGraph(TheProc, parentP, tempCallItem, theCall, ToItem, TheThread, TheSpawn,
+				TheUBSI, TheUBSIStart);
 
 	}
 

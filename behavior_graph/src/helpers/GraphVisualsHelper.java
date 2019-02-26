@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections15.Transformer;
+import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 
 import classes.AccessCall;
 import classes.ResourceItem;
@@ -53,8 +54,8 @@ public class GraphVisualsHelper {
 		public String transform(AccessCall e) {
 			String Call = "";
 
-			Call = e.Command + "(" + e.OccuranceFactor + ")" + "-"+ e.sequenceNumber;
- 
+			Call = e.Command + "(" + e.OccuranceFactor + ")" + "-" + e.sequenceNumber;
+
 			return Call; // "Call ( "+ Call + " ) : "
 							// +graph.getEndpoints(e).toString();
 		}
@@ -69,7 +70,7 @@ public class GraphVisualsHelper {
 		public String transform(AccessCall e) {
 			String Call = "";
 
-			Call = e.toString(); // e.Command + "(" + e.OccuranceFactor + ")";
+			Call = e.toN4JObjectString(); // e.Command + "(" + e.OccuranceFactor + ")";
 
 			return Call; // "Call ( "+ Call + " ) : "
 							// +graph.getEndpoints(e).toString();
@@ -85,7 +86,7 @@ public class GraphVisualsHelper {
 	Transformer<ResourceItem, String> VertexLabeler = new Transformer<ResourceItem, String>() {
 		public String transform(ResourceItem e) {
 			String ret = "";
-			ret +=  e.Type.toString() + " | " + e.Number + " ("
+			ret += e.Type.toString() + " | " + e.Number + " ("
 					+ ((e.Type.equals(ResourceType.Process)) ? e.Title : e.Title) + ")";
 
 			return ret;
@@ -100,8 +101,8 @@ public class GraphVisualsHelper {
 
 	private Transformer<ResourceItem, Paint> colorifier = new Transformer<ResourceItem, Paint>() {
 		public Paint transform(ResourceItem e) {
-			Color[] colors = { Color.RED, Color.black, Color.blue, Color.LIGHT_GRAY, Color.green, Color.ORANGE,
-					Color.PINK, Color.pink, Color.gray, Color.CYAN, Color.DARK_GRAY, Color.YELLOW, Color.WHITE };
+			Color[] colors = { Color.RED, Color.YELLOW, Color.blue, Color.LIGHT_GRAY, Color.green, Color.ORANGE,
+					Color.PINK, Color.pink, Color.gray, Color.CYAN, Color.black, Color.WHITE, Color.DARK_GRAY };
 
 			switch (e.Type) {
 			case Process:
@@ -130,7 +131,7 @@ public class GraphVisualsHelper {
 				return colors[11];
 			case Service:
 				return colors[12];
-			case API:
+			case EXEUnit:
 				return colors[6];
 			}
 			return Color.magenta;
@@ -147,15 +148,14 @@ public class GraphVisualsHelper {
 		@Override
 		public String transform(ResourceItem I) {
 			// return String.valueOf(i*i + i );
-			String ret = "";
+			String ret = I.toN4JObjectString();
 			/*
-			 * switch (i.) { case "1": ret =
-			 * "Process \r\n Name : httpd , ID : 12"; break; case "2": ret =
-			 * "Thread \r\n ID : 18 "; break; case "5": ret =
+			 * switch (i.) { case "1": ret = "Process \r\n Name : httpd , ID : 12"; break;
+			 * case "2": ret = "Thread \r\n ID : 18 "; break; case "5": ret =
 			 * "Thread \r\n ID : 19 "; break; case "3": ret =
-			 * "Network : port : 233 , location : 127.0.0.1"; break; case "4":
-			 * ret = "File \r\n Directory : /usr/omido/ Name : data.cnfg ";
-			 * break; default: ret = "Resource  "; break; }
+			 * "Network : port : 233 , location : 127.0.0.1"; break; case "4": ret =
+			 * "File \r\n Directory : /usr/omido/ Name : data.cnfg "; break; default: ret =
+			 * "Resource  "; break; }
 			 */
 			return ret;
 		}
@@ -222,14 +222,41 @@ public class GraphVisualsHelper {
 			case Pipe:
 				ret = new Rectangle2D.Float(-2 * size, -1 * size / 2, size * 4, size);
 				break;
-			case NetworkIPV4:
-			case NetworkIPV6:
+			case Thread:
+				int x_1 = (int) Math.round(Math.cos(18) * 1 * size);
+				int x_2 = (int) Math.round(Math.sin(36) * 1 * size);
+				int y_1 = (int) Math.round(Math.sin(18) * 1 * size);
+				int y_2 = (int) Math.round(Math.cos(36) * 1 * size);
+
 				Polygon tp = new Polygon();
 				tp.addPoint(0, -1 * (int) size);
-				tp.addPoint(-2 * (int) size, 0);
-				tp.addPoint(0, 1 * (int) size);
-				tp.addPoint(2 * (int) size, 0);
+				tp.addPoint(-1 * x_2, y_2);
+				tp.addPoint(x_1, -1 * y_1);
+				tp.addPoint(-1 * x_1, -1 * y_1);
+				tp.addPoint(x_2, y_2);
 				ret = tp;
+
+				break;
+			case EXEUnit:
+
+				Polygon tp3 = new Polygon();
+				tp3.addPoint(-3 * (int) size, -1 * (int) size / 2);
+				tp3.addPoint(1 * (int) size, -1 * (int) size / 2);
+				tp3.addPoint(3 * (int) size, 1 * (int) size / 2);
+				tp3.addPoint(-1 * (int) size, 1 * (int) size / 2);
+				ret = tp3;
+
+				break;
+			case NetworkIPV4:
+			case NetworkIPV6:
+
+				Polygon tp2 = new Polygon();
+				tp2.addPoint(0, -1 * (int) size);
+				tp2.addPoint(-2 * (int) size, 0);
+				tp2.addPoint(0, 1 * (int) size);
+				tp2.addPoint(2 * (int) size, 0);
+				ret = tp2;
+
 				break;
 			default:
 				ret = new Ellipse2D.Float(-1 * size / 2, -1 * size / 2, size, size);
