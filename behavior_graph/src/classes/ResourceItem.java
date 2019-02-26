@@ -23,8 +23,7 @@ public class ResourceItem {
 	}
 
 	/**
-	 * returns a string representation of the object 
-	 * in the Neo4J insertion format 
+	 * returns a string representation of the object in the Neo4J insertion format
 	 * 
 	 * @return the formated to string
 	 */
@@ -32,12 +31,8 @@ public class ResourceItem {
 
 		return String.format(
 				"%s{id:\"%s\", title:\"%s\" , path:\"%s\", " + "number: \"%s\", description:\"%s\" , type:\"%s\"  }",
-				Type.toString(), 
-				String.valueOf(id), 
-				String.valueOf(Title), 
-				String.valueOf(Path), 
-				String.valueOf(Number), 
-				"",//String.valueOf(Description), 
+				Type.toString(), String.valueOf(id), String.valueOf(Title), String.valueOf(Path),
+				String.valueOf(Number), "", // String.valueOf(Description),
 				Type.toString());
 	}
 
@@ -48,6 +43,10 @@ public class ResourceItem {
 			return false;
 
 		return this.id.equals(((ResourceItem) obj).id);
+	}
+
+	public String getHashID() {
+		return this.id + "|" + this.Number + "|" + this.Title;
 	}
 
 	public String getID() {

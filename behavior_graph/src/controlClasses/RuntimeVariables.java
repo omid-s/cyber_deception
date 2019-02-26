@@ -33,6 +33,7 @@ public class RuntimeVariables {
 			fieldsMap.put("back_depth", this.getClass().getDeclaredField("backDepth"));
 			fieldsMap.put("ignore_fd_num", this.getClass().getDeclaredField("ignoreFDNumber"));
 			fieldsMap.put("auto_merge", this.getClass().getDeclaredField("automaticMerge"));
+			fieldsMap.put("print_query", this.getClass().getDeclaredField("print_query"));
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -43,6 +44,7 @@ public class RuntimeVariables {
 		backDepth = Integer.MAX_VALUE;
 		ignoreFDNumber = true;
 		automaticMerge = false;
+		print_query=false;
 	}
 
 	private Map<String, Field> fieldsMap;
@@ -151,6 +153,21 @@ public class RuntimeVariables {
 	 */
 	public Boolean getIgnoreFDNumber() {
 		return this.ignoreFDNumber;
+	}
+
+	/**
+	 * shows wheter the query being run on database should be printed
+	 */
+	private Boolean print_query ; 
+	
+	
+	
+	public Boolean getPrint_query() {
+		return print_query;
+	}
+
+	public void setPrint_query(Boolean print_query) {
+		this.print_query = print_query;
 	}
 
 	/**

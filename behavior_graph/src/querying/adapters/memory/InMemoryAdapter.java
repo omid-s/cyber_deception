@@ -275,14 +275,6 @@ public class InMemoryAdapter extends BaseAdapter {
 			if (verticeTypes.size() == 0 || verticeTypes.contains(pick.Type))
 				ret.addVertex(pick);
 		}
-		// temp.add(V.get(id));
-		// ret.addVertex(ProcessMap.get(id));
-		// temp.add(ActivityMap
-		// .get("11955/Activity{free.guidegame.shadowfightfree/free.guidegame.shadowfightfree.MainActivity}")
-		// .get(0));
-		// ret.addVertex(ActivityMap
-		// .get("11955/Activity{free.guidegame.shadowfightfree/free.guidegame.shadowfightfree.MainActivity}")
-		// .get(0));
 
 		/**
 		 * propcess all the edges that initiate from the chosen nodes, if a new noew is
@@ -302,14 +294,14 @@ public class InMemoryAdapter extends BaseAdapter {
 			// continue;
 
 			/// iterate over all the edges that go out of the picked node and
-			/// add them as apropriate
+			/// add them as appropriate
 			if (isForwardTracked && fromsMap.containsKey(v.id.toLowerCase())
 					&& depth < RuntimeVariables.getInstance().getForwardDepth())
 				for (AccessCall pick : fromsMap.get(v.id.toLowerCase())) {
 
 					/**
 					 * check if there is any criteria for user names and ids, apply it. ( if there
-					 * is no user based criteria, add the edge, otherwise apply the cirterai )
+					 * is no user based criteria, add the edge, otherwise apply the sorter )
 					 */
 					if ((edge_criteria.size() > 0 && edge_criteria.stream()
 							.anyMatch(x -> ((x.getOp().equalsIgnoreCase("has") && pick.user_name.contains(x.getValue())
@@ -460,12 +452,9 @@ public class InMemoryAdapter extends BaseAdapter {
 							temp.add(pick.From);
 							depthMap.add(depth + 1);
 						}
-
 					}
 				}
-
 		}
-
 
 		return ret;
 	}
@@ -481,6 +470,4 @@ public class InMemoryAdapter extends BaseAdapter {
 		types.add("binder");
 		return !types.contains(inp);
 	}
-
 }
-// 11955/Activity{free.guidegame.shadowfightfree/free.guidegame.shadowfightfree.MainActivity}

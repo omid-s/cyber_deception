@@ -11,8 +11,8 @@ import classes.ResourceType;
 import classes.SysdigRecordObject;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
-import dataBaseStuff.SysdigObjectDAL;
 import helpers.Configurations;
+import readers.SysdigObjectDAL;
 
 /**
  * @author omido

@@ -4,7 +4,6 @@ import controlClasses.RecordInterpretorFactory;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
 import dataBaseStuff.GraphDBDal;
-import dataBaseStuff.SysdigObjectDAL;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
@@ -21,6 +20,8 @@ import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.GraphObjectHelper;
+import readers.CSVReader;
+import readers.SysdigObjectDAL;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -61,7 +62,7 @@ public class MainClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -83,23 +84,27 @@ public class MainClass {
 			}
 			if (pick.equals("g"))
 				ShowGraph = true;
-			if (pick.equals("ssql"))
+			if (pick.equals("ssql") || pick.equals("save_sql"))
 				SaveToDB = true;
-			if (pick.equals("sneo4j"))
+			if (pick.equals("sneo4j") || pick.equals("save_neo4j"))
 				SaveToGraph = true;
-			if (pick.equals("neo4jv"))
+			if (pick.equals("neo4jv") || pick.equals("save_neo4j_verbose"))
 				Neo4JVerbose = true;
 			if (pick.equals("short"))
 				InShortFormat = true;
-			if (pick.equals("sf"))
+			if (pick.equals("csv") || pick.equals("read_csv"))
+				ReadCSV = true;
+			if (pick.equals("sf") || pick.equals("save_formatted"))
 				SaveFormated = true;
-			if (pick.equals("rm"))
+			if (pick.equals("rm") || pick.equals("query_memory"))
 				MemQuery = true;
-			if (pick.equals("rspg"))
+			if (pick.equals("rspg") || pick.equals("query_postgres"))
 				SimplePGQuery = true;
-			if (pick.equals("rsn4j"))
+			if (pick.equals("rsn4j") || pick.equals("query_neo4j"))
 				SimpleNeo4JQuery = true;
-
+			if (pick.equals("sj") || pick.equals("save_json"))
+				SaveJSON = true;
+			
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -114,7 +119,12 @@ public class MainClass {
 			return;
 		}
 
-		SysdigObjectDAL temp = new SysdigObjectDAL(InShortFormat);
+		SysdigObjectDAL objectDAL = null;
+		if (ReadCSV)
+			objectDAL = new CSVReader();
+		else
+			objectDAL = new SysdigObjectDAL(InShortFormat);
+
 		InputStreamReader isReader = new InputStreamReader(System.in);
 		BufferedReader bufReader = new BufferedReader(isReader);
 
@@ -129,7 +139,7 @@ public class MainClass {
 		int skipped = 0;
 
 		FileWriter output_file_writer = null;
-		if (SaveFormated) {
+		if (SaveFormated || SaveJSON) {
 			output_file_writer = new FileWriter(new File(output_file));
 		}
 
@@ -144,7 +154,7 @@ public class MainClass {
 						if (counterr == 1 || counterr == 100000)
 							System.out.println(inputStr);
 						// if(true) continue;
-						SysdigRecordObject tempObj = temp.GetObjectFromTextLine(inputStr);
+						SysdigRecordObject tempObj = objectDAL.GetObjectFromTextLine(inputStr);
 
 						/// if desired write the formated file
 						if (SaveFormated)
@@ -157,7 +167,7 @@ public class MainClass {
 						}
 
 						if (SaveToDB)
-							temp.Insert(tempObj);
+							objectDAL.Insert(tempObj);
 
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
@@ -185,6 +195,9 @@ public class MainClass {
 					System.out.println("Error");
 				}
 			}
+// if json is desired, create the array
+		if (SaveJSON)
+			output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
@@ -201,10 +214,12 @@ public class MainClass {
 							int theL = multipleRecords.length();
 
 							multipleRecords += test.nextLine();
-							tempObj = temp.GetObjectFromTextLine(multipleRecords);
+							tempObj = objectDAL.GetObjectFromTextLine(multipleRecords);
 
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
+							if (SaveJSON)
+								output_file_writer.write(tempObj.toJSONString() + ",");
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -220,7 +235,7 @@ public class MainClass {
 						counter++;
 
 						if (SaveToDB)
-							temp.Insert(tempObj);
+							objectDAL.Insert(tempObj);
 
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
@@ -251,13 +266,16 @@ public class MainClass {
 			}
 
 		}
-		temp.flushRows();
+		objectDAL.flushRows();
 
 		Instant end2 = Instant.now();
 
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
 		/// clsoe the output file
 		if (output_file_writer != null) {
+			// is json is desired, close the array
+			if (SaveJSON)
+				output_file_writer.write("\n]");
 			output_file_writer.flush();
 			output_file_writer.close();
 		}
@@ -290,7 +308,7 @@ public class MainClass {
 			queryMachine = InMemoryAdapter.getSignleton();
 		else if (SimplePGQuery)
 			queryMachine = SimplePGAdapter.getSignleton();
-		else if ( SimpleNeo4JQuery)
+		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		/// setup GUI window
