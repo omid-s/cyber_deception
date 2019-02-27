@@ -32,6 +32,9 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -52,19 +55,16 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 
-public class MainClass {
+public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
 	private static final long REPORT_ROW_COUNT = 10000;
 
-	
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
 		String pid = "";
-		
-		
-		
+
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
 				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
@@ -130,23 +130,36 @@ public class MainClass {
 		else
 			objectDAL = new SysdigObjectDAL(InShortFormat);
 
-		InputStreamReader isReader = new InputStreamReader(System.in);
-
+ 
 		GraphDBDal GraphActionFactory = new GraphDBDal();
 
-		GraphObjectHelper VerboseHelper = new GraphObjectHelper(true, pid);
-		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
-
-		int counter = 0;
+ 
+		long counter = 0;
 
 		FileWriter stats_file = null;
 
 		stats_file = new FileWriter(new File(output_file));
 
-// if json is desired, create the array
-		if (SaveJSON)
-			stats_file.write("[\n");
+		
+		BaseAdapter queryMachine = null;
+
+		/// set the query adapter
+		if (MemQuery)
+			queryMachine = InMemoryAdapter.getSignleton();
+		else if (SimplePGQuery)
+			queryMachine = SimplePGAdapter.getSignleton();
+		else if (SimpleNeo4JQuery)
+			queryMachine = SimpleNeo4JAdapter.getSignleton();
+
+		String[] keys = {
+				"counter" , "date_time" , "last_rows_time", "total_time", "select_time", "select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex",
+				"ft_time", "ft_edge", "ft_vertex"
+		};
+		
+		long total_time = 0 ;
+ 	 
 		Instant start2 = Instant.now();
+		Instant lastStep = Instant.now();
 		if (ReadFromFile) {
 			try {
 				System.out.println("in read File");
@@ -188,21 +201,33 @@ public class MainClass {
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
 
-						if (ShowVerbose) {
-							VerboseHelper.AddRowToGraph(theGraph, tempObj);
-
-						}
-						if (ShowGraph) {
-							ClearHelper.AddRowToGraph(theGraph, tempObj);
-
-						}
-
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
 							if (counter % 10000 == 0) {
-//								Duration.between(start2, end).toMillis() 
+								Map <String, Long > stats = new HashMap<String, Long>();
+								
+								Instant temp_end = Instant.now();
+								Long last_rows_time =  Duration.between(lastStep, temp_end).toMillis();
+								total_time += last_rows_time;
+								
+								stats.put("counter", counter);
+								stats.put("date_time", (new Date()).getTime() );
+								stats.put("last_rows_time", last_rows_time);
+								stats.put("total_time", total_time);
+								
+								runQuery("select * from * where name has bash_ ", queryMachine, stats, "select_");
+								runQuery("back select * from * where name has bash_ ", queryMachine, stats, "bt_");
+								runQuery("forward select * from * where name has ssh ", queryMachine, stats, "ft_");
+								
+								String row= "";
+								for( int i = 0 ; i < keys.length; i++ ) {
+									row += stats.get(keys[i])+ ",";
+								}
+								stats_file.write(row+ "\n");
+								stats_file.flush();
+								lastStep = Instant.now();
 							}
-							// break;
+							
 						}
 
 					} catch (Exception ex) {
@@ -225,113 +250,52 @@ public class MainClass {
 		/// clsoe the output file
 		if (stats_file != null) {
 			// is json is desired, close the array
-			if (SaveJSON)
-				stats_file.write("\n]");
 			stats_file.flush();
 			stats_file.close();
 		}
 
-		int num_edges = theGraph.getEdgeCount();
-		int num_vertex = theGraph.getVertexCount();
-
-		theGraph = null;
-		ClearHelper.release_maps();
-		VerboseHelper.release_maps();
-
-		VerboseHelper = null;
-		ClearHelper = null;
-
-		System.gc();
-
-		BaseAdapter queryMachine = null;
-
-		/// set the query adapter
-		if (MemQuery)
-			queryMachine = InMemoryAdapter.getSignleton();
-		else if (SimplePGQuery)
-			queryMachine = SimplePGAdapter.getSignleton();
-		else if (SimpleNeo4JQuery)
-			queryMachine = SimpleNeo4JAdapter.getSignleton();
-
 		/// setup GUI window
 
-		Scanner reader = new Scanner(System.in);
-		while (true) {
-			try {
-				ColorHelpers.PrintBlue("$$>>");
-				String command = reader.nextLine();
-				if (command.equalsIgnoreCase("exit") || command.equalsIgnoreCase("quit"))
-					break;
-
-				else if (command.trim().equalsIgnoreCase("info")) {
-					ColorHelpers.PrintGreen(
-							String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex));
-					continue;
-				} else if (command.trim().toLowerCase().startsWith("set ")) { // process
-																				// runtime
-																				// variablse
-																				// settings
-
-					RuntimeVariables.getInstance().setValue(command.trim().split(" ")[1], command.trim().split(" ")[2]);
-					continue;
-				} else if (command.trim().toLowerCase().startsWith("get ")) {// process
-																				// runtime
-																				// variablse
-																				// settings
-					ColorHelpers
-							.PrintGreen(RuntimeVariables.getInstance().getValue(command.trim().split(" ")[1]) + "\r\n");
-					continue;
-				} else if (command.trim().toLowerCase().startsWith("describe")) {
-
-					boolean isAggregated = !(command.contains(" verbose"));
-					boolean hasPath = command.indexOf("path=") > 0;
-					boolean hasSort = command.indexOf("orderby=") > 0;
-					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
-					String SortBy = hasSort ? command.substring(command.indexOf("orderby=") + "orderby=".length(),
-							command.indexOf(" ", command.indexOf("orderby=")) > 0
-									? command.indexOf(" ", command.indexOf("orderby="))
-									: command.length())
-							: null;
-
-					DescribeFactory.doDescribe(thePath, isAggregated, SortBy);
-					continue;
-				}
-
-				Instant start = Instant.now();
-
-				try {
-
-					ParsedQuery query = null;
-					try {
-						query = QueryInterpreter.interpret(command, theGraph);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-
-					theGraph = queryMachine.runQuery(query);
-				} catch (Exception ex) {
-					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
-					continue;
-				}
-
-				Instant end = Instant.now();
-
-				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
-
-				System.out.flush();
-				System.gc();
-
-			} catch (VariableNoitFoundException ex) {
-				ColorHelpers.PrintRed(ex.getMessage());
-			} catch (Exception ex) {
-				throw (ex);
-				// ColorHelpers.PrintRed("query Problem!please try agin...
-				// \r\n");
-			}
-		}
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
 
 	}
+
+	private static void runQuery(String command, BaseAdapter queryMachine, Map<String, Long> stats , String stat_prefix) {
+
+		try {
+
+			Graph<ResourceItem, AccessCall> theGraph = null;
+
+			Instant start = Instant.now();
+
+			try {
+
+				ParsedQuery query = null;
+				try {
+					query = QueryInterpreter.interpret(command, theGraph);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+				theGraph = queryMachine.runQuery(query);
+			} catch (Exception ex) {
+				ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
+				
+			}
+
+			Instant end = Instant.now();
+
+			stats.put(  stat_prefix +"time" ,  Duration.between(start, end).toMillis());
+			stats.put(stat_prefix+"edge", (long)theGraph.getEdgeCount() );
+			stats.put(stat_prefix+"vertex",(long)theGraph.getVertexCount());
+			
+		}  catch (Exception ex) {
+			throw (ex);
+			// ColorHelpers.PrintRed("query Problem!please try agin...
+			// \r\n");
+		}
+	}
+
 }
