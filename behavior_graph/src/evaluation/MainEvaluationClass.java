@@ -156,6 +156,13 @@ public class MainEvaluationClass {
 				"ft_time", "ft_edge", "ft_vertex"
 		};
 		
+		String row1= "";
+		for( int i = 0 ; i < keys.length; i++ ) {
+			row1 +=keys[i]+ ",";
+		}
+		stats_file.write(row1+ "\n");
+		stats_file.flush();
+		
 		long total_time = 0 ;
  	 
 		Instant start2 = Instant.now();
@@ -201,9 +208,10 @@ public class MainEvaluationClass {
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
 
-						if (counter % 1000 == 0) {
-							System.out.println(counter);
-							if (counter % 10000 == 0) {
+						if (counter % (REPORT_ROW_COUNT/10) == 0) {
+							System.out.print("*");
+							if (counter % REPORT_ROW_COUNT == 0) {
+								System.out.println(counter);	
 								Map <String, Long > stats = new HashMap<String, Long>();
 								
 								Instant temp_end = Instant.now();
@@ -249,7 +257,6 @@ public class MainEvaluationClass {
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
 		/// clsoe the output file
 		if (stats_file != null) {
-			// is json is desired, close the array
 			stats_file.flush();
 			stats_file.close();
 		}
