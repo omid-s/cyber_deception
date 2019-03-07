@@ -47,7 +47,7 @@ public class AccessCall extends Object {
 						String.valueOf(user_id), 
 						String.valueOf(user_name)
 				
-				);
+				).replace("\\", "");
 
 	}
 

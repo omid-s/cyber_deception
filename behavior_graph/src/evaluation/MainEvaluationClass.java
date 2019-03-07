@@ -177,10 +177,10 @@ public class MainEvaluationClass {
 //							counter++;
 //							continue;
 //						}
-//						if (SimpleNeo4JQuery && counter < 4750000) {
-//							counter++;
-//							continue;
-//						}
+						if (SimpleNeo4JQuery && counter < 7800000) {
+							counter++;
+							continue;
+						}
 
 						SysdigRecordObject tempObj;
 						try {

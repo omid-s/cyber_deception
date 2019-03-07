@@ -33,7 +33,7 @@ public class ResourceItem {
 				"%s{id:\"%s\", title:\"%s\" , path:\"%s\", " + "number: \"%s\", description:\"%s\" , type:\"%s\"  }",
 				Type.toString(), String.valueOf(id), String.valueOf(Title), String.valueOf(Path),
 				String.valueOf(Number), "", // String.valueOf(Description),
-				Type.toString());
+				Type.toString()).replace("\\", "");
 	}
 
 	@Override
