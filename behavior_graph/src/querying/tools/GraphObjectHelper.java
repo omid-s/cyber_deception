@@ -316,7 +316,6 @@ public class GraphObjectHelper {
 			 * raise the occirance factor otherwisde insert it
 			 */
 			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID() + pick.evt_type))
-
 			{
 
 				AccessCall t = EdgeMap.get(FF.getID() + TT.getID() + pick.evt_type);
@@ -724,7 +723,7 @@ public class GraphObjectHelper {
 //		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
 		// is there an fd resource ? if so add it the graph, other wise skip it
-		if (pick.fd_num != "<NA>") {
+		if (!pick.fd_num.equals("<NA>")) {
 
 			// find out the fd type
 			ResourceType ItemType = ResourceType.File;

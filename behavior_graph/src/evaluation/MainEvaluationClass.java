@@ -58,7 +58,7 @@ import classes.SysdigRecordObject;
 public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
-	private static final long REPORT_ROW_COUNT = 10000;
+	private static final long REPORT_ROW_COUNT = 100000;
 
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
@@ -130,17 +130,14 @@ public class MainEvaluationClass {
 		else
 			objectDAL = new SysdigObjectDAL(InShortFormat);
 
- 
 		GraphDBDal GraphActionFactory = new GraphDBDal();
 
- 
 		long counter = 0;
 
 		FileWriter stats_file = null;
 
 		stats_file = new FileWriter(new File(output_file));
 
-		
 		BaseAdapter queryMachine = null;
 
 		/// set the query adapter
@@ -151,20 +148,18 @@ public class MainEvaluationClass {
 		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
-		String[] keys = {
-				"counter" , "date_time" , "last_rows_time", "total_time", "select_time", "select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex",
-				"ft_time", "ft_edge", "ft_vertex"
-		};
-		
-		String row1= "";
-		for( int i = 0 ; i < keys.length; i++ ) {
-			row1 +=keys[i]+ ",";
+		String[] keys = { "counter", "date_time", "last_rows_time", "total_time", "select_time", "select_edge",
+				"select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex" };
+
+		String row1 = "";
+		for (int i = 0; i < keys.length; i++) {
+			row1 += keys[i] + ",";
 		}
-		stats_file.write(row1+ "\n");
+		stats_file.write(row1 + "\n");
 		stats_file.flush();
-		
-		long total_time = 0 ;
- 	 
+
+		long total_time = 0;
+
 		Instant start2 = Instant.now();
 		Instant lastStep = Instant.now();
 		if (ReadFromFile) {
@@ -177,6 +172,16 @@ public class MainEvaluationClass {
 
 				while (test.hasNextLine()) {
 					try {
+
+//						if (SimplePGQuery && counter < 8999999) {
+//							counter++;
+//							continue;
+//						}
+//						if (SimpleNeo4JQuery && counter < 4750000) {
+//							counter++;
+//							continue;
+//						}
+
 						SysdigRecordObject tempObj;
 						try {
 							int theL = multipleRecords.length();
@@ -188,6 +193,8 @@ public class MainEvaluationClass {
 								stats_file.write(tempObj.toString() + "\n");
 							if (SaveJSON)
 								stats_file.write(tempObj.toJSONString() + ",");
+							if (SaveToDB)
+								objectDAL.Insert(tempObj);
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -208,34 +215,34 @@ public class MainEvaluationClass {
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
 
-						if (counter % (REPORT_ROW_COUNT/10) == 0) {
+						if (counter % (REPORT_ROW_COUNT / 10) == 0) {
 							System.out.print("*");
 							if (counter % REPORT_ROW_COUNT == 0) {
-								System.out.println(counter);	
-								Map <String, Long > stats = new HashMap<String, Long>();
-								
+								System.out.println(counter);
+								Map<String, Long> stats = new HashMap<String, Long>();
+
 								Instant temp_end = Instant.now();
-								Long last_rows_time =  Duration.between(lastStep, temp_end).toMillis();
+								Long last_rows_time = Duration.between(lastStep, temp_end).toMillis();
 								total_time += last_rows_time;
-								
+
 								stats.put("counter", counter);
-								stats.put("date_time", (new Date()).getTime() );
+								stats.put("date_time", (new Date()).getTime());
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
-								
-								runQuery("select * from * where name has bash_ ", queryMachine, stats, "select_");
-								runQuery("back select * from * where name has bash_ ", queryMachine, stats, "bt_");
-								runQuery("forward select * from * where name has ssh ", queryMachine, stats, "ft_");
-								
-								String row= "";
-								for( int i = 0 ; i < keys.length; i++ ) {
-									row += stats.get(keys[i])+ ",";
+
+								runQuery("select * from * where name has /home/ ", queryMachine, stats, "select_");
+								runQuery("back select * from * where name has /home/ ", queryMachine, stats, "bt_");
+								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
+
+								String row = "";
+								for (int i = 0; i < keys.length; i++) {
+									row += stats.get(keys[i]) + ",";
 								}
-								stats_file.write(row+ "\n");
+								stats_file.write(row + "\n");
 								stats_file.flush();
 								lastStep = Instant.now();
 							}
-							
+
 						}
 
 					} catch (Exception ex) {
@@ -251,7 +258,8 @@ public class MainEvaluationClass {
 
 		}
 		objectDAL.flushRows();
-
+		GraphActionFactory.flushRows();
+		
 		Instant end2 = Instant.now();
 
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
@@ -269,7 +277,8 @@ public class MainEvaluationClass {
 
 	}
 
-	private static void runQuery(String command, BaseAdapter queryMachine, Map<String, Long> stats , String stat_prefix) {
+	private static void runQuery(String command, BaseAdapter queryMachine, Map<String, Long> stats,
+			String stat_prefix) {
 
 		try {
 
@@ -289,16 +298,16 @@ public class MainEvaluationClass {
 				theGraph = queryMachine.runQuery(query);
 			} catch (Exception ex) {
 				ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
-				
+
 			}
 
 			Instant end = Instant.now();
 
-			stats.put(  stat_prefix +"time" ,  Duration.between(start, end).toMillis());
-			stats.put(stat_prefix+"edge", (long)theGraph.getEdgeCount() );
-			stats.put(stat_prefix+"vertex",(long)theGraph.getVertexCount());
-			
-		}  catch (Exception ex) {
+			stats.put(stat_prefix + "time", Duration.between(start, end).toMillis());
+			stats.put(stat_prefix + "edge", (long) theGraph.getEdgeCount());
+			stats.put(stat_prefix + "vertex", (long) theGraph.getVertexCount());
+
+		} catch (Exception ex) {
 			throw (ex);
 			// ColorHelpers.PrintRed("query Problem!please try agin...
 			// \r\n");

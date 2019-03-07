@@ -15,6 +15,7 @@ import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
+import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -157,7 +158,8 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			String Query = String.format("select %s from sysdigoutput  where %s", Fields, where_clause);
 
-			System.out.println(Query);
+			if (RuntimeVariables.getInstance().getPrint_query())
+				System.out.println(Query);
 			Statement st = theConnection.createStatement();
 			ResultSet resutls = st.executeQuery(Query);
 
@@ -165,6 +167,8 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			while (resutls.next()) {
 				try {
+					if (resutls == null)
+						break;
 					SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
 
 					graphHelper.AddRowToGraph(ret, temp);
@@ -228,8 +232,8 @@ public class SimplePGAdapter extends BaseAdapter {
 							graphHelper.AddRowToGraph(ret, temp);
 
 						} catch (Exception ex) {
-							System.out.println(ex.getMessage());
-							ex.printStackTrace();
+//							System.out.println(ex.getMessage());
+//							ex.printStackTrace();
 							continue;
 						}
 					}

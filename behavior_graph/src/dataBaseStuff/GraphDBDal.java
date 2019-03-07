@@ -1,10 +1,19 @@
 package dataBaseStuff;
 
+import java.sql.Connection;
+
 //import org.neo4j.jdbc.*;
 
-import java.sql.*;
+//import java.sql.*;
+import java.sql.Statement;
+import java.util.ArrayList;
 
+import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.Transaction;
 
 import classes.*;
 import edu.uci.ics.jung.graph.Graph;
@@ -32,6 +41,8 @@ public class GraphDBDal {
 
 	private static Connection TheConnection;
 	private static Statement TheStateMent;
+	private Driver driver = null;
+	ArrayList<String> Queries = new ArrayList<String>();
 
 	public void Save(SysdigRecordObject inp, boolean SaveVerbose) {
 
@@ -44,38 +55,106 @@ public class GraphDBDal {
 		temp += "\r\n"
 				+ String.format(" merge (parentProc)-[:%s]->(newProc) ", tempGraph.getExec().toN4JObjectString());
 		if (tempGraph.getItem() != null) {
-			
+
 			temp += "\r\n" + String.format(" merge ( thread:%s ) ", tempGraph.getThread().toN4JObjectString());
 			temp += "\r\n" + String.format(" merge ( ubsi:%s ) ", tempGraph.getUBSIUnit().toN4JObjectString());
-			
-			temp += "\r\n" + String.format(" merge (newProc)-[:%s]->(thread) ", tempGraph.getSpawn().toN4JObjectString());
-			temp += "\r\n" + String.format(" merge (thread)-[:%s]->(ubsi) ", tempGraph.getUbsi_start().toN4JObjectString());
-			
+
+			temp += "\r\n"
+					+ String.format(" merge (newProc)-[:%s]->(thread) ", tempGraph.getSpawn().toN4JObjectString());
+			temp += "\r\n"
+					+ String.format(" merge (thread)-[:%s]->(ubsi) ", tempGraph.getUbsi_start().toN4JObjectString());
+
 			temp += "\r\n" + String.format(" merge ( item:%s ) ", tempGraph.getItem().toN4JObjectString());
 			temp += "\r\n" + String.format(" merge (ubsi)-[:%s]->(item) ", tempGraph.getSyscall().toN4JObjectString());
 		}
 
 		temp += ";";
 
+//		try {
+//			if (TheConnection == null) {
+//				TheConnection = java.sql.DriverManager.getConnection(
+//						String.format("jdbc:neo4j:bolt://%s/",
+//								Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//				);
+//				TheStateMent = TheConnection.createStatement();
+//			}
+//
+//			TheStateMent.executeUpdate(temp);
+////			System.out.print(";");
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		}
+
+		Queries.add(temp);
+//
+		if (Queries.size() % 1000 == 0)
+			flushRows();
+
+	}
+
+	public void flushRows() {
+
 		try {
 
-			// Connect
-			if (TheConnection == null) {
-				TheConnection = DriverManager.getConnection(
-						String.format("jdbc:neo4j:bolt://%s/",
-								Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
-						Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
-						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+			
+//			try {
+//				if (TheConnection == null) {
+//					TheConnection = java.sql.DriverManager.getConnection(
+//							String.format("jdbc:neo4j:bolt://%s/",
+//									Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//							Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//							Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//					);
+//					TheStateMent = TheConnection.createStatement();
+//				}
+//				for (String temp : Queries)
+//					TheStateMent.executeUpdate(temp);
+////				System.out.print(";");
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//			}
 
-				);
-				TheStateMent = TheConnection.createStatement();
-			}
+			
+			
+			// Connect
+//			if (TheConnection == null) {
+//				TheConnection = DriverManager.getConnection(
+//						String.format("jdbc:neo4j:bolt://%s/",
+//								Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//				);
+//				TheStateMent = TheConnection.createStatement();
+//			}
 			// Querying
-			TheStateMent.executeQuery(temp);
+
+			if (driver == null)
+				driver = GraphDatabase.driver(
+						"bolt://" + Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER),
+						AuthTokens.basic(Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+								Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)));
+			Session session = driver.session();
+
+			Transaction trnx = session.beginTransaction();
+			for (String pick : Queries) {
+				trnx.run(pick);
+			}
+			trnx.success();
+////			trnx.
+//
+			trnx.close();
+//			
+//			
+			Queries.clear();
+//			System.out.println("0");
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
 	}
 }

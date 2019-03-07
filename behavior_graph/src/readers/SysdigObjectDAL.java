@@ -99,7 +99,7 @@ public class SysdigObjectDAL {
 				DL.runUpdateQuery(items.toString());
 				big_query = "";
 				items = new StringJoiner(" ");
-				System.out.println("Running!");
+//				System.out.println("Running!");
 			}
 		} catch (Exception ex) {
 			System.out.println(Query);
@@ -124,7 +124,7 @@ public class SysdigObjectDAL {
 		for (Field pick : ClassFields) {
 
 			String value = input.getString(pick.getName());
-			if (!value.isEmpty())
+			if ( value!= null && !value.isEmpty())
 				pick.set(ret, value);
 		}
 

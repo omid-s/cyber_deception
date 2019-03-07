@@ -76,11 +76,13 @@ public class CSVReader extends SysdigObjectDAL {
 			ret.evt_type = ret.evt_type.substring(0, ret.evt_type.indexOf('('));
 
 		ret.fd_typechar = getFDTypeChar(ret.fd_type);
-		if (ret.fd_name == null)
+		if (ret.fd_name == null || ret.fd_name.isEmpty())
 			ret.fd_name = "<NA>";
-		if (ret.proc_name == null)
+		if (ret.fd_num == null || ret.fd_num.isEmpty())
+			ret.fd_num = "<NA>";
+		if (ret.proc_name == null || ret.proc_name.isEmpty())
 			ret.proc_name = "<NA>";
-		if (ret.proc_pname == null)
+		if (ret.proc_pname == null || ret.proc_pname.isEmpty())
 			if (pid_to_pname.containsKey(ret.proc_ppid)) {
 				ret.proc_pname = pid_to_pname.get(ret.proc_ppid);
 				System.out.println("*");
