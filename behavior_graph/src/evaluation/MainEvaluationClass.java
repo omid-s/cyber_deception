@@ -58,7 +58,7 @@ import classes.SysdigRecordObject;
 public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
-	private static final long REPORT_ROW_COUNT = 100000;
+	private static final long REPORT_ROW_COUNT = 10000000;
 
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
@@ -230,8 +230,8 @@ public class MainEvaluationClass {
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
 
-								runQuery("select * from * where name has /home/ ", queryMachine, stats, "select_");
-								runQuery("back select * from * where name has /home/ ", queryMachine, stats, "bt_");
+								runQuery("select * from file where name has /home/ ", queryMachine, stats, "select_");
+								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
 								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
 
 								String row = "";
@@ -242,7 +242,6 @@ public class MainEvaluationClass {
 								stats_file.flush();
 								lastStep = Instant.now();
 							}
-
 						}
 
 					} catch (Exception ex) {
