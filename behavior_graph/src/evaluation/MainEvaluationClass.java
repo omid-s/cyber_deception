@@ -177,10 +177,10 @@ public class MainEvaluationClass {
 //							counter++;
 //							continue;
 //						}
-						if (SimpleNeo4JQuery && counter < 7800000) {
-							counter++;
-							continue;
-						}
+//						if (SimpleNeo4JQuery && counter < 7800000) {
+//							counter++;
+//							continue;
+//						}
 
 						SysdigRecordObject tempObj;
 						try {
@@ -230,7 +230,7 @@ public class MainEvaluationClass {
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
 
-								runQuery("select * from file where name has /home/ ", queryMachine, stats, "select_");
+								runQuery("select * from file where name has .txt ", queryMachine, stats, "select_");
 								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
 								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
 

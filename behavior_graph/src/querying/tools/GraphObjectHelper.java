@@ -82,7 +82,7 @@ public class GraphObjectHelper {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
-
+		
 		// is process new ?
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
 			resourcesMap.put(ResourceType.Process, new HashMap<String, ResourceItem>());
@@ -141,7 +141,7 @@ public class GraphObjectHelper {
 		}
 
 		// add the thread edge if it does not exist already
-		if (!EdgeMap.containsKey(TheProc.getID() + TheThread.getID() + "spawn")) {
+		if (!EdgeMap.containsKey(TheProc.getHashID() + TheThread.getID() + "spawn")) {
 
 			// add the connection to the process
 			AccessCall tempCallItem = new AccessCall();
@@ -156,7 +156,7 @@ public class GraphObjectHelper {
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 			EdgeMap.put(TheProc.getID() + TheThread.getID() + "spawn", tempCallItem);
 		} else {
-			AccessCall t = EdgeMap.get(TheProc.getID() + TheThread.getID() + "spawn");
+			AccessCall t = EdgeMap.get(TheProc.getHashID() + TheThread.getID() + "spawn");
 			theGraph.addVertex(t.From);
 			theGraph.addEdge(t, t.From, t.To);
 		}

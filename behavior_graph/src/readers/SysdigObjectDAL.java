@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
-import javax.xml.bind.ValidationException;
 
 import classes.*;
 import dataBaseStuff.DataBaseLayer;
@@ -158,12 +157,12 @@ public class SysdigObjectDAL {
 //		String tokens[] = inp.split("=&amin&=");
 		String tokens[] = inp.split(Configurations.getInstance().getSetting(Configurations.LINE_SEPERATOR));
 
-		if (tokens.length < ClassFields.length) {
+		if (tokens.length < ClassFields.length-2) {
 			throw new LowFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 			// System.out.println("Error! number of fields do not match!" +
 			// tokens.length + " instead of "+ ClassFields.length);
-		} else if (tokens.length > ClassFields.length) {
+		} else if (tokens.length > ClassFields.length-2) {
 			throw new HighFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 

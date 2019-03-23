@@ -31,8 +31,10 @@ public class ResourceItem {
 
 		return String.format(
 				"%s{id:\"%s\", title:\"%s\" , path:\"%s\", " + "number: \"%s\", description:\"%s\" , type:\"%s\"  }",
-				Type.toString(), String.valueOf(id), String.valueOf(Title), String.valueOf(Path),
-				String.valueOf(Number), "", // String.valueOf(Description),
+				Type.toString(), 
+				Type==ResourceType.File? getID(): String.valueOf(id), 
+				String.valueOf(Title), String.valueOf(Path),
+				Type==ResourceType.Process? String.valueOf(Number) : "" , "", // String.valueOf(Description),
 				Type.toString()).replace("\\", "");
 	}
 
