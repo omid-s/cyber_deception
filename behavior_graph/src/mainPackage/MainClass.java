@@ -104,7 +104,7 @@ public class MainClass {
 				SimpleNeo4JQuery = true;
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
-			
+
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -196,8 +196,8 @@ public class MainClass {
 				}
 			}
 // if json is desired, create the array
-		if (SaveJSON)
-			output_file_writer.write("[\n");
+//		if (SaveJSON)
+//			output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
@@ -219,7 +219,8 @@ public class MainClass {
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
 							if (SaveJSON)
-								output_file_writer.write(tempObj.toJSONString() + ",");
+								output_file_writer
+										.write("{\"index\":{\"_index\":\"test\"}}\n" + tempObj.toJSONString() + "\n");
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -275,7 +276,8 @@ public class MainClass {
 		if (output_file_writer != null) {
 			// is json is desired, close the array
 			if (SaveJSON)
-				output_file_writer.write("\n]");
+//				output_file_writer.write("\n]");
+				output_file_writer.write("\n");
 			output_file_writer.flush();
 			output_file_writer.close();
 		}

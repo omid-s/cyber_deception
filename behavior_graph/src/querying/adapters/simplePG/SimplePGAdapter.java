@@ -258,7 +258,8 @@ public class SimplePGAdapter extends BaseAdapter {
 
 				// in each iteration find the heads and fetch from there
 				for (ResourceItem pick : ret.getVertices()) {
-					if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
+//					if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
+						if ( !dones.contains(pick.getID()))
 						stack.add(pick);
 				}
 
@@ -273,8 +274,8 @@ public class SimplePGAdapter extends BaseAdapter {
 									"(select %s from sysdigoutput  where proc_pid='%s' or proc_ppid='%s'  )", Fields,
 									pick.Number, pick.Number));
 						} else {
-//							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
-//									pick.Title));
+							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
+									pick.Title));
 						}
 					}
 					stack.clear();
