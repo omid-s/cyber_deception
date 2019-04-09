@@ -58,7 +58,7 @@ import classes.SysdigRecordObject;
 public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
-	private static final long REPORT_ROW_COUNT = 10000000;
+	private static final long REPORT_ROW_COUNT = 500000;
 
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();

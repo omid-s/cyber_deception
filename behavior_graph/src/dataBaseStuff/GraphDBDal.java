@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import org.neo4j.driver.*;
+
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
@@ -24,7 +26,7 @@ public class GraphDBDal {
 
 	public GraphDBDal() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		// to do : inittaite
-		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+//		Class.forName("org.neo4j.jdbc.Driver").newInstance();
 	}
 
 	public void closeConnections() {
@@ -148,7 +150,17 @@ public class GraphDBDal {
 ////			trnx.
 //
 			trnx.close();
-//			
+
+
+//			for (String pick : Queries) {
+//				session.run(pick);
+//			}
+//			trnx.success();
+//			trnx.close();
+
+//			session.close();
+			
+			//			
 //			
 			Queries.clear();
 //			System.out.println("0");

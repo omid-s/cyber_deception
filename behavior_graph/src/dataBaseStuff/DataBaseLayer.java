@@ -71,10 +71,10 @@ public class DataBaseLayer {
 	 */
 	public static Connection getNeo4JConnection()
 			throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+//		Class.forName("org.neo4j.jdbc.Driver").newInstance();
 		if (_underlyingNeo4jConenction == null) {
 			_underlyingNeo4jConenction = DriverManager.getConnection(
-					String.format("jdbc:neo4j:bolt://%s/",
+					String.format("bolt://%s/",
 							Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
 					Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
 					Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
