@@ -1,5 +1,6 @@
 package dataBaseStuff;
 
+import java.io.File;
 import java.sql.Connection;
 
 //import org.neo4j.jdbc.*;
@@ -16,6 +17,8 @@ import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Transaction;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import classes.*;
 import edu.uci.ics.jung.graph.Graph;
@@ -97,11 +100,30 @@ public class GraphDBDal {
 
 	}
 
+	private GraphDatabaseService theDB = null;
+
+	public void flushRows_local() {
+		if (theDB == null) {
+			GraphDatabaseFactory graphDbFactory = new GraphDatabaseFactory();
+			theDB = graphDbFactory.newEmbeddedDatabase(new File("data/test_1_db"));
+			
+		}
+		
+		theDB.beginTx();
+		for (String pick : Queries) {
+			theDB.execute(pick);
+		}
+		
+
+	}
+
 	public void flushRows() {
 
+		flushRows_local();
+		if(true)
+			return;
 		try {
 
-			
 //			try {
 //				if (TheConnection == null) {
 //					TheConnection = java.sql.DriverManager.getConnection(
@@ -120,8 +142,6 @@ public class GraphDBDal {
 //				ex.printStackTrace();
 //			}
 
-			
-			
 			// Connect
 //			if (TheConnection == null) {
 //				TheConnection = DriverManager.getConnection(
@@ -151,7 +171,6 @@ public class GraphDBDal {
 //
 			trnx.close();
 
-
 //			for (String pick : Queries) {
 //				session.run(pick);
 //			}
@@ -159,8 +178,8 @@ public class GraphDBDal {
 //			trnx.close();
 
 //			session.close();
-			
-			//			
+
+			//
 //			
 			Queries.clear();
 //			System.out.println("0");
