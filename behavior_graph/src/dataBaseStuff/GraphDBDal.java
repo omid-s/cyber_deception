@@ -106,22 +106,20 @@ public class GraphDBDal {
 		if (theDB == null) {
 			GraphDatabaseFactory graphDbFactory = new GraphDatabaseFactory();
 			theDB = graphDbFactory.newEmbeddedDatabase(new File("data/test_1_db"));
-			
 		}
-		
+
 		theDB.beginTx();
 		for (String pick : Queries) {
 			theDB.execute(pick);
 		}
-		
-
 	}
 
 	public void flushRows() {
 
-		flushRows_local();
-		if(true)
+		if (false) {
+			flushRows_local();
 			return;
+		}
 		try {
 
 //			try {
