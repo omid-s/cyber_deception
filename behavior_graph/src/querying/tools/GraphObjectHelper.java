@@ -514,7 +514,6 @@ public class GraphObjectHelper {
 
 			theCall.From = From;
 			theCall.To = To;
-//
 			theGraph.addVertex(theCall.From);
 			theGraph.addVertex(theCall.To);
 			theGraph.addEdge(theCall, theCall.From, theCall.To);
@@ -571,7 +570,6 @@ public class GraphObjectHelper {
 		for (ResourceItem pick : toRemove)
 			theGraph.removeVertex(pick);
 
-//		return theGraph;
 	}
 
 	/**
@@ -589,8 +587,6 @@ public class GraphObjectHelper {
 		}
 		for (AccessCall pick : toRemove)
 			theGraph.removeEdge(pick);
-
-//		return theGraph;
 	}
 
 	/**
@@ -600,23 +596,16 @@ public class GraphObjectHelper {
 	 * @param from the graph which will be merged into the other one
 	 */
 	public void mergeGraphs(Graph<ResourceItem, AccessCall> to, Graph<ResourceItem, AccessCall> from) {
-//to.getEdges().clear();
+
 		for (ResourceItem pick : from.getVertices()) {
 			to.addVertex(pick);
 		}
 
 		for (AccessCall pick : EdgeMap.values()) {
-//			to.removeEdge(pick);
 
 			if (to.containsVertex(pick.From) && to.containsVertex(pick.To))
 				to.addEdge(pick, pick.From, pick.To);
 
-//			if (to.containsVertex(pick.From) && to.containsVertex(pick.To)
-//					&& !to.getEdges().stream().anyMatch(x -> x.From.getID().equals(pick.From.getID())
-//							&& x.To.getID().equals(pick.To.getID()) && x.Command.equals(pick.Command)
-//
-//					))
-//				to.addEdge(pick, pick.From, pick.To);
 		}
 
 	}

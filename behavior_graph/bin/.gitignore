@@ -1,6 +1,7 @@
-/readers/
-/dataBaseStuff/
+/querying/
 /evaluation/
 /mainPackage/
-/querying/
+/readers/
 /helpers/
+/filterStack/
+/dataBaseStuff/

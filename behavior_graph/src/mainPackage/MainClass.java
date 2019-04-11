@@ -1,12 +1,20 @@
 package mainPackage;
 
-import controlClasses.RecordInterpretorFactory;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Scanner;
+import javax.swing.JFrame;
+import classes.AccessCall;
+import classes.ResourceItem;
+import classes.SysdigRecordObject;
 import controlClasses.RuntimeVariables;
-import dataBaseStuff.DataBaseLayer;
 import dataBaseStuff.GraphDBDal;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
@@ -18,45 +26,14 @@ import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.adapters.simpleNeo4J.SimpleNeo4JAdapter;
 import querying.adapters.simplePG.SimplePGAdapter;
-import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.GraphObjectHelper;
 import readers.CSVReader;
 import readers.SysdigObjectDAL;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Properties;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
-import org.jfree.ui.RefineryUtilities;
-import org.omg.CORBA.Environment;
-
-import classes.AccessCall;
-import classes.ResourceItem;
-import classes.ResourceType;
-import classes.SysdigRecordObject;
-
 public class MainClass {
-	private static final boolean IsVerbose = false;
-
+	
+	
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
@@ -107,8 +84,7 @@ public class MainClass {
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
 			if (pick.equals("lg") || pick.equals("legacy_mode"))
-				LegacyMode =true;
-				
+				LegacyMode = true;
 
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
@@ -117,8 +93,8 @@ public class MainClass {
 				return;
 			}
 		}
-		
-		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE,  String.valueOf(LegacyMode));
+
+		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
 
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
@@ -260,7 +236,6 @@ public class MainClass {
 						Thread t1 = new Thread(new Runnable() {
 							@Override
 							public void run() {
-								// code goes here.
 								System.gc();
 							}
 						});
@@ -270,8 +245,6 @@ public class MainClass {
 
 							if (counter % 50000 == 0)
 								t1.start();
-//							System.gc();
-							// break;
 						}
 
 					} catch (Exception ex) {
@@ -322,6 +295,25 @@ public class MainClass {
 
 		System.gc();
 
+		command_loop(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges, num_vertex, theGraph, ShowGraph, ShowVerbose, fileAdr, GraphActionFactory);
+		
+	}
+
+	/**
+	 * Runs the main command entry loop 
+	 * @param MemQuery
+	 * @param SimplePGQuery
+	 * @param SimpleNeo4JQuery
+	 * @param num_edges
+	 * @param num_vertex
+	 * @param theGraph
+	 * @param ShowGraph
+	 * @param ShowVerbose
+	 * @param fileAdr
+	 * @param GraphActionFactory
+	 */
+	private static void command_loop(boolean MemQuery,boolean SimplePGQuery, boolean SimpleNeo4JQuery,int num_edges, int num_vertex,Graph<ResourceItem, AccessCall> theGraph,
+			boolean ShowGraph, boolean ShowVerbose, String fileAdr, GraphDBDal GraphActionFactory ) {
 		BaseAdapter queryMachine = null;
 
 		/// set the query adapter
@@ -333,7 +325,7 @@ public class MainClass {
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		/// setup GUI window
-		EdgeLabelDemo theGraphWindow = null;
+		GraphPanel theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 
 		Scanner reader = new Scanner(System.in);
@@ -397,10 +389,11 @@ public class MainClass {
 
 				Instant end = Instant.now();
 
-				theGraphWindow = new EdgeLabelDemo(theGraph);
+				
 
 				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
 
+				theGraphWindow = new GraphPanel(theGraph);
 				if (frame1.isVisible()) {
 					frame1.setVisible(false);
 					frame1.dispose();
@@ -414,7 +407,7 @@ public class MainClass {
 					frame1.add(theGraphWindow);
 					frame1.setVisible(true);
 					frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
-					frame1.setTitle(fileAdr + ": " + pid);
+					frame1.setTitle(fileAdr );
 				}
 
 				System.out.flush();
@@ -431,6 +424,6 @@ public class MainClass {
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
-
 	}
+
 }

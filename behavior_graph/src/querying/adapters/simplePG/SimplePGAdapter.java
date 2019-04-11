@@ -181,9 +181,6 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			st.close();
 
-//			graphHelper.pruneByType(ret, theQuery);
-
-			// TODO :Handle Backtrack
 			int depthCounter = 0;
 			if (theQuery.isBackTracked()) {
 
@@ -232,8 +229,6 @@ public class SimplePGAdapter extends BaseAdapter {
 							graphHelper.AddRowToGraph(ret, temp);
 
 						} catch (Exception ex) {
-//							System.out.println(ex.getMessage());
-//							ex.printStackTrace();
 							continue;
 						}
 					}
@@ -250,16 +245,14 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			}
 
-			// TODO : handle forward track
-
 			if (theQuery.isForwardTracked()) {
 				ArrayList<String> dones = new ArrayList<String>();
 				ArrayList<ResourceItem> stack = new ArrayList<ResourceItem>();
 
 				// in each iteration find the heads and fetch from there
 				for (ResourceItem pick : ret.getVertices()) {
-//					if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
-						if ( !dones.contains(pick.getID()))
+
+					if (!dones.contains(pick.getID()))
 						stack.add(pick);
 				}
 
