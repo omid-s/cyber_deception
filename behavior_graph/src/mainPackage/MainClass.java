@@ -11,6 +11,7 @@ import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
+import helpers.Configurations;
 import helpers.DescribeFactory;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
@@ -46,6 +47,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.jfree.ui.RefineryUtilities;
+import org.omg.CORBA.Environment;
 
 import classes.AccessCall;
 import classes.ResourceItem;
@@ -62,7 +64,7 @@ public class MainClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -104,7 +106,10 @@ public class MainClass {
 				SimpleNeo4JQuery = true;
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
-			
+			if (pick.equals("lg") || pick.equals("legacy_mode"))
+				LegacyMode =true;
+				
+
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -112,6 +117,8 @@ public class MainClass {
 				return;
 			}
 		}
+		
+		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE,  String.valueOf(LegacyMode));
 
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
@@ -196,8 +203,8 @@ public class MainClass {
 				}
 			}
 // if json is desired, create the array
-		if (SaveJSON)
-			output_file_writer.write("[\n");
+//		if (SaveJSON)
+//			output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
@@ -219,7 +226,8 @@ public class MainClass {
 							if (SaveFormated)
 								output_file_writer.write(tempObj.toString() + "\n");
 							if (SaveJSON)
-								output_file_writer.write(tempObj.toJSONString() + ",");
+								output_file_writer
+										.write("{\"index\":{\"_index\":\"test\"}}\n" + tempObj.toJSONString() + "\n");
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -249,8 +257,20 @@ public class MainClass {
 
 						}
 
+						Thread t1 = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								// code goes here.
+								System.gc();
+							}
+						});
+
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
+
+							if (counter % 50000 == 0)
+								t1.start();
+//							System.gc();
 							// break;
 						}
 
@@ -275,7 +295,8 @@ public class MainClass {
 		if (output_file_writer != null) {
 			// is json is desired, close the array
 			if (SaveJSON)
-				output_file_writer.write("\n]");
+//				output_file_writer.write("\n]");
+				output_file_writer.write("\n");
 			output_file_writer.flush();
 			output_file_writer.close();
 		}

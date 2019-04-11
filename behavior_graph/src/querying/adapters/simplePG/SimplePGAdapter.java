@@ -15,6 +15,7 @@ import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
+import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -157,7 +158,8 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			String Query = String.format("select %s from sysdigoutput  where %s", Fields, where_clause);
 
-			System.out.println(Query);
+			if (RuntimeVariables.getInstance().getPrint_query())
+				System.out.println(Query);
 			Statement st = theConnection.createStatement();
 			ResultSet resutls = st.executeQuery(Query);
 
@@ -165,6 +167,8 @@ public class SimplePGAdapter extends BaseAdapter {
 
 			while (resutls.next()) {
 				try {
+					if (resutls == null)
+						break;
 					SysdigRecordObject temp = objectDAL.LoadFromResultSet(resutls);
 
 					graphHelper.AddRowToGraph(ret, temp);
@@ -228,8 +232,8 @@ public class SimplePGAdapter extends BaseAdapter {
 							graphHelper.AddRowToGraph(ret, temp);
 
 						} catch (Exception ex) {
-							System.out.println(ex.getMessage());
-							ex.printStackTrace();
+//							System.out.println(ex.getMessage());
+//							ex.printStackTrace();
 							continue;
 						}
 					}
@@ -254,7 +258,8 @@ public class SimplePGAdapter extends BaseAdapter {
 
 				// in each iteration find the heads and fetch from there
 				for (ResourceItem pick : ret.getVertices()) {
-					if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
+//					if (ret.outDegree(pick) == 0 && !dones.contains(pick.getID()))
+						if ( !dones.contains(pick.getID()))
 						stack.add(pick);
 				}
 
@@ -269,8 +274,8 @@ public class SimplePGAdapter extends BaseAdapter {
 									"(select %s from sysdigoutput  where proc_pid='%s' or proc_ppid='%s'  )", Fields,
 									pick.Number, pick.Number));
 						} else {
-//							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
-//									pick.Title));
+							criterias.add(String.format("(select %s from sysdigoutput  where fd_name='%s' )", Fields,
+									pick.Title));
 						}
 					}
 					stack.clear();
@@ -334,19 +339,19 @@ public class SimplePGAdapter extends BaseAdapter {
 		InMemoryAdapter mem = InMemoryAdapter.getSignleton();
 		mem.ClearAll();
 
-		try {
-			// add nodes and edges :
-			for (ResourceItem pick : ret.getVertices())
-				mem.addResourceItem(pick);
-			for (AccessCall pick : ret.getEdges())
-				mem.addAccessCall(pick);
-
-			ret = mem.runQuery(theQuery);
-		} catch (Exception ex) {
-			System.out.println(ex.getCause() + "\n" + ex.getMessage());
-
-			ex.printStackTrace();
-		}
+//		try {
+//			// add nodes and edges :
+//			for (ResourceItem pick : ret.getVertices())
+//				mem.addResourceItem(pick);
+//			for (AccessCall pick : ret.getEdges())
+//				mem.addAccessCall(pick);
+//
+//			ret = mem.runQuery(theQuery);
+//		} catch (Exception ex) {
+//			System.out.println(ex.getCause() + "\n" + ex.getMessage());
+//
+//			ex.printStackTrace();
+//		}
 		// if merge is desired merge the Graphs
 		if (theQuery.isDoesAppend())
 			ret = graphHelper.mergeGraphs2(ret, theQuery.getOriginalGraph());

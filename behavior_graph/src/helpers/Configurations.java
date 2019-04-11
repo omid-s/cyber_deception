@@ -164,6 +164,16 @@ public class Configurations {
 		}
 	}
 
+	
+	/**
+	 * Adds a settings key to the settings
+	 * @param Key the key
+	 * @param Value the value assigned
+	 */
+	public void setSetting(String Key, String Value) {
+		settings.put(Key, Value);
+	}
+	
 	/**
 	 * Returns a list of fields that are considered in the short format
 	 * 
@@ -198,5 +208,7 @@ public class Configurations {
 	// program configuration
 	public static final String LINE_SEPERATOR = "line_seperator";
 	public static final String PRINT_QUERY="print_query";
+	public static final String LEGACY_MODE= "legacy_mode";
+	
 
 }
