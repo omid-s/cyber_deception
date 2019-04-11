@@ -119,7 +119,7 @@ public class SysdigObjectDAL {
 
 	/**
 	 *  Flushes the rows into the storage 
-	 *  This method will be called priodically to flush the rows 
+	 *  This method will be called periodically to flush the rows 
 	 */
 	public void flushRows() {
 		try {
