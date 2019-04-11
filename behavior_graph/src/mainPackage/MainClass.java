@@ -325,7 +325,7 @@ public class MainClass {
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		/// setup GUI window
-		EdgeLabelDemo theGraphWindow = null;
+		GraphPanel theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 
 		Scanner reader = new Scanner(System.in);
@@ -393,7 +393,7 @@ public class MainClass {
 
 				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
 
-				theGraphWindow = new EdgeLabelDemo(theGraph);
+				theGraphWindow = new GraphPanel(theGraph);
 				if (frame1.isVisible()) {
 					frame1.setVisible(false);
 					frame1.dispose();

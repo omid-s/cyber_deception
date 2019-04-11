@@ -89,8 +89,10 @@ import helpers.GraphVisualsHelper;
  * 
  * @author Tom Nelson
  * 
+ * This code has been modified by Omid Setayeshfar
+ * 
  */
-public class EdgeLabelDemo extends JPanel {
+public class GraphPanel extends JPanel {
 
 	/**
 	 * 
@@ -119,7 +121,7 @@ public class EdgeLabelDemo extends JPanel {
 
 	private boolean clickToReorder = false;
 
-	public EdgeLabelDemo() {
+	public GraphPanel() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -131,13 +133,11 @@ public class EdgeLabelDemo extends JPanel {
 	 * 
 	 */
 	@SuppressWarnings("serial")
-	public EdgeLabelDemo(ArrayList<ResourceItem> Items, ArrayList<AccessCall> Calls) {
+	public GraphPanel(ArrayList<ResourceItem> Items, ArrayList<AccessCall> Calls) {
 		this.Calls = Calls;
 		this.Items = Items;
 		// create a simple graph for the demo
 		graph = new SparseMultigraph<ResourceItem, AccessCall>();
-
-		// RefreshGraph(Items, Calls);
 
 		Layout<ResourceItem, AccessCall> layout = new FRLayout<ResourceItem, AccessCall>(graph);
 		java.awt.Toolkit tk = java.awt.Toolkit.getDefaultToolkit();
@@ -161,17 +161,11 @@ public class EdgeLabelDemo extends JPanel {
 		// create a from to hold the graph
 		panel = new GraphZoomScrollPane(vv);
 
-		Container content = this; // getContentPane();
-
-		// content.add(panel);
+		Container content = this; 
 
 		final DefaultModalGraphMouse<ResourceItem, AccessCall> graphMouse = new DefaultModalGraphMouse<ResourceItem, AccessCall>();
 		vv.setGraphMouse(graphMouse);
 		graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
-
-		// MutableDirectionalEdgeValue mv = new MutableDirectionalEdgeValue(.5,
-		// .7);
-		// vv.getRenderContext().setEdgeLabelClosenessTransformer(mv);
 
 		Box controls = Box.createHorizontalBox();
 
@@ -201,7 +195,7 @@ public class EdgeLabelDemo extends JPanel {
 	}
 
 	@SuppressWarnings("serial")
-	public EdgeLabelDemo(Graph<ResourceItem, AccessCall> inp) {
+	public GraphPanel(Graph<ResourceItem, AccessCall> inp) {
 
 		// create a simple graph for the demo
 		graph = inp;
@@ -272,10 +266,6 @@ public class EdgeLabelDemo extends JPanel {
 			}
 		});
 
-		// MutableDirectionalEdgeValue mv = new MutableDirectionalEdgeValue(.5,
-		// .7);
-		// vv.getRenderContext().setEdgeLabelClosenessTransformer(mv);
-
 		Box controls = Box.createHorizontalBox();
 
 		JPanel modePanel = new JPanel(new GridLayout(2, 1));
@@ -298,22 +288,5 @@ public class EdgeLabelDemo extends JPanel {
 
 		content.add(controls, BorderLayout.NORTH);
 		content.add(panel, BorderLayout.AFTER_LAST_LINE);
-
 	}
-
-	// public void RefreshGraph(ArrayList<ResourceItem> Items,
-	// ArrayList<AccessCall> Calls) {
-	// this.Calls = Calls;
-	// this.Items = Items;
-	// // for (ResourceItem item : graph.getVertices())
-	// // graph.removeVertex(item);
-	// // for (AccessCall item : graph.getEdges())
-	// // graph.removeEdge(item);
-	// createVertices();
-	// createEdges();
-	// System.out.println("Number of Edges: " + graph.getEdgeCount());
-	// System.out.println("Number of Vertices: " + graph.getVertices().size());
-	//
-	// }
-
 }
