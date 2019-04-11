@@ -147,16 +147,7 @@ public class GraphVisualsHelper {
 
 		@Override
 		public String transform(ResourceItem I) {
-			// return String.valueOf(i*i + i );
 			String ret = I.toN4JObjectString();
-			/*
-			 * switch (i.) { case "1": ret = "Process \r\n Name : httpd , ID : 12"; break;
-			 * case "2": ret = "Thread \r\n ID : 18 "; break; case "5": ret =
-			 * "Thread \r\n ID : 19 "; break; case "3": ret =
-			 * "Network : port : 233 , location : 127.0.0.1"; break; case "4": ret =
-			 * "File \r\n Directory : /usr/omido/ Name : data.cnfg "; break; default: ret =
-			 * "Resource  "; break; }
-			 */
 			return ret;
 		}
 	};
