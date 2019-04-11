@@ -250,8 +250,21 @@ public class MainClass {
 
 						}
 
+						Thread t1 = new Thread(new Runnable() {
+						    @Override
+						    public void run() {
+						        // code goes here.
+						    	System.gc();
+						    }
+						});  
+						
+						
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
+						
+							if (counter % 50000==0 )
+								t1.start();
+//							System.gc();
 							// break;
 						}
 
