@@ -3,10 +3,8 @@ package readers;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringJoiner;
-
 import classes.*;
 import dataBaseStuff.DataBaseLayer;
 import exceptions.HighFieldNumberException;
@@ -29,9 +27,7 @@ public class SysdigObjectDAL {
 
 			ClassFields = temp.toArray(new Field[temp.size()]);
 		}
-
 		// endregion
-
 	}
 
 	public SysdigObjectDAL() {
@@ -39,10 +35,7 @@ public class SysdigObjectDAL {
 	}
 
 	protected void init() {
-//		// validate the classfields has value
-//		if ( ClassFields == null )
-//			throw new Exce("Class Fields are not present");
-//		
+
 		// region create insert template
 		String Keys = " Insert into SysdigOutPut ( ";
 		String Values = "";
@@ -81,23 +74,18 @@ public class SysdigObjectDAL {
 					PickString += " , ";
 
 				PickString += "'" + temp.toString().replace("'", "''") + "'";
-				// PickString +="\""+ temp.toString().replace("\"",
-				// "\\\"")+"\"";
 			}
 			DataBaseLayer DL = new DataBaseLayer();
 			Query = String.format(InsertTemplate, PickString);
 
 			items.add(Query);
 
-			// big_query += Query;
 			big_query_counter++;
 
 			if (big_query_counter % 1000 == 0) {
-				// StringJoiner j = new StringJoiner(' ');
 				DL.runUpdateQuery(items.toString());
 				big_query = "";
 				items = new StringJoiner(" ");
-//				System.out.println("Running!");
 			}
 		} catch (Exception ex) {
 			System.out.println(Query);
@@ -129,6 +117,10 @@ public class SysdigObjectDAL {
 		return ret;
 	}
 
+	/**
+	 *  Flushes the rows into the storage 
+	 *  This method will be called priodically to flush the rows 
+	 */
 	public void flushRows() {
 		try {
 			DataBaseLayer DL = new DataBaseLayer();
@@ -153,7 +145,6 @@ public class SysdigObjectDAL {
 			throws LowFieldNumberException, HighFieldNumberException, IllegalArgumentException, IllegalAccessException {
 		SysdigRecordObject ret = new SysdigRecordObject();
 
-//		String tokens[] = inp.split("=&amin&=");
 		String tokens[] = inp.split(Configurations.getInstance().getSetting(Configurations.LINE_SEPERATOR));
 
 		int Length = tokens.length;
@@ -164,12 +155,9 @@ public class SysdigObjectDAL {
 		if (Length < ClassFields.length) {
 			throw new LowFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
-			// System.out.println("Error! number of fields do not match!" +
-			// tokens.length + " instead of "+ ClassFields.length);
 		} else if (Length > ClassFields.length) {
 			throw new HighFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
-
 		}
 		for (int index = 0; index < tokens.length; index++)
 			ClassFields[index].set(ret, tokens[index].trim());
@@ -178,25 +166,5 @@ public class SysdigObjectDAL {
 		// ret.proc_pid = ret.proc_pid+"|" + ret.proc_name;
 		return ret;
 	}
-
-	// public SysdigRecordObject GetObjectFromAndroidTextLine(String inp)
-	// throws InvalidFormatException, IllegalArgumentException,
-	// IllegalAccessException {
-	// SysdigRecordObject ret = new SysdigRecordObject();
-	//
-	// String tokens[] = inp.split(",");
-	//
-	// if (tokens.length != ClassFields.length) {
-	// throw new InvalidFormatException(
-	// "Error! number of fields do not match!" + tokens.length + " instead of "
-	// + ClassFields.length);
-	// // System.out.println("Error! number of fields do not match!" +
-	// // tokens.length + " instead of "+ ClassFields.length);
-	// }
-	// for (int index = 0; index < tokens.length; index++)
-	// ClassFields[index].set(ret, tokens[index]);
-	//
-	// return ret;
-	// }
 
 }

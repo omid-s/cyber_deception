@@ -32,8 +32,8 @@ import readers.CSVReader;
 import readers.SysdigObjectDAL;
 
 public class MainClass {
-	private static final boolean IsVerbose = false;
-
+	
+	
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
@@ -236,7 +236,6 @@ public class MainClass {
 						Thread t1 = new Thread(new Runnable() {
 							@Override
 							public void run() {
-								// code goes here.
 								System.gc();
 							}
 						});
@@ -246,8 +245,6 @@ public class MainClass {
 
 							if (counter % 50000 == 0)
 								t1.start();
-//							System.gc();
-							// break;
 						}
 
 					} catch (Exception ex) {
