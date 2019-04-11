@@ -110,7 +110,6 @@ public class GraphObjectHelper {
 				TheProc.Title = pick.proc_name;
 				System.out.println("*");
 			}
-
 		}
 
 		theGraph.addVertex(TheProc);
@@ -141,7 +140,7 @@ public class GraphObjectHelper {
 		}
 
 		// add the thread edge if it does not exist already
-		if (!EdgeMap.containsKey(TheProc.getHashID() + TheThread.getID() + "spawn")) {
+		if (!EdgeMap.containsKey(TheProc.getHashID() + TheThread.id + "spawn")) {
 
 			// add the connection to the process
 			AccessCall tempCallItem = new AccessCall();
@@ -154,9 +153,9 @@ public class GraphObjectHelper {
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
-			EdgeMap.put(TheProc.getID() + TheThread.getID() + "spawn", tempCallItem);
+			EdgeMap.put(TheProc.getHashID() + TheThread.id + "spawn", tempCallItem);
 		} else {
-			AccessCall t = EdgeMap.get(TheProc.getHashID() + TheThread.getID() + "spawn");
+			AccessCall t = EdgeMap.get(TheProc.getHashID() + TheThread.id + "spawn");
 			theGraph.addVertex(t.From);
 			theGraph.addEdge(t, t.From, t.To);
 		}
@@ -187,7 +186,7 @@ public class GraphObjectHelper {
 		}
 
 		// add the thread edge if it does not exist already
-		if (!EdgeMap.containsKey(TheThread.getID() + TheUBSI.getID() + "started")) {
+		if (!EdgeMap.containsKey(TheThread.id + TheUBSI.id + "started")) {
 
 			// add the connection to the process
 			AccessCall tempCallItem = new AccessCall();
@@ -200,9 +199,9 @@ public class GraphObjectHelper {
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
-			EdgeMap.put(TheThread.getID() + TheUBSI.getID() + "started", tempCallItem);
+			EdgeMap.put(TheThread.id + TheUBSI.id + "started", tempCallItem);
 		} else {
-			AccessCall t = EdgeMap.get(TheThread.getID() + TheUBSI.getID() + "started");
+			AccessCall t = EdgeMap.get(TheThread.id + TheUBSI.id + "started");
 			theGraph.addVertex(t.From);
 			theGraph.addEdge(t, t.From, t.To);
 		}
