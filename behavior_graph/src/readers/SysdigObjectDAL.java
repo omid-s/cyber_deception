@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
-
 import classes.*;
 import dataBaseStuff.DataBaseLayer;
 import exceptions.HighFieldNumberException;
@@ -123,7 +122,7 @@ public class SysdigObjectDAL {
 		for (Field pick : ClassFields) {
 
 			String value = input.getString(pick.getName());
-			if ( value!= null && !value.isEmpty())
+			if (value != null && !value.isEmpty())
 				pick.set(ret, value);
 		}
 
@@ -157,12 +156,17 @@ public class SysdigObjectDAL {
 //		String tokens[] = inp.split("=&amin&=");
 		String tokens[] = inp.split(Configurations.getInstance().getSetting(Configurations.LINE_SEPERATOR));
 
-		if (tokens.length +2< ClassFields.length) {
+		int Length = tokens.length;
+
+		if (Configurations.getInstance().getSetting(Configurations.LEGACY_MODE).equals("true"))
+			Length += 2;
+
+		if (Length < ClassFields.length) {
 			throw new LowFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 			// System.out.println("Error! number of fields do not match!" +
 			// tokens.length + " instead of "+ ClassFields.length);
-		} else if (tokens.length+2  > ClassFields.length) {
+		} else if (Length > ClassFields.length) {
 			throw new HighFieldNumberException("Error! number of fields do not match!" + tokens.length + " instead of "
 					+ ClassFields.length + " : " + inp);
 
