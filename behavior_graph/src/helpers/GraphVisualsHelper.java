@@ -255,12 +255,7 @@ public class GraphVisualsHelper {
 			}
 
 			return ret;
-			// return new Ellipse2D.Float(-1 * size / 2, -1 * size / 2, size,
-			// size);
-
-			// return new Rectangle2D.Float(-1 * size / 2, -1 * size / 2, size,
-			// size);
-
+	
 		}
 	};
 
