@@ -32,8 +32,7 @@ import readers.CSVReader;
 import readers.SysdigObjectDAL;
 
 public class MainClass {
-	
-	
+
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
@@ -178,9 +177,9 @@ public class MainClass {
 					System.out.println("Error");
 				}
 			}
-// if json is desired, create the array
-//		if (SaveJSON)
-//			output_file_writer.write("[\n");
+		// if json is desired, create the array
+		// if (SaveJSON)
+		// output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
 		if (ReadFromFile) {
 			try {
@@ -243,8 +242,11 @@ public class MainClass {
 						if (counter % 1000 == 0) {
 							System.out.println(counter);
 
-							if (counter % 50000 == 0)
-								t1.start();
+							if (counter % 50000 == 0) {
+								Runtime runtime = Runtime.getRuntime();
+								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30)
+									t1.start();
+							}
 						}
 
 					} catch (Exception ex) {
@@ -268,7 +270,7 @@ public class MainClass {
 		if (output_file_writer != null) {
 			// is json is desired, close the array
 			if (SaveJSON)
-//				output_file_writer.write("\n]");
+				// output_file_writer.write("\n]");
 				output_file_writer.write("\n");
 			output_file_writer.flush();
 			output_file_writer.close();
@@ -295,12 +297,14 @@ public class MainClass {
 
 		System.gc();
 
-		command_loop(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges, num_vertex, theGraph, ShowGraph, ShowVerbose, fileAdr, GraphActionFactory);
-		
+		command_loop(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges, num_vertex, theGraph, ShowGraph, ShowVerbose,
+				fileAdr, GraphActionFactory);
+
 	}
 
 	/**
-	 * Runs the main command entry loop 
+	 * Runs the main command entry loop
+	 * 
 	 * @param MemQuery
 	 * @param SimplePGQuery
 	 * @param SimpleNeo4JQuery
@@ -312,8 +316,9 @@ public class MainClass {
 	 * @param fileAdr
 	 * @param GraphActionFactory
 	 */
-	private static void command_loop(boolean MemQuery,boolean SimplePGQuery, boolean SimpleNeo4JQuery,int num_edges, int num_vertex,Graph<ResourceItem, AccessCall> theGraph,
-			boolean ShowGraph, boolean ShowVerbose, String fileAdr, GraphDBDal GraphActionFactory ) {
+	private static void command_loop(boolean MemQuery, boolean SimplePGQuery, boolean SimpleNeo4JQuery, int num_edges,
+			int num_vertex, Graph<ResourceItem, AccessCall> theGraph, boolean ShowGraph, boolean ShowVerbose,
+			String fileAdr, GraphDBDal GraphActionFactory) {
 		BaseAdapter queryMachine = null;
 
 		/// set the query adapter
@@ -360,10 +365,10 @@ public class MainClass {
 					boolean hasPath = command.indexOf("path=") > 0;
 					boolean hasSort = command.indexOf("orderby=") > 0;
 					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
-					String SortBy = hasSort ? command.substring(command.indexOf("orderby=") + "orderby=".length(),
-							command.indexOf(" ", command.indexOf("orderby=")) > 0
-									? command.indexOf(" ", command.indexOf("orderby="))
-									: command.length())
+					String SortBy = hasSort
+							? command.substring(command.indexOf("orderby=") + "orderby=".length(),
+									command.indexOf(" ", command.indexOf("orderby=")) > 0
+											? command.indexOf(" ", command.indexOf("orderby=")) : command.length())
 							: null;
 
 					DescribeFactory.doDescribe(thePath, isAggregated, SortBy);
@@ -389,8 +394,6 @@ public class MainClass {
 
 				Instant end = Instant.now();
 
-				
-
 				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
 
 				theGraphWindow = new GraphPanel(theGraph);
@@ -407,7 +410,7 @@ public class MainClass {
 					frame1.add(theGraphWindow);
 					frame1.setVisible(true);
 					frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
-					frame1.setTitle(fileAdr );
+					frame1.setTitle(fileAdr);
 				}
 
 				System.out.flush();
@@ -426,5 +429,4 @@ public class MainClass {
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
 	}
 
-	
 }
