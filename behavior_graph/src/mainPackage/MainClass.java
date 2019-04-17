@@ -181,6 +181,9 @@ public class MainClass {
 		// if (SaveJSON)
 		// output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
+		Runtime runtime = Runtime.getRuntime();
+		int cleaner_ctr = 0;
+		
 		if (ReadFromFile) {
 			try {
 				System.out.println("in read File");
@@ -232,20 +235,23 @@ public class MainClass {
 
 						}
 
-						Thread t1 = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								System.gc();
-							}
-						});
-
-						if (counter % 1000 == 0) {
+						if (counter % 10000 == 0) {
 							System.out.println(counter);
 
-							if (counter % 50000 == 0) {
-								Runtime runtime = Runtime.getRuntime();
-								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30)
+							if (counter % 500000 == 0) {
+
+								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+									cleaner_ctr++;
+									System.out.print("*");
+									Thread t1 = new Thread(new Runnable() {
+										@Override
+										public void run() {
+											System.gc();
+										}
+									});
 									t1.start();
+
+								}
 							}
 						}
 
@@ -294,7 +300,7 @@ public class MainClass {
 
 		VerboseHelper = null;
 		ClearHelper = null;
-
+		System.out.println("Cleaner was run :" + cleaner_ctr);
 		System.gc();
 
 		command_loop(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges, num_vertex, theGraph, ShowGraph, ShowVerbose,
@@ -365,10 +371,10 @@ public class MainClass {
 					boolean hasPath = command.indexOf("path=") > 0;
 					boolean hasSort = command.indexOf("orderby=") > 0;
 					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
-					String SortBy = hasSort
-							? command.substring(command.indexOf("orderby=") + "orderby=".length(),
-									command.indexOf(" ", command.indexOf("orderby=")) > 0
-											? command.indexOf(" ", command.indexOf("orderby=")) : command.length())
+					String SortBy = hasSort ? command.substring(command.indexOf("orderby=") + "orderby=".length(),
+							command.indexOf(" ", command.indexOf("orderby=")) > 0
+									? command.indexOf(" ", command.indexOf("orderby="))
+									: command.length())
 							: null;
 
 					DescribeFactory.doDescribe(thePath, isAggregated, SortBy);
