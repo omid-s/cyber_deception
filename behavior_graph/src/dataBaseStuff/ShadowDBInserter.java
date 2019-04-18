@@ -26,48 +26,54 @@ import querying.tools.GraphObjectHelper;
  */
 public class ShadowDBInserter {
 
-	private static ShadowDBInserter __Instance= null; // holds the singleton instance of shadow inserter
-	private ConcurrentLinkedQueue<ResourceItem> theResourceQue;  //
+	private static ShadowDBInserter __Instance = null; // holds the singleton instance of shadow inserter
+	private ConcurrentLinkedQueue<ResourceItem> theResourceQue; //
 	private ConcurrentLinkedQueue<AccessCall> theCallQue;
-	
+
 	/**
-	 * returns the singleton inserter object. 
+	 * returns the singleton inserter object.
+	 * 
 	 * @return the inserter object
 	 */
 	public static ShadowDBInserter getInstance() {
-		if( __Instance == null )
+		if (__Instance == null)
 			__Instance = new ShadowDBInserter();
-		
+
 		return __Instance;
 	}
-	
-	
+
 	/**
-	 * creates an instance of the shadow inserter object 
+	 * creates an instance of the shadow inserter object
 	 */
-	private  ShadowDBInserter() {
-		theResourceQue= new ConcurrentLinkedQueue<ResourceItem>();
-		theCallQue= new ConcurrentLinkedQueue<AccessCall>();
-		
-		//TODO : implement the threaded inserter 
-		
+	private ShadowDBInserter() {
+		theResourceQue = new ConcurrentLinkedQueue<ResourceItem>();
+		theCallQue = new ConcurrentLinkedQueue<AccessCall>();
+
+		// TODO : implement the threaded inserter
+
 	}
-	
-	
-	public void insertNode( ResourceItem node ) {
-		
+
+	public void insertNode(ResourceItem node) {
+		String temp = "";
+
+		temp += "\r\n" + String.format(" merge ( f:%s ) ", node.toN4JObjectString());
+
+		temp += ";";
+
+		Queries.add(temp);
+
+		if (Queries.size() % 1000 == 0)
+			flushRows();
 	}
-	
-	
-	public void insertEdge( AccessCall edge ) {
+
+	public void insertEdge(AccessCall edge) {
 
 		String temp = "";
 
 		temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
 		temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
-		temp += "\r\n"
-				+ String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
-		
+		temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
+
 		temp += ";";
 
 		Queries.add(temp);
@@ -85,7 +91,6 @@ public class ShadowDBInserter {
 
 		try {
 
-			
 //			try {
 //				if (TheConnection == null) {
 //					TheConnection = java.sql.DriverManager.getConnection(
@@ -104,8 +109,6 @@ public class ShadowDBInserter {
 //				ex.printStackTrace();
 //			}
 
-			
-			
 			// Connect
 //			if (TheConnection == null) {
 //				TheConnection = DriverManager.getConnection(
@@ -117,8 +120,7 @@ public class ShadowDBInserter {
 //				);
 //				TheStateMent = TheConnection.createStatement();
 //			}
-			
-			 
+
 			if (driver == null)
 				driver = GraphDatabase.driver(
 						"bolt://" + Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER),
@@ -130,7 +132,7 @@ public class ShadowDBInserter {
 			for (String pick : Queries) {
 				trnx.run(pick);
 			}
-			
+
 			trnx.success();
 			trnx.close();
 
