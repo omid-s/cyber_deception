@@ -15,8 +15,10 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
+import dataBaseStuff.ShadowDBInserter;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import helpers.Configurations;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
 
@@ -101,6 +103,10 @@ public class GraphObjectHelper {
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
 
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertNode(tempItem);
+			}
+			
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
 			TheProc = resourcesMap.get(ResourceType.Process).get(pick.getProcPID());
@@ -134,6 +140,10 @@ public class GraphObjectHelper {
 			TheThread = tempItem;
 			theGraph.addVertex(tempItem);
 
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertNode(tempItem);
+			}
+			
 			resourcesMap.get(ResourceType.Thread).put(pick.getTID(), TheThread);
 		} else {
 			TheThread = resourcesMap.get(ResourceType.Thread).get(pick.getTID());
@@ -153,6 +163,11 @@ public class GraphObjectHelper {
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertEdge(tempCallItem);
+			}
+			
 			EdgeMap.put(TheProc.getHashID() + TheThread.id + "spawn", tempCallItem);
 		} else {
 			AccessCall t = EdgeMap.get(TheProc.getHashID() + TheThread.id + "spawn");
@@ -180,6 +195,11 @@ public class GraphObjectHelper {
 			TheUBSI = tempItem;
 			theGraph.addVertex(tempItem);
 
+			
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertNode(tempItem);
+			}
+			
 			resourcesMap.get(ResourceType.EXEUnit).put(pick.getUBSIID(), TheUBSI);
 		} else {
 			TheUBSI = resourcesMap.get(ResourceType.EXEUnit).get(pick.getUBSIID());
@@ -199,6 +219,11 @@ public class GraphObjectHelper {
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertEdge(tempCallItem);
+			}
+			
 			EdgeMap.put(TheThread.id + TheUBSI.id + "started", tempCallItem);
 		} else {
 			AccessCall t = EdgeMap.get(TheThread.id + TheUBSI.id + "started");
@@ -223,6 +248,8 @@ public class GraphObjectHelper {
 
 		theGraph.addVertex(parentP);
 
+		
+		
 		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
 
 		ResourceItem tp = TheProc;
@@ -240,6 +267,11 @@ public class GraphObjectHelper {
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertEdge(tempCallItem);
+			}
+			
 			EdgeMap.put(parentP.getID() + tp.getID() + tempCallItem.Command, tempCallItem);
 		} else {
 			AccessCall t = EdgeMap.get(parentP.getID() + tp.getID() + "exec");
@@ -294,6 +326,11 @@ public class GraphObjectHelper {
 			// tempItem.Description = pick.fd_
 
 			theGraph.addVertex(tempItem);
+			
+			if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+				ShadowDBInserter.getInstance().insertNode(tempItem);
+			}
+			
 			resourcesMap.get(ItemType).put(pick.getFD_ID(), tempItem);
 			ToItem = tempItem;
 		}
@@ -342,6 +379,10 @@ public class GraphObjectHelper {
 				theGraph.addVertex(theCall.To);
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 //
+				if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
+					ShadowDBInserter.getInstance().insertEdge(theCall);
+				}
+				
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}

@@ -40,7 +40,7 @@ public class MainClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false, ShadowInserter=false;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -84,6 +84,8 @@ public class MainClass {
 				SaveJSON = true;
 			if (pick.equals("lg") || pick.equals("legacy_mode"))
 				LegacyMode = true;
+			if( pick.equals("si") || pick.equals("shadow_insert") )
+				ShadowInserter=true;
 
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
@@ -94,7 +96,8 @@ public class MainClass {
 		}
 
 		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
-
+		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
+		
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
 					"to save formated output the outoutfuile has to be supplied! use outpath= key to set the path");

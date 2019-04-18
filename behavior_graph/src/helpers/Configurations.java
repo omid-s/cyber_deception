@@ -209,6 +209,7 @@ public class Configurations {
 	public static final String LINE_SEPERATOR = "line_seperator";
 	public static final String PRINT_QUERY="print_query";
 	public static final String LEGACY_MODE= "legacy_mode";
+	public static final String SHADOW_INSERTER = "shadow_inserter";
 	
 
 }

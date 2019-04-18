@@ -11,6 +11,7 @@ import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
+import helpers.Configurations;
 import helpers.DescribeFactory;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
@@ -58,17 +59,23 @@ import classes.SysdigRecordObject;
 public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
-	private static final long REPORT_ROW_COUNT = 10000000;
+	private static final long REPORT_ROW_COUNT = 1000000;
+	
+	
 
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
 		String pid = "";
 
+		
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
 				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
 		String fileAdr = "", output_file = "";
+		
+		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(true));
+		
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
@@ -162,6 +169,9 @@ public class MainEvaluationClass {
 
 		Instant start2 = Instant.now();
 		Instant lastStep = Instant.now();
+		Runtime runtime = Runtime.getRuntime();
+		
+		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
 		if (ReadFromFile) {
 			try {
 				System.out.println("in read File");
@@ -195,6 +205,9 @@ public class MainEvaluationClass {
 								stats_file.write(tempObj.toJSONString() + ",");
 							if (SaveToDB)
 								objectDAL.Insert(tempObj);
+							if (ShowGraph) {
+								ClearHelper.AddRowToGraph(theGraph, tempObj);
+							}
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -215,6 +228,27 @@ public class MainEvaluationClass {
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
 
+						if (counter % 100000 == 0) {
+							System.out.println(counter);
+
+							if (counter % 5000000 == 0) {
+
+								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+									
+									System.out.print("#");
+									Thread t1 = new Thread(new Runnable() {
+										@Override
+										public void run() {
+											System.gc();
+										}
+									});
+									t1.start();
+
+								}
+							}
+						}
+						
+						
 						if (counter % (REPORT_ROW_COUNT / 10) == 0) {
 							System.out.print("*");
 							if (counter % REPORT_ROW_COUNT == 0) {
