@@ -3,11 +3,22 @@
  */
 package dataBaseStuff;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.Transaction;
+
 import classes.AccessCall;
 import classes.ResourceItem;
+import classes.SysdigRecordObjectGraph;
+import helpers.Configurations;
+import querying.tools.GraphObjectHelper;
 
 /**
  * @author omid
@@ -38,8 +49,95 @@ public class ShadowDBInserter {
 		theResourceQue= new ConcurrentLinkedQueue<ResourceItem>();
 		theCallQue= new ConcurrentLinkedQueue<AccessCall>();
 		
-		//TODO : implenment the threaded inserter 
+		//TODO : implement the threaded inserter 
 		
 	}
 	
+	
+	public void insertNode( ResourceItem node ) {
+		
+	}
+	
+	
+	public void insertEdge( AccessCall edge ) {
+
+		String temp = "";
+
+		temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
+		temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
+		temp += "\r\n"
+				+ String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
+		
+		temp += ";";
+
+		Queries.add(temp);
+
+		if (Queries.size() % 1000 == 0)
+			flushRows();
+	}
+
+	private static Connection TheConnection;
+	private static Statement TheStateMent;
+	private Driver driver = null;
+	ArrayList<String> Queries = new ArrayList<String>();
+
+	public void flushRows() {
+
+		try {
+
+			
+//			try {
+//				if (TheConnection == null) {
+//					TheConnection = java.sql.DriverManager.getConnection(
+//							String.format("jdbc:neo4j:bolt://%s/",
+//									Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//							Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//							Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//					);
+//					TheStateMent = TheConnection.createStatement();
+//				}
+//				for (String temp : Queries)
+//					TheStateMent.executeUpdate(temp);
+////				System.out.print(";");
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//			}
+
+			
+			
+			// Connect
+//			if (TheConnection == null) {
+//				TheConnection = DriverManager.getConnection(
+//						String.format("jdbc:neo4j:bolt://%s/",
+//								Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//				);
+//				TheStateMent = TheConnection.createStatement();
+//			}
+			
+			 
+			if (driver == null)
+				driver = GraphDatabase.driver(
+						"bolt://" + Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER),
+						AuthTokens.basic(Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+								Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)));
+			Session session = driver.session();
+
+			Transaction trnx = session.beginTransaction();
+			for (String pick : Queries) {
+				trnx.run(pick);
+			}
+			
+			trnx.success();
+			trnx.close();
+
+			Queries.clear();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 }
