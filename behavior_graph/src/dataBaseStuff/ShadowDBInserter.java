@@ -62,24 +62,33 @@ public class ShadowDBInserter {
 
 		Queries.add(temp);
 
-		if (Queries.size() % 1000 == 0)
+		if (Queries.size() % 10000 == 0)
+		{
+			System.out.print(".");
 			flushRows();
+//			Queries.clear();
+		}
 	}
 
 	public void insertEdge(AccessCall edge) {
 
 		String temp = "";
 
-		temp += "\r\n" + String.format(" match ( f:%s ) ", edge.From.toN4JObjectString());
-		temp += "\r\n" + String.format(" match ( t:%s ) ", edge.To.toN4JObjectString());
+		temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
+		temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
 		temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
 
 		temp += ";";
 
 		Queries.add(temp);
 
-		if (Queries.size() % 1000 == 0)
+		if (Queries.size() % 10000 == 0)
+		{
+			System.out.print(".");
 			flushRows();
+//			Queries.clear();
+		}
+//			
 	}
 
 	private static Connection TheConnection;

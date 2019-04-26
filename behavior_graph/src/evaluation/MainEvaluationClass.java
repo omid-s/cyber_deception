@@ -59,23 +59,20 @@ import classes.SysdigRecordObject;
 public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
-	private static final long REPORT_ROW_COUNT = 1000000;
-	
-	
+	private static final long REPORT_ROW_COUNT = 100000;
 
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
 		String pid = "";
 
-		
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false,ShadowInserter=false;
 		String fileAdr = "", output_file = "";
+
 		
-		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(true));
-		
+
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
@@ -116,7 +113,11 @@ public class MainEvaluationClass {
 				SimpleNeo4JQuery = true;
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
+			if( pick.equals("si") || pick.equals("shadow_insert") )
+				ShadowInserter=true;
 
+			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
+			
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -155,7 +156,7 @@ public class MainEvaluationClass {
 		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
-		String[] keys = { "counter", "date_time", "last_rows_time", "total_time", "select_time", "select_edge",
+		String[] keys = { "counter","clock_time", "date_time", "last_rows_time", "total_time", "select_time", "select_edge",
 				"select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex" };
 
 		String row1 = "";
@@ -170,7 +171,9 @@ public class MainEvaluationClass {
 		Instant start2 = Instant.now();
 		Instant lastStep = Instant.now();
 		Runtime runtime = Runtime.getRuntime();
-		
+		double init_imte = -1;
+		double previous_time = 0 ;
+		double time_drag = 0;
 		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
 		if (ReadFromFile) {
 			try {
@@ -199,15 +202,6 @@ public class MainEvaluationClass {
 							multipleRecords += test.nextLine();
 							tempObj = objectDAL.GetObjectFromTextLine(multipleRecords);
 
-							if (SaveFormated)
-								stats_file.write(tempObj.toString() + "\n");
-							if (SaveJSON)
-								stats_file.write(tempObj.toJSONString() + ",");
-							if (SaveToDB)
-								objectDAL.Insert(tempObj);
-							if (ShowGraph) {
-								ClearHelper.AddRowToGraph(theGraph, tempObj);
-							}
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -220,21 +214,36 @@ public class MainEvaluationClass {
 
 						multipleRecords = "";
 
+						
+						
+						double the_time = Double.parseDouble(tempObj.evt_datetime.substring(0, tempObj.evt_datetime.indexOf('(') ));
+						if (init_imte==-1 ||  Math.abs(  previous_time - the_time ) > 100 )
+						{
+							time_drag+= Math.round( previous_time- init_imte);
+							init_imte = the_time;
+						}
+						previous_time= the_time;
+						
 						counter++;
-
+						if (SaveFormated)
+							stats_file.write(tempObj.toString() + "\n");
+						if (SaveJSON)
+							stats_file.write(tempObj.toJSONString() + ",");
 						if (SaveToDB)
 							objectDAL.Insert(tempObj);
-
+						if (ShowGraph) {
+							ClearHelper.AddRowToGraph(theGraph, tempObj);
+						}
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
 
 						if (counter % 100000 == 0) {
-							System.out.println(counter);
+//							System.out.println(counter);
 
 							if (counter % 5000000 == 0) {
 
 								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
-									
+
 									System.out.print("#");
 									Thread t1 = new Thread(new Runnable() {
 										@Override
@@ -247,8 +256,7 @@ public class MainEvaluationClass {
 								}
 							}
 						}
-						
-						
+
 						if (counter % (REPORT_ROW_COUNT / 10) == 0) {
 							System.out.print("*");
 							if (counter % REPORT_ROW_COUNT == 0) {
@@ -259,15 +267,32 @@ public class MainEvaluationClass {
 								Long last_rows_time = Duration.between(lastStep, temp_end).toMillis();
 								total_time += last_rows_time;
 
+								System.out.println(tempObj.evt_datetime);
+								
+								time_drag+= Math.round( the_time-init_imte);
+								
+								
 								stats.put("counter", counter);
+								stats.put("clock_time", Math.round( time_drag));
 								stats.put("date_time", (new Date()).getTime());
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
 
-								runQuery("select * from file where name has .txt ", queryMachine, stats, "select_");
-								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
-								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
+//								runQuery("select * from file where name has iou897iou ", queryMachine, stats, "select_");
+//								runQuery("select * from file where name has iou897iou ", queryMachine, stats, "bt_");
+//								runQuery("select * from file where name has iou897iou ", queryMachine, stats, "ft_");
+//								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
+//								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
 
+								
+								stats.put("bt_"+ "time", 0l);
+								stats.put("bt_" + "edge", 0l);
+								stats.put("bt_"+ "vertex", 0l);
+								stats.put("ft_"+ "time", 0l);
+								stats.put("ft_" + "edge", 0l);
+								stats.put("ft_"+ "vertex", 0l);
+
+								
 								String row = "";
 								for (int i = 0; i < keys.length; i++) {
 									row += stats.get(keys[i]) + ",";
@@ -292,7 +317,7 @@ public class MainEvaluationClass {
 		}
 		objectDAL.flushRows();
 		GraphActionFactory.flushRows();
-		
+
 		Instant end2 = Instant.now();
 
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
@@ -307,6 +332,7 @@ public class MainEvaluationClass {
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
+		System.exit(0);
 
 	}
 
