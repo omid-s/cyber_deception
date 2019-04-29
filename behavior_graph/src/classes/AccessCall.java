@@ -1,6 +1,7 @@
 package classes;
 
 import java.sql.Date;
+import java.util.ArrayList;
 
 public class AccessCall extends Object {
 	public String id;
@@ -16,6 +17,7 @@ public class AccessCall extends Object {
 	public String user_name;
 	public int OccuranceFactor = 1;
 	public long sequenceNumber;
+	public ArrayList<Long> times;
 
 	public boolean isEqual(AccessCall theOther) {
 		AccessCall tmp = (AccessCall) theOther;
@@ -38,16 +40,11 @@ public class AccessCall extends Object {
 		return String.format(
 				"%s{command:\"%s\",date:\"%s\", description:\"%s\" , "
 						+ "args:\"%s\", info:\"%s\", user_id:\"%s\" , user_name:\"%s\"  }",
-						String.valueOf(Command), 
-						String.valueOf(Command), 
-						String.valueOf(DateTime), 
-						"",//String.valueOf(Description), 
-						"",//String.valueOf(args), 
-						String.valueOf(Info), 
-						String.valueOf(user_id), 
-						String.valueOf(user_name)
-				
-				).replace("\\", "");
+				String.valueOf(Command), String.valueOf(Command), String.valueOf(DateTime), "", // String.valueOf(Description),
+				"", // String.valueOf(args),
+				String.valueOf(Info), String.valueOf(user_id), String.valueOf(user_name)
+
+		).replace("\\", "");
 
 	}
 
@@ -61,4 +58,55 @@ public class AccessCall extends Object {
 														// this.id.equals(((AccessCall)
 														// obj).id) ;
 	}
+
+	/**
+	 * adds the given sequence counter to the edge
+	 * 
+	 * @param sequenceNumber
+	 * @param mode           0- no compression , 1- will keep only the edge and adds
+	 *                       seq counters 2- will keep only first and last 3- will
+	 *                       keep just the first
+	 */
+	public void addTime(long sequenceNumber, int mode) {
+		if (times == null)
+			times = new ArrayList<Long>();
+		switch (mode) {
+		case 1: 
+			// both will be kept
+			times.add(sequenceNumber);
+			break;
+		case 2:
+			// the beggining and end will be kept
+			switch (times.size()) {
+			case 0:
+			case 1:
+				times.add(sequenceNumber);
+				break;
+			case 2:
+				times.remove(1);
+				times.add(sequenceNumber);
+				break;
+
+			default:
+				break;
+			}
+			break;
+		case 3:
+			// onely one instace is to be kept
+			switch (times.size()) {
+			case 0:
+				times.add(sequenceNumber);
+				break;
+			case 1:
+				times.remove(0);
+				times.add(sequenceNumber);
+				break;
+
+			default:
+				break;
+			}
+
+		}
+	}
+
 }
