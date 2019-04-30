@@ -71,6 +71,7 @@ public class MainEvaluationClass {
 				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false,ShadowInserter=false;
 		String fileAdr = "", output_file = "";
 
+		int compression=-1;
 		
 
 		for (String pick : args) {
@@ -115,7 +116,18 @@ public class MainEvaluationClass {
 				SaveJSON = true;
 			if( pick.equals("si") || pick.equals("shadow_insert") )
 				ShadowInserter=true;
+			if( pick.equals("c0") )
+				compression=0;
+			if( pick.equals("c1") )
+				compression=1;
+			if( pick.equals("c2") )
+				compression=2;
+			if( pick.equals("c3") )
+				compression=3;
+			
 
+			
+			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));		
 			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
 			
 			if (pick.equals("-h")) {
