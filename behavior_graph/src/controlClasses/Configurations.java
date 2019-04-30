@@ -1,7 +1,7 @@
 /**
  * 
  */
-package helpers;
+package controlClasses;
 
 import java.io.File;
 import java.io.IOException;
@@ -210,6 +210,7 @@ public class Configurations {
 	public static final String PRINT_QUERY="print_query";
 	public static final String LEGACY_MODE= "legacy_mode";
 	public static final String SHADOW_INSERTER = "shadow_inserter";
+	public static final String COMPRESSSION_LEVEL ="compression_level";
 	
 
 }

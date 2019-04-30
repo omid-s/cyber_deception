@@ -15,10 +15,10 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
+import controlClasses.Configurations;
 import dataBaseStuff.ShadowDBInserter;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import helpers.Configurations;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
 
@@ -356,7 +356,10 @@ public class GraphObjectHelper {
 
 				AccessCall t = EdgeMap.get(FF.getID() + TT.getID() + pick.evt_type);
 				t.OccuranceFactor++;
-
+				sequenceCounter++;
+				t.addTime(sequenceCounter, Integer.parseInt( Configurations.getInstance().getSetting(Configurations.COMPRESSSION_LEVEL) ));
+				
+				
 				theGraph.addVertex(t.From);
 				theGraph.addVertex(t.To);
 				theGraph.addEdge(t, t.From, t.To);
@@ -374,11 +377,14 @@ public class GraphObjectHelper {
 				theCall.user_id = pick.user_uid;
 				theCall.user_name = pick.user_name;
 				theCall.sequenceNumber = sequenceCounter++;
+				theCall.addTime(sequenceCounter,
+						Integer.parseInt(Configurations.getInstance().getSetting(Configurations.COMPRESSSION_LEVEL)));
 
 				theGraph.addVertex(theCall.From);
 				theGraph.addVertex(theCall.To);
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 //
+				
 				if( Boolean.valueOf( Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER) )) {
 					ShadowDBInserter.getInstance().insertEdge(theCall);
 				}

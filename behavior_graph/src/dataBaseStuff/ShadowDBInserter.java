@@ -17,7 +17,7 @@ import org.neo4j.driver.v1.Transaction;
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.SysdigRecordObjectGraph;
-import helpers.Configurations;
+import controlClasses.Configurations;
 import querying.tools.GraphObjectHelper;
 
 /**

@@ -9,9 +9,9 @@ import java.sql.Statement;
 
 import classes.ResourceType;
 import classes.SysdigRecordObject;
+import controlClasses.Configurations;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
-import helpers.Configurations;
 import readers.SysdigObjectDAL;
 
 /**

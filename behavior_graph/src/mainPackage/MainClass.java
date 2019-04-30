@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.SysdigRecordObject;
+import controlClasses.Configurations;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.GraphDBDal;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
@@ -19,7 +20,6 @@ import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
-import helpers.Configurations;
 import helpers.DescribeFactory;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
@@ -41,6 +41,7 @@ public class MainClass {
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
 				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false, ShadowInserter=false;
+		int compression=-1;
 		String fileAdr = "", output_file = "";
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -86,6 +87,14 @@ public class MainClass {
 				LegacyMode = true;
 			if( pick.equals("si") || pick.equals("shadow_insert") )
 				ShadowInserter=true;
+			if( pick.equals("c0") )
+				compression=0;
+			if( pick.equals("c1") )
+				compression=1;
+			if( pick.equals("c2") )
+				compression=2;
+			if( pick.equals("c3") )
+				compression=3;
 
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
@@ -94,7 +103,9 @@ public class MainClass {
 				return;
 			}
 		}
-
+ 
+			
+		Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));		
 		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
 		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
 		
