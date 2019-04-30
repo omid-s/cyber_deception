@@ -6,10 +6,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 import classes.*;
+import controlClasses.Configurations;
 import dataBaseStuff.DataBaseLayer;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
-import helpers.Configurations;
 
 public class SysdigObjectDAL {
 	protected Field[] ClassFields;

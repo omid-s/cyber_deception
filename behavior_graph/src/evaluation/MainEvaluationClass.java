@@ -1,5 +1,6 @@
 package evaluation;
 
+import controlClasses.Configurations;
 import controlClasses.RecordInterpretorFactory;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
@@ -11,7 +12,6 @@ import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
-import helpers.Configurations;
 import helpers.DescribeFactory;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;

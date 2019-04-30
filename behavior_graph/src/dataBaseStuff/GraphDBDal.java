@@ -16,8 +16,8 @@ import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Transaction;
 
 import classes.*;
+import controlClasses.Configurations;
 import edu.uci.ics.jung.graph.Graph;
-import helpers.Configurations;
 import querying.tools.GraphObjectHelper;
 
 public class GraphDBDal {

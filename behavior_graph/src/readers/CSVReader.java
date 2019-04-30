@@ -9,9 +9,9 @@ import java.util.Map;
 import org.apache.commons.collections15.map.HashedMap;
 
 import classes.SysdigRecordObject;
+import controlClasses.Configurations;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
-import helpers.Configurations;
 
 public class CSVReader extends SysdigObjectDAL {
 
