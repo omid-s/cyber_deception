@@ -68,11 +68,10 @@ public class MainEvaluationClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false,ShadowInserter=false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, ShadowInserter = false;
 		String fileAdr = "", output_file = "";
 
-		int compression=-1;
-		
+		int compression = -1;
 
 		for (String pick : args) {
 			if (pick.equals("file"))
@@ -114,22 +113,20 @@ public class MainEvaluationClass {
 				SimpleNeo4JQuery = true;
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
-			if( pick.equals("si") || pick.equals("shadow_insert") )
-				ShadowInserter=true;
-			if( pick.equals("c0") )
-				compression=0;
-			if( pick.equals("c1") )
-				compression=1;
-			if( pick.equals("c2") )
-				compression=2;
-			if( pick.equals("c3") )
-				compression=3;
-			
+			if (pick.equals("si") || pick.equals("shadow_insert"))
+				ShadowInserter = true;
+			if (pick.equals("c0"))
+				compression = 0;
+			if (pick.equals("c1"))
+				compression = 1;
+			if (pick.equals("c2"))
+				compression = 2;
+			if (pick.equals("c3"))
+				compression = 3;
 
-			
-			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));		
+			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
-			
+
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -168,8 +165,8 @@ public class MainEvaluationClass {
 		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
-		String[] keys = { "counter","clock_time", "date_time", "last_rows_time", "total_time", "select_time", "select_edge",
-				"select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex" };
+		String[] keys = { "counter", "clock_time", "date_time", "last_rows_time", "total_time", "select_time",
+				"select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex","mem_used" };
 
 		String row1 = "";
 		for (int i = 0; i < keys.length; i++) {
@@ -184,7 +181,7 @@ public class MainEvaluationClass {
 		Instant lastStep = Instant.now();
 		Runtime runtime = Runtime.getRuntime();
 		double init_imte = -1;
-		double previous_time = 0 ;
+		double previous_time = 0;
 		double time_drag = 0;
 		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
 		if (ReadFromFile) {
@@ -226,16 +223,14 @@ public class MainEvaluationClass {
 
 						multipleRecords = "";
 
-						
-						
-						double the_time = Double.parseDouble(tempObj.evt_datetime.substring(0, tempObj.evt_datetime.indexOf('(') ));
-						if (init_imte==-1 ||  Math.abs(  previous_time - the_time ) > 100 )
-						{
-							time_drag+= Math.round( previous_time- init_imte);
+						double the_time = Double
+								.parseDouble(tempObj.evt_datetime.substring(0, tempObj.evt_datetime.indexOf('(')));
+						if (init_imte == -1 || Math.abs(previous_time - the_time) > 100) {
+							time_drag += Math.round(previous_time - init_imte);
 							init_imte = the_time;
 						}
-						previous_time= the_time;
-						
+						previous_time = the_time;
+
 						counter++;
 						if (SaveFormated)
 							stats_file.write(tempObj.toString() + "\n");
@@ -280,12 +275,11 @@ public class MainEvaluationClass {
 								total_time += last_rows_time;
 
 								System.out.println(tempObj.evt_datetime);
-								
-								time_drag+= Math.round( the_time-init_imte);
-								
-								
+
+								time_drag += Math.round(the_time - init_imte);
+
 								stats.put("counter", counter);
-								stats.put("clock_time", Math.round( time_drag));
+								stats.put("clock_time", Math.round(time_drag));
 								stats.put("date_time", (new Date()).getTime());
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
@@ -296,15 +290,14 @@ public class MainEvaluationClass {
 //								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
 //								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
 
-								
-								stats.put("bt_"+ "time", 0l);
+								stats.put("bt_" + "time", 0l);
 								stats.put("bt_" + "edge", 0l);
-								stats.put("bt_"+ "vertex", 0l);
-								stats.put("ft_"+ "time", 0l);
+								stats.put("bt_" + "vertex", 0l);
+								stats.put("ft_" + "time", 0l);
 								stats.put("ft_" + "edge", 0l);
-								stats.put("ft_"+ "vertex", 0l);
+								stats.put("ft_" + "vertex", 0l);
+								stats.put("mem_used", runtime.totalMemory() - runtime.freeMemory());
 
-								
 								String row = "";
 								for (int i = 0; i < keys.length; i++) {
 									row += stats.get(keys[i]) + ",";
