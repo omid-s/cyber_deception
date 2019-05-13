@@ -175,4 +175,8 @@ public class ShadowDBInserter {
 	public String getQuery () {
 		return theQueryQue.poll();
 	}
+	
+	public long getQueLenght() {
+		return theQueryQue.size();
+	}
 }
