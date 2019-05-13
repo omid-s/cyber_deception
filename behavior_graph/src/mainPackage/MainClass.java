@@ -280,7 +280,6 @@ public class MainClass {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-
 		}
 		objectDAL.flushRows();
 

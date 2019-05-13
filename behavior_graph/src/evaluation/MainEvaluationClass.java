@@ -13,6 +13,7 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
+import insertion.graph.ShadowDBInserter;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
@@ -297,6 +298,7 @@ public class MainEvaluationClass {
 								stats.put("ft_" + "edge", 0l);
 								stats.put("ft_" + "vertex", 0l);
 								stats.put("mem_used", runtime.totalMemory() - runtime.freeMemory());
+								stats.put("buffer_size", ShadowDBInserter.getInstance().getQueLenght());
 
 								String row = "";
 								for (int i = 0; i < keys.length; i++) {
