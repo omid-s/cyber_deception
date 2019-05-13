@@ -5,18 +5,12 @@ package querying.adapters.simpleNeo4J;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.TooManyListenersException;
-
-import org.omg.CORBA.Environment;
-
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
-import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;

@@ -16,9 +16,9 @@ import classes.ResourceType;
 import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
 import controlClasses.Configurations;
-import dataBaseStuff.ShadowDBInserter;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import insertion.graph.ShadowDBInserter;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
 

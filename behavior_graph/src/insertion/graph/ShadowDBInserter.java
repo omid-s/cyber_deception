@@ -1,7 +1,7 @@
 /**
  * 
  */
-package dataBaseStuff;
+package insertion.graph;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -29,6 +29,7 @@ public class ShadowDBInserter {
 	private static ShadowDBInserter __Instance = null; // holds the singleton instance of shadow inserter
 	private ConcurrentLinkedQueue<ResourceItem> theResourceQue; //
 	private ConcurrentLinkedQueue<AccessCall> theCallQue;
+	private ConcurrentLinkedQueue<String> theQueryQue;
 
 	/**
 	 * returns the singleton inserter object.
@@ -48,9 +49,13 @@ public class ShadowDBInserter {
 	private ShadowDBInserter() {
 		theResourceQue = new ConcurrentLinkedQueue<ResourceItem>();
 		theCallQue = new ConcurrentLinkedQueue<AccessCall>();
-
+		theQueryQue = new ConcurrentLinkedQueue<String>();
+		
 		// TODO : implement the threaded inserter
 
+		Thread inserter = new Thread( new AsyncNeo4JInserter(this) );
+		inserter.start();
+		
 	}
 
 	public void insertNode(ResourceItem node) {
@@ -60,14 +65,14 @@ public class ShadowDBInserter {
 
 		temp += ";";
 
-		Queries.add(temp);
+		theQueryQue.add(temp);
 
-		if (Queries.size() % 10000 == 0)
-		{
-			System.out.print(".");
-			flushRows();
-//			Queries.clear();
-		}
+//		if (Queries.size() % 10000 == 0)
+//		{
+//			System.out.print(".");
+//			flushRows();
+////			Queries.clear();
+//		}
 	}
 
 	public void insertEdge(AccessCall edge) {
@@ -80,14 +85,17 @@ public class ShadowDBInserter {
 
 		temp += ";";
 
-		Queries.add(temp);
+		
 
-		if (Queries.size() % 10000 == 0)
-		{
-			System.out.print(".");
-			flushRows();
-//			Queries.clear();
-		}
+	theQueryQue.add(temp);
+		
+////	Queries.add(temp);
+//		if (theQueryQue.size() % 10000 == 0)
+//		{
+//			System.out.print(".");
+//			flushRows();
+////			Queries.clear();
+//		}
 //			
 	}
 
@@ -150,5 +158,21 @@ public class ShadowDBInserter {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+	
+	/**
+	 * returns true if there are queris to be run 
+	 * @return true if there are queris to be processed
+	 */
+	public boolean hasNext() {
+		return theQueryQue.size() > 0 ; 
+	}
+
+	/**
+	 * returns the first query to be processed
+	 * @return the first query to be run
+	 */
+	public String getQuery () {
+		return theQueryQue.poll();
 	}
 }
