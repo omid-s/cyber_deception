@@ -24,7 +24,7 @@ public class GraphDBDal {
 
 	public GraphDBDal() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		// to do : inittaite
-		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+//		Class.forName("org.neo4j.jdbc.Driver").newInstance();
 	}
 
 	/**

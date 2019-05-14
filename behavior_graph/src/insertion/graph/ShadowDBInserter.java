@@ -63,13 +63,13 @@ public class ShadowDBInserter {
 
 	public void insertEdge(AccessCall edge) {
 
-		if (!theObjectQue.contains(edge))
+//		if (!theObjectQue.contains(edge))
 			theObjectQue.add(edge);
 
 	}
 
 	public void setEdgeForUpdate(AccessCall edge) {
-		if (!theEdgeUpdateQue.contains(edge))
+//		if (!theEdgeUpdateQue.contains(edge))
 			theEdgeUpdateQue.add(edge);
 	}
 

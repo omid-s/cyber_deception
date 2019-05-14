@@ -8,6 +8,7 @@ import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Transaction;
+import org.neo4j.driver.v1.TransactionWork;
 
 import controlClasses.Configurations;
 
@@ -39,41 +40,75 @@ public class AsyncNeo4JInserter implements Runnable {
 	public void run() {
 
 		reloadConnection(false);
-
+		long counter = 0;
 		while (true) {
-			long counter = 0;
+
 			boolean x = true;
 			try {
-				reloadConnection(true);
-				Session session = driver.session();
+//				reloadConnection(true);
+//				Session session = driver.session();
 
-				Transaction trnx = session.beginTransaction();
-
-				while (session.isOpen()) {
-					if (x) {
-						System.out.println("+");
-						x = false;
-					}
-					if (__theBuffer.hasNext()) {
-						lastQuery = __theBuffer.getQuery();
-						trnx.run(lastQuery);
-						counter++;
-						if (counter == 100000) {
-							trnx.success();
-							System.out.println("-0");
-//							trnx.close();
-							System.out.println("-1");
-							session.closeAsync();
-							System.out.println("-2");
-							driver.closeAsync();
-							System.gc();
-							break;
+//				Transaction trnx = session.beginTransaction();
+				 
+				while (true) {
+//					if (x) {
+//						System.out.println("+");
+//						x = false;
+//					}
+					counter ++;
+					if (counter % 100==0) {
+						driver.closeAsync();
+						reloadConnection(true);
 						}
-					} else {
-						Thread.sleep(100);
+					try (Session session = driver.session()) {
+						session.writeTransaction(new TransactionWork<Integer>() {
+							@Override
+							public Integer execute(Transaction tx) {
+								int counter=0;
+								while (true) {
+									if (__theBuffer.hasNext()) {
+										lastQuery = __theBuffer.getQuery();
+										tx.run(lastQuery);
+										counter++;
+										if (counter % 100==0)
+											break;
+									} else {
+										try {
+											Thread.sleep(100);
+										} catch (Exception ex) {
+										}
+									}
+								}
+
+								return (int) counter;
+							}
+						});
 					}
+
+//						session.run(lastQuery);
+
+//						trnx.run(lastQuery);
+//						counter++;
+//						if (counter % 100=0) {
+//							trnx.success();
+////							System.out.println("-0");
+//							trnx.commitAsync().thenRun((Runnable) session.closeAsync());
+////							System.out.println("-1");
+////							session.closeAsync();
+////							System.out.println("-2");
+////							driver.closeAsync();
+////							System.gc();
+////							return ;
+//							break;
+//						}
+//						if( counter % 1000==0 ) {
+//						
+//							trnx.
+//							
+//						}
+
 				}
-				System.out.println("-3");
+//				System.out.println("-3");
 			} catch (Exception ex) {
 
 				System.gc();
