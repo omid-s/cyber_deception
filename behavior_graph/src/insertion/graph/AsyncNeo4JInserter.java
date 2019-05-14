@@ -44,6 +44,7 @@ public class AsyncNeo4JInserter implements Runnable {
 			long counter = 0;
 			boolean x = true;
 			try {
+				reloadConnection(true);
 				Session session = driver.session();
 
 				Transaction trnx = session.beginTransaction();
@@ -62,8 +63,10 @@ public class AsyncNeo4JInserter implements Runnable {
 							System.out.println("-0");
 //							trnx.close();
 							System.out.println("-1");
-//							session.close();
+							session.closeAsync();
 							System.out.println("-2");
+							driver.closeAsync();
+							System.gc();
 							break;
 						}
 					} else {
@@ -76,8 +79,8 @@ public class AsyncNeo4JInserter implements Runnable {
 				System.gc();
 				System.out.print(ex.getMessage());
 				ex.printStackTrace();
-
-//				reloadConnection(true);
+				driver.closeAsync();
+				reloadConnection(true);
 
 			}
 		}
