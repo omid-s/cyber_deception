@@ -167,7 +167,7 @@ public class MainEvaluationClass {
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		String[] keys = { "counter", "clock_time", "date_time", "last_rows_time", "total_time", "select_time",
-				"select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex","mem_used" };
+				"select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex","mem_used","buffer_size" };
 
 		String row1 = "";
 		for (int i = 0; i < keys.length; i++) {
@@ -339,7 +339,7 @@ public class MainEvaluationClass {
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
-		System.exit(0);
+		ShadowDBInserter.getInstance().getWorkerThread().wait();
 
 	}
 

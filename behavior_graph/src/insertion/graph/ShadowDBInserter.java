@@ -28,6 +28,9 @@ public class ShadowDBInserter {
 
 	private static ShadowDBInserter __Instance = null; // holds the singleton instance of shadow inserter
 	private ConcurrentLinkedQueue<Object> theObjectQue;
+	private ConcurrentLinkedQueue<AccessCall> theEdgeUpdateQue;
+
+	private Thread inserterThread;
 
 	/**
 	 * returns the singleton inserter object.
@@ -47,10 +50,10 @@ public class ShadowDBInserter {
 	private ShadowDBInserter() {
 
 		theObjectQue = new ConcurrentLinkedQueue<Object>();
+		theEdgeUpdateQue = new ConcurrentLinkedQueue<AccessCall>();
 
-		Thread inserter = new Thread(new AsyncNeo4JInserter(this));
-		inserter.start();
-
+		inserterThread = new Thread(new AsyncNeo4JInserter(this));
+		inserterThread.start();
 	}
 
 	public void insertNode(ResourceItem node) {
@@ -65,13 +68,18 @@ public class ShadowDBInserter {
 
 	}
 
+	public void setEdgeForUpdate(AccessCall edge) {
+		if (!theEdgeUpdateQue.contains(edge))
+			theEdgeUpdateQue.add(edge);
+	}
+
 	/**
 	 * returns true if there are queris to be run
 	 * 
 	 * @return true if there are queris to be processed
 	 */
 	public boolean hasNext() {
-		return theObjectQue.size() > 0;
+		return theObjectQue.size() + theEdgeUpdateQue.size() > 0;
 	}
 
 	/**
@@ -106,6 +114,10 @@ public class ShadowDBInserter {
 	}
 
 	public long getQueLenght() {
-		return theObjectQue.size();
+		return theObjectQue.size() + theEdgeUpdateQue.size();
+	}
+
+	public Thread getWorkerThread() {
+		return this.inserterThread;
 	}
 }
