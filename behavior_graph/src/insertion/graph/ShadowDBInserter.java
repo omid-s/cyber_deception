@@ -45,7 +45,7 @@ public class ShadowDBInserter {
 	 * creates an instance of the shadow inserter object
 	 */
 	private ShadowDBInserter() {
-		
+
 		theObjectQue = new ConcurrentLinkedQueue<Object>();
 
 		Thread inserter = new Thread(new AsyncNeo4JInserter(this));
@@ -54,17 +54,16 @@ public class ShadowDBInserter {
 	}
 
 	public void insertNode(ResourceItem node) {
-
 		theObjectQue.add(node);
 
 	}
 
 	public void insertEdge(AccessCall edge) {
 
-		theObjectQue.add(edge);
+		if (!theObjectQue.contains(edge))
+			theObjectQue.add(edge);
 
 	}
-
 
 	/**
 	 * returns true if there are queris to be run
