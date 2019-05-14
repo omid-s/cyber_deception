@@ -30,6 +30,7 @@ public class ShadowDBInserter {
 	private ConcurrentLinkedQueue<ResourceItem> theResourceQue; //
 	private ConcurrentLinkedQueue<AccessCall> theCallQue;
 	private ConcurrentLinkedQueue<String> theQueryQue;
+	private ConcurrentLinkedQueue<Object> theObjectQue;
 
 	/**
 	 * returns the singleton inserter object.
@@ -50,12 +51,11 @@ public class ShadowDBInserter {
 		theResourceQue = new ConcurrentLinkedQueue<ResourceItem>();
 		theCallQue = new ConcurrentLinkedQueue<AccessCall>();
 		theQueryQue = new ConcurrentLinkedQueue<String>();
-		
-		// TODO : implement the threaded inserter
+		theObjectQue = new ConcurrentLinkedQueue<Object>();
 
-		Thread inserter = new Thread( new AsyncNeo4JInserter(this) );
+		Thread inserter = new Thread(new AsyncNeo4JInserter(this));
 		inserter.start();
-		
+
 	}
 
 	public void insertNode(ResourceItem node) {
@@ -65,7 +65,8 @@ public class ShadowDBInserter {
 
 		temp += ";";
 
-		theQueryQue.add(temp);
+//		theQueryQue.add(temp);
+		theObjectQue.add(node);
 
 //		if (Queries.size() % 10000 == 0)
 //		{
@@ -77,18 +78,18 @@ public class ShadowDBInserter {
 
 	public void insertEdge(AccessCall edge) {
 
-		String temp = "";
+//		String temp = "";
+//
+//		temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
+//		temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
+//		temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
+//
+//		temp += ";";
 
-		temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
-		temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
-		temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
+		theObjectQue.add(edge);
 
-		temp += ";";
+//	theQueryQue.add(temp);
 
-		
-
-	theQueryQue.add(temp);
-		
 ////	Queries.add(temp);
 //		if (theQueryQue.size() % 10000 == 0)
 //		{
@@ -159,24 +160,48 @@ public class ShadowDBInserter {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * returns true if there are queris to be run 
+	 * returns true if there are queris to be run
+	 * 
 	 * @return true if there are queris to be processed
 	 */
 	public boolean hasNext() {
-		return theQueryQue.size() > 0 ; 
+		return theObjectQue.size() > 0;
 	}
 
 	/**
 	 * returns the first query to be processed
+	 * 
 	 * @return the first query to be run
 	 */
-	public String getQuery () {
-		return theQueryQue.poll();
+	public String getQuery() {
+		Object ret = theObjectQue.poll();
+		if (ret instanceof String)
+			return (String) ret;
+		else if (ret instanceof AccessCall) {
+			AccessCall edge = (AccessCall) ret;
+			String temp = "";
+
+			temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
+			temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
+			temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
+
+			temp += ";";
+			return temp;
+		} else if (ret instanceof ResourceItem) {
+			ResourceItem node = (ResourceItem) ret;
+			String temp = "";
+
+			temp += "\r\n" + String.format(" merge ( f:%s ) ", node.toN4JObjectString());
+
+			temp += ";";
+			return temp;
+		}
+		return "";
 	}
-	
+
 	public long getQueLenght() {
-		return theQueryQue.size();
+		return theObjectQue.size();
 	}
 }
