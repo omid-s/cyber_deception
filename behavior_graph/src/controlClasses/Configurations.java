@@ -138,13 +138,18 @@ public class Configurations {
 		keysOrder.add(FORWARD_STEPS);
 
 		// program configurations
-		
+
 		settings.put(LINE_SEPERATOR, "=&amin&=");
 		settings.put(PRINT_QUERY, "false");
-		
+		settings.put(TRANSACTION_FLUSH, "10");
+		settings.put(DRIVER_FLUSH, "1000");
+
 		keysOrder.add("# Internal program configurations");
 		keysOrder.add(LINE_SEPERATOR);
 		keysOrder.add(PRINT_QUERY);
+		keysOrder.add(TRANSACTION_FLUSH);
+		keysOrder.add(DRIVER_FLUSH);
+
 	}
 
 	/**
@@ -164,16 +169,16 @@ public class Configurations {
 		}
 	}
 
-	
 	/**
 	 * Adds a settings key to the settings
-	 * @param Key the key
+	 * 
+	 * @param Key   the key
 	 * @param Value the value assigned
 	 */
 	public void setSetting(String Key, String Value) {
 		settings.put(Key, Value);
 	}
-	
+
 	/**
 	 * Returns a list of fields that are considered in the short format
 	 * 
@@ -207,10 +212,11 @@ public class Configurations {
 
 	// program configuration
 	public static final String LINE_SEPERATOR = "line_seperator";
-	public static final String PRINT_QUERY="print_query";
-	public static final String LEGACY_MODE= "legacy_mode";
+	public static final String PRINT_QUERY = "print_query";
+	public static final String LEGACY_MODE = "legacy_mode";
 	public static final String SHADOW_INSERTER = "shadow_inserter";
-	public static final String COMPRESSSION_LEVEL ="compression_level";
-	
+	public static final String COMPRESSSION_LEVEL = "compression_level";
+	public static final String TRANSACTION_FLUSH = "trasaction_flush";
+	public static final String DRIVER_FLUSH = "driver_flush";
 
 }

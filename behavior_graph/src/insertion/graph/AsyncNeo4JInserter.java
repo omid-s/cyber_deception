@@ -41,36 +41,33 @@ public class AsyncNeo4JInserter implements Runnable {
 
 		reloadConnection(false);
 		long counter = 0;
+		long driverFlush = Long.parseLong(Configurations.getInstance().getSetting(Configurations.DRIVER_FLUSH));
+		long transactionFlush = Long
+				.parseLong(Configurations.getInstance().getSetting(Configurations.TRANSACTION_FLUSH));
+		;
+
 		while (true) {
 
-			boolean x = true;
 			try {
-//				reloadConnection(true);
-//				Session session = driver.session();
 
-//				Transaction trnx = session.beginTransaction();
-				 
 				while (true) {
-//					if (x) {
-//						System.out.println("+");
-//						x = false;
-//					}
-					counter ++;
-					if (counter % 100==0) {
+
+					if (driverFlush > 0 && counter == driverFlush) {
 						driver.closeAsync();
 						reloadConnection(true);
-						}
+						counter = 0;
+					}
 					try (Session session = driver.session()) {
 						session.writeTransaction(new TransactionWork<Integer>() {
 							@Override
 							public Integer execute(Transaction tx) {
-								int counter=0;
+								int counter = 0;
 								while (true) {
 									if (__theBuffer.hasNext()) {
 										lastQuery = __theBuffer.getQuery();
 										tx.run(lastQuery);
 										counter++;
-										if (counter % 100==0)
+										if (transactionFlush >= 0 && counter % transactionFlush == 0)
 											break;
 									} else {
 										try {
@@ -83,7 +80,9 @@ public class AsyncNeo4JInserter implements Runnable {
 								return (int) counter;
 							}
 						});
+
 					}
+					counter++;
 
 //						session.run(lastQuery);
 
