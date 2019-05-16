@@ -44,7 +44,6 @@ public class AsyncNeo4JInserter implements Runnable {
 		long driverFlush = Long.parseLong(Configurations.getInstance().getSetting(Configurations.DRIVER_FLUSH));
 		long transactionFlush = Long
 				.parseLong(Configurations.getInstance().getSetting(Configurations.TRANSACTION_FLUSH));
-		;
 
 		while (true) {
 
@@ -52,11 +51,13 @@ public class AsyncNeo4JInserter implements Runnable {
 
 				while (true) {
 
+					// refresh the driver instance if it's time
 					if (driverFlush > 0 && counter == driverFlush) {
 						driver.closeAsync();
 						reloadConnection(true);
 						counter = 0;
 					}
+					// create a sessin and insert a set of values
 					try (Session session = driver.session()) {
 						session.writeTransaction(new TransactionWork<Integer>() {
 							@Override
@@ -67,12 +68,14 @@ public class AsyncNeo4JInserter implements Runnable {
 										lastQuery = __theBuffer.getQuery();
 										tx.run(lastQuery);
 										counter++;
+										// if the tracation flush is meet, create a new trasaction
 										if (transactionFlush >= 0 && counter % transactionFlush == 0)
 											break;
 									} else {
 										try {
 											Thread.sleep(100);
 										} catch (Exception ex) {
+											// ignore thread sleep errors
 										}
 									}
 								}
@@ -82,32 +85,10 @@ public class AsyncNeo4JInserter implements Runnable {
 						});
 
 					}
+
 					counter++;
 
-//						session.run(lastQuery);
-
-//						trnx.run(lastQuery);
-//						counter++;
-//						if (counter % 100=0) {
-//							trnx.success();
-////							System.out.println("-0");
-//							trnx.commitAsync().thenRun((Runnable) session.closeAsync());
-////							System.out.println("-1");
-////							session.closeAsync();
-////							System.out.println("-2");
-////							driver.closeAsync();
-////							System.gc();
-////							return ;
-//							break;
-//						}
-//						if( counter % 1000==0 ) {
-//						
-//							trnx.
-//							
-//						}
-
 				}
-//				System.out.println("-3");
 			} catch (Exception ex) {
 
 				System.gc();
