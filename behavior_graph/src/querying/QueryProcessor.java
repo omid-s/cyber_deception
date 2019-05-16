@@ -130,7 +130,7 @@ public class QueryProcessor implements Runnable {
 						ex.printStackTrace();
 					}
 
-//					System.out.println(theGraph.getEdgeCount() + "|" + theGraph.getVertexCount());
+					System.out.println(theGraph.getEdgeCount() + "|" + theGraph.getVertexCount());
 //					if (theGraph.getVertexCount() != num_vertices) {
 //						if (MemQuery) {
 //							InMemoryAdapter mem = InMemoryAdapter.getSignleton();
