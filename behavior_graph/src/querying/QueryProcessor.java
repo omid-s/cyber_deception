@@ -40,8 +40,20 @@ public class QueryProcessor implements Runnable {
 	/**
 	 * 
 	 */
-	public QueryProcessor() {
+	public QueryProcessor(boolean MemQuery, boolean SimplePGQuery, boolean SimpleNeo4JQuery, Long num_edges,
+			Long num_vertex, Graph<ResourceItem, AccessCall> theGraph, boolean ShowGraph, boolean ShowVerbose,
+			String fileAdr, GraphDBDal GraphActionFactory) {
 		// TODO Auto-generated constructor stub
+		this.MemQuery = MemQuery;
+		this.SimplePGQuery = SimplePGQuery;
+		this.SimpleNeo4JQuery = SimpleNeo4JQuery;
+		this.num_edges = num_edges;
+		this.num_vertex = num_vertex;
+		this.theGraph = theGraph;
+		this.ShowGraph = ShowGraph;
+		this.ShowVerbose = ShowVerbose;
+		this.fileAdr = fileAdr;
+		this.GraphActionFactory = GraphActionFactory;
 	}
 
 	@Override

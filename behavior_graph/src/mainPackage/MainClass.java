@@ -23,6 +23,7 @@ import helpers.ColorHelpers;
 import helpers.DescribeFactory;
 import insertion.graph.ShadowDBInserter;
 import querying.QueryInterpreter;
+import querying.QueryProcessor;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.adapters.simpleNeo4J.SimpleNeo4JAdapter;
@@ -139,6 +140,13 @@ public class MainClass {
 		if (SaveFormated || SaveJSON) {
 			output_file_writer = new FileWriter(new File(output_file));
 		}
+		Long num_edges = (long) theGraph.getEdgeCount();
+		Long num_vertex = (long) theGraph.getVertexCount();
+		QueryProcessor q_processor = new QueryProcessor(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges,
+				num_vertex, theGraph, ShowGraph, ShowVerbose, fileAdr, GraphActionFactory);
+
+		Thread queryThread = new Thread(q_processor);
+		queryThread.start();
 
 		if (ReadStream)
 			while (true) {
@@ -251,7 +259,18 @@ public class MainClass {
 						}
 
 						if (counter % 10000 == 0) {
-							System.out.println(counter + "(Q :" + ShadowDBInserter.getInstance().getQueLenght() + ")");
+
+							if (MemQuery) {
+								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+								for (ResourceItem pick : theGraph.getVertices()) {
+									mem.addResourceItem(pick);
+								}
+								for (AccessCall pick : theGraph.getEdges()) {
+									mem.addAccessCall(pick);
+								}
+							}
+
+//							System.out.println(counter + "(Q :" + ShadowDBInserter.getInstance().getQueLenght() + ")");
 
 							if (counter % 500000 == 0) {
 
@@ -296,17 +315,15 @@ public class MainClass {
 			output_file_writer.close();
 		}
 
-		if (MemQuery) {
-			InMemoryAdapter mem = InMemoryAdapter.getSignleton();
-			for (ResourceItem pick : theGraph.getVertices()) {
-				mem.addResourceItem(pick);
-			}
-			for (AccessCall pick : theGraph.getEdges()) {
-				mem.addAccessCall(pick);
-			}
-		}
-		int num_edges = theGraph.getEdgeCount();
-		int num_vertex = theGraph.getVertexCount();
+//		if (MemQuery) {
+//			InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+//			for (ResourceItem pick : theGraph.getVertices()) {
+//				mem.addResourceItem(pick);
+//			}
+//			for (AccessCall pick : theGraph.getEdges()) {
+//				mem.addAccessCall(pick);
+//			}
+//		}
 
 		theGraph = null;
 		ClearHelper.release_maps();
@@ -316,9 +333,6 @@ public class MainClass {
 		ClearHelper = null;
 		System.out.println("Cleaner was run :" + cleaner_ctr);
 		System.gc();
-
-		command_loop(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges, num_vertex, theGraph, ShowGraph, ShowVerbose,
-				fileAdr, GraphActionFactory);
 
 	}
 
