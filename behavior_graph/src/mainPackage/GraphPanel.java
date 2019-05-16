@@ -107,7 +107,7 @@ public class GraphPanel extends JPanel {
 	/**
 	 * the visual component and renderer for the graph
 	 */
-	VisualizationViewer<ResourceItem, AccessCall> vv;
+	public VisualizationViewer<ResourceItem, AccessCall> vv;
 
 	/**
 	 */

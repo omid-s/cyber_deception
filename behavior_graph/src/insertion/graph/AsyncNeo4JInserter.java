@@ -21,10 +21,9 @@ public class AsyncNeo4JInserter implements Runnable {
 	private ShadowDBInserter __theBuffer;
 
 	/**
-	 * 
+	 * creates an instance 
 	 */
 	public AsyncNeo4JInserter(ShadowDBInserter theBuffer) {
-		// TODO Auto-generated constructor stub
 		this.__theBuffer = theBuffer;
 	}
 
