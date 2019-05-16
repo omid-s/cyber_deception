@@ -260,15 +260,15 @@ public class MainClass {
 
 						if (counter % 10000 == 0) {
 
-							if (MemQuery) {
-								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
-								for (ResourceItem pick : theGraph.getVertices()) {
-									mem.addResourceItem(pick);
-								}
-								for (AccessCall pick : theGraph.getEdges()) {
-									mem.addAccessCall(pick);
-								}
-							}
+//							if (MemQuery) {
+//								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+//								for (ResourceItem pick : theGraph.getVertices()) {
+//									mem.addResourceItem(pick);
+//								}
+//								for (AccessCall pick : theGraph.getEdges()) {
+//									mem.addAccessCall(pick);
+//								}
+//							}
 
 //							System.out.println(counter + "(Q :" + ShadowDBInserter.getInstance().getQueLenght() + ")");
 

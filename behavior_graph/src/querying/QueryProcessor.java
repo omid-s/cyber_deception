@@ -69,12 +69,16 @@ public class QueryProcessor implements Runnable {
 		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
+		Graph<ResourceItem, AccessCall> theLocalGraph = null;
+
 		/// setup GUI window
 		GraphPanel theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 
 		Scanner reader = new Scanner(System.in);
+		long num_vertices = 0;
 		while (true) {
+
 			try {
 				ColorHelpers.PrintBlue("$$>>");
 				String command = reader.nextLine();
@@ -121,13 +125,43 @@ public class QueryProcessor implements Runnable {
 
 					ParsedQuery query = null;
 					try {
-						query = QueryInterpreter.interpret(command, theGraph);
+						query = QueryInterpreter.interpret(command, theLocalGraph);
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
 
-					theGraph = queryMachine.runQuery(query);
+					System.out.println(theGraph.getEdgeCount() + "|" + theGraph.getVertexCount());
+					if (theGraph.getVertexCount() != num_vertices) {
+						if (MemQuery) {
+							InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+							mem.ClearAll();
+							System.gc();
+							Object [] tempArr =theGraph.getVertices().toArray().clone(); 
+							for (int i = 0; i < tempArr.length  ; i++) {
+								ResourceItem pick =  (ResourceItem) tempArr[i] ;
+								mem.addResourceItem(pick);
+							}
+							tempArr = theGraph.getEdges().toArray().clone();
+							for (int i = 0; i< tempArr.length ; i++) {
+								AccessCall pick = (AccessCall) tempArr[i];
+								mem.addAccessCall(pick);
+							}
+							tempArr= null;
+							System.gc();
+							
+//							for (AccessCall pick : theGraph.getEdges()) {
+//								mem.addAccessCall(pick);
+//							}
+						}
+						num_vertices = theGraph.getVertexCount();
+					}
+
+					theLocalGraph = queryMachine.runQuery(query);
 				} catch (Exception ex) {
+
+					System.out.println(ex.getMessage());
+					ex.printStackTrace();
+
 					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
 					continue;
 				}
@@ -136,7 +170,7 @@ public class QueryProcessor implements Runnable {
 
 				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
 
-				theGraphWindow = new GraphPanel(theGraph);
+				theGraphWindow = new GraphPanel(theLocalGraph);
 				if (frame1.isVisible()) {
 					frame1.setVisible(false);
 					frame1.dispose();
