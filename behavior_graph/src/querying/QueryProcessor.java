@@ -130,31 +130,31 @@ public class QueryProcessor implements Runnable {
 						ex.printStackTrace();
 					}
 
-					System.out.println(theGraph.getEdgeCount() + "|" + theGraph.getVertexCount());
-					if (theGraph.getVertexCount() != num_vertices) {
-						if (MemQuery) {
-							InMemoryAdapter mem = InMemoryAdapter.getSignleton();
-							mem.ClearAll();
-							System.gc();
-							Object [] tempArr =theGraph.getVertices().toArray().clone(); 
-							for (int i = 0; i < tempArr.length  ; i++) {
-								ResourceItem pick =  (ResourceItem) tempArr[i] ;
-								mem.addResourceItem(pick);
-							}
-							tempArr = theGraph.getEdges().toArray().clone();
-							for (int i = 0; i< tempArr.length ; i++) {
-								AccessCall pick = (AccessCall) tempArr[i];
-								mem.addAccessCall(pick);
-							}
-							tempArr= null;
-							System.gc();
-							
-//							for (AccessCall pick : theGraph.getEdges()) {
+//					System.out.println(theGraph.getEdgeCount() + "|" + theGraph.getVertexCount());
+//					if (theGraph.getVertexCount() != num_vertices) {
+//						if (MemQuery) {
+//							InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+//							mem.ClearAll();
+//							System.gc();
+//							Object [] tempArr =theGraph.getVertices().toArray().clone(); 
+//							for (int i = 0; i < tempArr.length  ; i++) {
+//								ResourceItem pick =  (ResourceItem) tempArr[i] ;
+//								mem.addResourceItem(pick);
+//							}
+//							tempArr = theGraph.getEdges().toArray().clone();
+//							for (int i = 0; i< tempArr.length ; i++) {
+//								AccessCall pick = (AccessCall) tempArr[i];
 //								mem.addAccessCall(pick);
 //							}
-						}
-						num_vertices = theGraph.getVertexCount();
-					}
+//							tempArr= null;
+//							System.gc();
+//							
+////							for (AccessCall pick : theGraph.getEdges()) {
+////								mem.addAccessCall(pick);
+////							}
+//						}
+//						num_vertices = theGraph.getVertexCount();
+//					}
 
 					theLocalGraph = queryMachine.runQuery(query);
 				} catch (Exception ex) {

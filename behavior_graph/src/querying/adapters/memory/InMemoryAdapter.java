@@ -68,6 +68,9 @@ public class InMemoryAdapter extends BaseAdapter {
 	}
 
 	public void addResourceItem(ResourceItem inp) {
+		if (V.containsKey(inp.id.toLowerCase()))
+			return;
+
 		V.put(inp.id.toLowerCase(), inp);
 		if (inp.Type == ResourceType.Process) {
 			ProcessMap.put(inp.id.toLowerCase(), inp);
@@ -96,6 +99,8 @@ public class InMemoryAdapter extends BaseAdapter {
 	}
 
 	public void addAccessCall(AccessCall inp) {
+		if (E.containsKey(inp.id))
+			return;
 		// add to access calls
 		E.put(inp.id, inp);
 
