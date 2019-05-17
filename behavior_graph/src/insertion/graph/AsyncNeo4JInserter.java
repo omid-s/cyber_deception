@@ -21,7 +21,7 @@ public class AsyncNeo4JInserter implements Runnable {
 	private ShadowDBInserter __theBuffer;
 
 	/**
-	 * creates an instance 
+	 * creates an instance
 	 */
 	public AsyncNeo4JInserter(ShadowDBInserter theBuffer) {
 		this.__theBuffer = theBuffer;
@@ -40,6 +40,7 @@ public class AsyncNeo4JInserter implements Runnable {
 
 		reloadConnection(false);
 		long counter = 0;
+		long counter2 = 0;
 		long driverFlush = Long.parseLong(Configurations.getInstance().getSetting(Configurations.DRIVER_FLUSH));
 		long transactionFlush = Long
 				.parseLong(Configurations.getInstance().getSetting(Configurations.TRANSACTION_FLUSH));
@@ -55,6 +56,22 @@ public class AsyncNeo4JInserter implements Runnable {
 						driver.closeAsync();
 						reloadConnection(true);
 						counter = 0;
+						counter2++;
+
+						// ## clean the database out
+						if (counter2 == 10) {
+							counter2 = 0;
+							try (Session session = driver.session()) {
+								session.writeTransaction(new TransactionWork<Integer>() {
+									@Override
+									public Integer execute(Transaction tx) {
+										tx.run("MATCH (n) DETACH DELETE n ;");
+										System.out.println("------------------deleted------------------\n");
+										return 1;
+									}
+								});
+							}
+						}
 					}
 					// create a sessin and insert a set of values
 					try (Session session = driver.session()) {
@@ -67,6 +84,7 @@ public class AsyncNeo4JInserter implements Runnable {
 										lastQuery = __theBuffer.getQuery();
 										tx.run(lastQuery);
 										counter++;
+
 										// if the tracation flush is meet, create a new trasaction
 										if (transactionFlush >= 0 && counter % transactionFlush == 0)
 											break;

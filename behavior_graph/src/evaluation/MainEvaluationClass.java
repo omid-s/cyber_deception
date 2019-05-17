@@ -167,7 +167,8 @@ public class MainEvaluationClass {
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
 		String[] keys = { "counter", "clock_time", "date_time", "last_rows_time", "total_time", "select_time",
-				"select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex","mem_used","buffer_size" };
+				"select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex",
+				"mem_used", "buffer_size" };
 
 		String row1 = "";
 		for (int i = 0; i < keys.length; i++) {
@@ -230,6 +231,11 @@ public class MainEvaluationClass {
 							time_drag += Math.round(previous_time - init_imte);
 							init_imte = the_time;
 						}
+//
+//						if (Math.round(the_time - previous_time) > 0) {
+//							Thread.sleep(Math.round(the_time-previous_time));	
+//						}
+						
 						previous_time = the_time;
 
 						counter++;
@@ -279,6 +285,10 @@ public class MainEvaluationClass {
 
 								time_drag += Math.round(the_time - init_imte);
 
+								lastStep = Instant.now();	
+								System.out.println(Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
+								Thread.sleep(1000* Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
+								
 								stats.put("counter", counter);
 								stats.put("clock_time", Math.round(time_drag));
 								stats.put("date_time", (new Date()).getTime());
@@ -306,7 +316,7 @@ public class MainEvaluationClass {
 								}
 								stats_file.write(row + "\n");
 								stats_file.flush();
-								lastStep = Instant.now();
+								//lastStep = Instant.now();
 							}
 						}
 
