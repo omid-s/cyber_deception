@@ -17,7 +17,7 @@ public class AccessCall extends Object {
 	public String user_name;
 	public int OccuranceFactor = 1;
 	public long sequenceNumber;
-	public String computer_ID;
+	public String computer_id;
 	public ArrayList<Long> times;
 
 	public boolean isEqual(AccessCall theOther) {
@@ -43,7 +43,7 @@ public class AccessCall extends Object {
 						+ "args:\"%s\", info:\"%s\", user_id:\"%s\" , user_name:\"%s\", computer_id:\"%s\"  }",
 				String.valueOf(Command), String.valueOf(Command), String.valueOf(DateTime), "", // String.valueOf(Description),
 				"", // String.valueOf(args),
-				String.valueOf(Info), String.valueOf(user_id), String.valueOf(user_name), String.valueOf(computer_ID)
+				String.valueOf(Info), String.valueOf(user_id), String.valueOf(user_name), String.valueOf(computer_id)
 
 		).replace("\\", "");
 

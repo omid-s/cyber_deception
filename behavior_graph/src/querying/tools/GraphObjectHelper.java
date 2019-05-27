@@ -99,6 +99,7 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getProcPID();
 			tempItem.Title = pick.proc_name;
 			tempItem.Description = pick.proc_args;
+			tempItem.computer_id = pick.Computer_id;
 
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
@@ -136,6 +137,7 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getTID();
 			tempItem.Title = "-";
 			tempItem.Description = "-";
+			tempItem.computer_id=pick.Computer_id;
 
 			TheThread = tempItem;
 			theGraph.addVertex(tempItem);
@@ -159,7 +161,7 @@ public class GraphObjectHelper {
 			tempCallItem.Command = "spawn";
 			tempCallItem.user_id = pick.user_uid;
 			tempCallItem.user_name = pick.user_name;
-
+			tempCallItem.computer_id=pick.Computer_id;
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
@@ -191,7 +193,8 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getUBSIID();
 			tempItem.Title = "-";
 			tempItem.Description = "-";
-
+			tempItem.computer_id=pick.Computer_id;
+			
 			TheUBSI = tempItem;
 			theGraph.addVertex(tempItem);
 
@@ -215,7 +218,7 @@ public class GraphObjectHelper {
 			tempCallItem.Command = "started";
 			tempCallItem.user_id = pick.user_uid;
 			tempCallItem.user_name = pick.user_name;
-
+			tempCallItem.computer_id=pick.Computer_id;
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
@@ -243,7 +246,7 @@ public class GraphObjectHelper {
 			parentP.id = pick.getParentProcID();
 			parentP.Title = pick.proc_pname;
 			parentP.Description = "";
-
+			parentP.computer_id=pick.Computer_id;
 		}
 
 		theGraph.addVertex(parentP);
@@ -263,7 +266,7 @@ public class GraphObjectHelper {
 			tempCallItem.Command = "exec";
 			tempCallItem.user_id = pick.user_uid;
 			tempCallItem.user_name = pick.user_name;
-
+			tempCallItem.computer_id=pick.Computer_id;
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
@@ -323,6 +326,7 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getFD_ID();
 			tempItem.Path = pick.fd_directory;
 			tempItem.Title = pick.fd_name;
+			tempItem.computer_id=pick.Computer_id;
 			// tempItem.Description = pick.fd_
 
 			theGraph.addVertex(tempItem);
@@ -379,7 +383,7 @@ public class GraphObjectHelper {
 				theCall.sequenceNumber = sequenceCounter++;
 				theCall.addTime(sequenceCounter,
 						Integer.parseInt(Configurations.getInstance().getSetting(Configurations.COMPRESSSION_LEVEL)));
-
+				theCall.computer_id=pick.Computer_id;
 				theGraph.addVertex(theCall.From);
 				theGraph.addVertex(theCall.To);
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
@@ -699,7 +703,8 @@ public class GraphObjectHelper {
 		tempItem.id = pick.getProcPID();
 		tempItem.Title = pick.proc_name;
 		tempItem.Description = pick.proc_args;
-
+		tempItem.computer_id=pick.Computer_id;
+		
 		ResourceItem TheProc = tempItem;
 //		ret.addVertex(tempItem);
 
@@ -708,7 +713,7 @@ public class GraphObjectHelper {
 		parentP.id = pick.getParentProcID();
 		parentP.Title = pick.proc_pname;
 		parentP.Type = ResourceType.Process;
-
+		parentP.computer_id=pick.Computer_id;
 //		ret.addVertex(parentP);
 
 		// add the call between process and process parent
@@ -718,7 +723,7 @@ public class GraphObjectHelper {
 		tempCallItem.Command = "exec";
 		tempCallItem.user_id = pick.user_uid;
 		tempCallItem.user_name = pick.user_name;
-
+		tempCallItem.computer_id=pick.Computer_id;
 		tempCallItem.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 		ResourceItem TheThread = new ResourceItem();
@@ -728,7 +733,7 @@ public class GraphObjectHelper {
 		TheThread.id = pick.getTID();
 		TheThread.Title = "-";
 		TheThread.Description = "-";
-
+		TheThread.computer_id=pick.Computer_id;
 		ResourceItem TheUBSI = new ResourceItem();
 
 		TheUBSI.Type = ResourceType.EXEUnit;
@@ -736,14 +741,14 @@ public class GraphObjectHelper {
 		TheUBSI.id = pick.getUBSIID();
 		TheUBSI.Title = "-";
 		TheUBSI.Description = "-";
-
+TheUBSI.computer_id=pick.Computer_id;
 		AccessCall TheSpawn = new AccessCall();
 		TheSpawn.From = TheProc;
 		TheSpawn.To = TheThread;
 		TheSpawn.Command = "spawn";
 		TheSpawn.user_id = pick.user_uid;
 		TheSpawn.user_name = pick.user_name;
-
+		TheSpawn.computer_id=pick.Computer_id;
 		TheSpawn.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 		AccessCall TheUBSIStart = new AccessCall();
@@ -752,7 +757,7 @@ public class GraphObjectHelper {
 		TheUBSIStart.Command = "started";
 		TheUBSIStart.user_id = pick.user_uid;
 		TheUBSIStart.user_name = pick.user_name;
-
+		TheUBSIStart.computer_id=pick.Computer_id;
 		TheUBSIStart.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 //		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
@@ -800,7 +805,7 @@ public class GraphObjectHelper {
 			ToItem.id = pick.getFD_ID();
 			ToItem.Path = pick.fd_directory;
 			ToItem.Title = pick.fd_name;
-
+			ToItem.computer_id=pick.Computer_id;
 //			ret.addVertex(ToItem);
 
 			// add the edge connecting the FD and the process
@@ -814,7 +819,7 @@ public class GraphObjectHelper {
 			theCall.user_id = pick.user_uid;
 			theCall.user_name = pick.user_name;
 			theCall.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
-
+			theCall.computer_id=pick.Computer_id;
 //			ret.addEdge(theCall, theCall.From, theCall.To);
 
 		}

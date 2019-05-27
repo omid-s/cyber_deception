@@ -91,6 +91,7 @@ public class SysdigRecordObject {
 	public String syslog_message;
 	public String ubsi_unit_id;
 	public String ubsi_thread_id;
+	public String Computer_id;
 	// public String arg1;
 	// public String arg2;
 	// public String returnValue;
