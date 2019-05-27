@@ -17,11 +17,12 @@ public class AccessCall extends Object {
 	public String user_name;
 	public int OccuranceFactor = 1;
 	public long sequenceNumber;
+	public String computer_ID;
 	public ArrayList<Long> times;
 
 	public boolean isEqual(AccessCall theOther) {
 		AccessCall tmp = (AccessCall) theOther;
-		return this.From == tmp.From && this.To == tmp.To && this.Command.equals(tmp.Command);
+		return  this.From == tmp.From && this.To == tmp.To && this.Command.equals(tmp.Command);
 	}
 
 	@Override
@@ -39,10 +40,10 @@ public class AccessCall extends Object {
 	public String toN4JObjectString() {
 		return String.format(
 				"%s{command:\"%s\",date:\"%s\", description:\"%s\" , "
-						+ "args:\"%s\", info:\"%s\", user_id:\"%s\" , user_name:\"%s\"  }",
+						+ "args:\"%s\", info:\"%s\", user_id:\"%s\" , user_name:\"%s\", computer_id:\"%s\"  }",
 				String.valueOf(Command), String.valueOf(Command), String.valueOf(DateTime), "", // String.valueOf(Description),
 				"", // String.valueOf(args),
-				String.valueOf(Info), String.valueOf(user_id), String.valueOf(user_name)
+				String.valueOf(Info), String.valueOf(user_id), String.valueOf(user_name), String.valueOf(computer_ID)
 
 		).replace("\\", "");
 
