@@ -22,7 +22,7 @@ public class AccessCall extends Object {
 
 	public boolean isEqual(AccessCall theOther) {
 		AccessCall tmp = (AccessCall) theOther;
-		return  this.From == tmp.From && this.To == tmp.To && this.Command.equals(tmp.Command);
+		return this.From == tmp.From && this.To == tmp.To && this.Command.equals(tmp.Command);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class AccessCall extends Object {
 		if (times == null)
 			times = new ArrayList<Long>();
 		switch (mode) {
-		case 1: 
+		case 1:
 			// both will be kept
 			times.add(sequenceNumber);
 			break;

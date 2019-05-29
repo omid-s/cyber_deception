@@ -6,6 +6,7 @@ package insertion.graph;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.neo4j.driver.v1.AuthTokens;
@@ -29,6 +30,7 @@ public class ShadowDBInserter {
 	private static ShadowDBInserter __Instance = null; // holds the singleton instance of shadow inserter
 	private ConcurrentLinkedQueue<Object> theObjectQue;
 	private ConcurrentLinkedQueue<AccessCall> theEdgeUpdateQue;
+	private ConcurrentHashMap<Long, Integer> theIndexer;
 
 	private Thread inserterThread;
 
@@ -52,6 +54,8 @@ public class ShadowDBInserter {
 		theObjectQue = new ConcurrentLinkedQueue<Object>();
 		theEdgeUpdateQue = new ConcurrentLinkedQueue<AccessCall>();
 
+		theIndexer = new ConcurrentHashMap<Long, Integer>();
+
 		inserterThread = new Thread(new AsyncNeo4JInserter(this));
 		inserterThread.start();
 	}
@@ -63,14 +67,17 @@ public class ShadowDBInserter {
 
 	public void insertEdge(AccessCall edge) {
 
+		if (!theIndexer.keySet().contains(edge.sequenceNumber)) {
+			theIndexer.put(edge.sequenceNumber, 1);
 //		if (!theObjectQue.contains(edge))
 			theObjectQue.add(edge);
+		}
 
 	}
 
 	public void setEdgeForUpdate(AccessCall edge) {
 //		if (!theEdgeUpdateQue.contains(edge))
-			theEdgeUpdateQue.add(edge);
+		theEdgeUpdateQue.add(edge);
 	}
 
 	/**

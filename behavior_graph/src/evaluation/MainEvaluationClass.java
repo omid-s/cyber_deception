@@ -287,7 +287,7 @@ public class MainEvaluationClass {
 
 								lastStep = Instant.now();	
 								System.out.println(Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
-								Thread.sleep(1000* Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
+//								Thread.sleep(1000* Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
 								
 								stats.put("counter", counter);
 								stats.put("clock_time", Math.round(time_drag));
