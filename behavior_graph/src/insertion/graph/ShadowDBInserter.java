@@ -60,24 +60,40 @@ public class ShadowDBInserter {
 		inserterThread.start();
 	}
 
+	/**
+	 * inserts the graph nodes/ resources in the queue to be added to the graph 
+	 * @param node the resource item to be inserted
+	 */
 	public void insertNode(ResourceItem node) {
 		theObjectQue.add(node);
-
 	}
 
+	/**
+	 * adds the edge to be inserted this is to be used for new edges
+	 * @param edge edge to be inseted
+	 */
 	public void insertEdge(AccessCall edge) {
 
 		if (!theIndexer.keySet().contains(edge.sequenceNumber)) {
 			theIndexer.put(edge.sequenceNumber, 1);
-//		if (!theObjectQue.contains(edge))
 			theObjectQue.add(edge);
 		}
 
 	}
 
+	/**
+	 * adds the edge to the queue for update. THis should only be used for edges that are set for update not inserts
+	 * @param edge the edge to be updated
+	 */
 	public void setEdgeForUpdate(AccessCall edge) {
-//		if (!theEdgeUpdateQue.contains(edge))
-		theEdgeUpdateQue.add(edge);
+
+		if (!theIndexer.keySet().contains(edge.sequenceNumber)) {
+			theIndexer.put(edge.sequenceNumber, 2);
+			theObjectQue.add(edge);
+		}
+		else {
+			// TODO : this case should be ignored in this model if other methods are desired this should change
+		}
 	}
 
 	/**
@@ -107,6 +123,10 @@ public class ShadowDBInserter {
 			temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
 
 			temp += ";";
+			
+			//remove the item from indexer list
+			theIndexer.remove(edge.sequenceNumber);
+			
 			return temp;
 		} else if (ret instanceof ResourceItem) {
 			ResourceItem node = (ResourceItem) ret;
@@ -120,6 +140,10 @@ public class ShadowDBInserter {
 		return "";
 	}
 
+	/**
+	 * returns the total length of the queues 
+	 * @return the length of the queues
+	 */
 	public long getQueLenght() {
 		return theObjectQue.size() + theEdgeUpdateQue.size();
 	}

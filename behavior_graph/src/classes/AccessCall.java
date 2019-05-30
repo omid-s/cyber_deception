@@ -67,14 +67,17 @@ public class AccessCall extends Object {
 	 * @param mode           0- no compression , 1- will keep only the edge and adds
 	 *                       seq counters 2- will keep only first and last 3- will
 	 *                       keep just the first
+	 * @return true if the item should be sent for update
 	 */
-	public void addTime(long sequenceNumber, int mode) {
+	public boolean addTime(long sequenceNumber, int mode) {
+		boolean shouldUpdate = mode != 0;
 		if (times == null)
 			times = new ArrayList<Long>();
 		switch (mode) {
 		case 1:
 			// both will be kept
 			times.add(sequenceNumber);
+
 			break;
 		case 2:
 			// the beggining and end will be kept
@@ -93,7 +96,7 @@ public class AccessCall extends Object {
 			}
 			break;
 		case 3:
-			// onely one instace is to be kept
+			// only one instance is to be kept
 			switch (times.size()) {
 			case 0:
 				times.add(sequenceNumber);
@@ -108,6 +111,8 @@ public class AccessCall extends Object {
 			}
 
 		}
+
+		return shouldUpdate;
 	}
 
 }
