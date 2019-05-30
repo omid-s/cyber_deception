@@ -290,7 +290,8 @@ public class MainClass {
 						}
 
 					} catch (Exception ex) {
-						System.out.println(ex.getMessage());
+						ColorHelpers.PrintRed("\nError Happened: " + ex.getMessage() + "\n");
+
 					}
 
 				}
