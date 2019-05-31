@@ -60,7 +60,7 @@ public class AsyncNeo4JInserter implements Runnable {
 
 //						// ## clean the database out if parameter is set
 						if (counter2 == 10 && Boolean
-								.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+								.valueOf(Configurations.getInstance().getSetting(Configurations.EVAL_CLEAR_DB))) {
 							counter2 = 0;
 							try (Session session = driver.session()) {
 								session.writeTransaction(new TransactionWork<Integer>() {
@@ -89,7 +89,7 @@ public class AsyncNeo4JInserter implements Runnable {
 										// if the tracation flush is meet, create a new trasaction
 										if (transactionFlush >= 0 && counter % transactionFlush == 0)
 											break;
-									} else {
+									} else {  
 										try {
 											Thread.sleep(100);
 										} catch (Exception ex) {

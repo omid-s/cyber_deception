@@ -69,7 +69,8 @@ public class MainEvaluationClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, ShadowInserter = false , ClearDB=false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, ShadowInserter = false,
+				ClearDB = false;
 		String fileAdr = "", output_file = "";
 
 		int compression = -1;
@@ -124,8 +125,8 @@ public class MainEvaluationClass {
 				compression = 2;
 			if (pick.equals("c3"))
 				compression = 3;
-			if(pick.equals("clr"))
-				ClearDB= true;
+			if (pick.equals("clr"))
+				ClearDB = true;
 
 			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
@@ -238,7 +239,7 @@ public class MainEvaluationClass {
 //						if (Math.round(the_time - previous_time) > 0) {
 //							Thread.sleep(Math.round(the_time-previous_time));	
 //						}
-						
+
 						previous_time = the_time;
 
 						counter++;
@@ -286,12 +287,14 @@ public class MainEvaluationClass {
 
 								System.out.println(tempObj.evt_datetime);
 
-								double clock_time  = time_drag + Math.round(the_time - init_time);
+								double clock_time = time_drag + Math.round(the_time - init_time);
 
-								lastStep = Instant.now();	
-								System.out.println(Math.abs(Math.round( clock_time - ( total_time/1000 ))) );
-								Thread.sleep(1000* Math.abs(Math.round( clock_time - ( total_time/1000 ))) );
+								lastStep = Instant.now();
+								System.out.println(Math.abs(Math.round(clock_time - (total_time / 1000))));
 								
+								if (Math.round(clock_time - (total_time / 1000)) > 0)
+									Thread.sleep(1000 * Math.round(clock_time - (total_time / 1000)));
+
 								stats.put("counter", counter);
 								stats.put("clock_time", Math.round(clock_time));
 								stats.put("date_time", (new Date()).getTime());
@@ -319,7 +322,7 @@ public class MainEvaluationClass {
 								}
 								stats_file.write(row + "\n");
 								stats_file.flush();
-								//lastStep = Instant.now();
+								// lastStep = Instant.now();
 							}
 						}
 
