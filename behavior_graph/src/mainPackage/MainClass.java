@@ -243,6 +243,7 @@ public class MainClass {
 							continue;
 						}
 
+						// set computer id
 						tempObj.Computer_id = Configurations.getInstance().getSetting(Configurations.COMPUTER_ID);
 
 						multipleRecords = "";
@@ -290,6 +291,22 @@ public class MainClass {
 									t1.start();
 
 								}
+								if (runtime.freeMemory() <= runtime.totalMemory() * 0.10) {
+									cleaner_ctr++;
+									System.out.print("+");
+									// memory is too full, purge some records out then flush GC
+									InMemoryAdapter.getSignleton().purge(1000, theGraph);
+
+									Thread t1 = new Thread(new Runnable() {
+										@Override
+										public void run() {
+											System.gc();
+										}
+									});
+									t1.start();
+
+								}
+
 							}
 						}
 

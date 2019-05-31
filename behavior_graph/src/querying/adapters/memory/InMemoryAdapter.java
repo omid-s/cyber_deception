@@ -44,6 +44,8 @@ public class InMemoryAdapter extends BaseAdapter {
 //	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
 	private Map<String, ConcurrentLinkedQueue<ResourceItem>> FDMap = new ConcurrentHashMap<String, ConcurrentLinkedQueue<ResourceItem>>();
 
+	private ConcurrentLinkedQueue<ResourceItem> theNodeQueue = new ConcurrentLinkedQueue<ResourceItem>();
+
 	public static InMemoryAdapter getSignleton() {
 		if (bmem == null) {
 			bmem = new InMemoryAdapter();
@@ -61,13 +63,13 @@ public class InMemoryAdapter extends BaseAdapter {
 		FDMap.clear();
 	}
 
-	
-
 	public void addResourceItem(ResourceItem inp) {
 		if (V.containsKey(inp.id.toLowerCase()))
 			return;
 
 		V.put(inp.id.toLowerCase(), inp);
+		theNodeQueue.add(inp);
+
 		if (inp.Type == ResourceType.Process) {
 			ProcessMap.put(inp.id.toLowerCase(), inp);
 
@@ -470,5 +472,31 @@ public class InMemoryAdapter extends BaseAdapter {
 		types.add("execve");
 		types.add("binder");
 		return !types.contains(inp);
+	}
+
+	/**
+	 * removes the first count items from the nodes
+	 * 
+	 * @param count number of items to be removed
+	 */
+	public void purge(int count, Graph<ResourceItem, AccessCall> theGraph) {
+		for (int i = 0; i < count && !theNodeQueue.isEmpty(); i++) {
+			ResourceItem pick = theNodeQueue.poll();
+			purge(pick, theGraph);
+		}
+	}
+
+	/**
+	 * removes the given resource item along with all it's edges from the underlying
+	 * memory object as well as the memory
+	 * 
+	 * @param item     the item to be removed
+	 * @param theGraph the graph object to be changed
+	 */
+	public void purge(ResourceItem item, Graph<ResourceItem, AccessCall> theGraph) {
+		V.remove(item.id.toLowerCase());
+		tosMap.remove(item.id.toLowerCase());
+		tosMap.remove(item.id.toLowerCase());
+		theGraph.removeVertex(item);
 	}
 }
