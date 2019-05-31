@@ -182,7 +182,7 @@ public class MainEvaluationClass {
 		Instant start2 = Instant.now();
 		Instant lastStep = Instant.now();
 		Runtime runtime = Runtime.getRuntime();
-		double init_imte = -1;
+		double init_time = -1;
 		double previous_time = 0;
 		double time_drag = 0;
 		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
@@ -227,9 +227,9 @@ public class MainEvaluationClass {
 
 						double the_time = Double
 								.parseDouble(tempObj.evt_datetime.substring(0, tempObj.evt_datetime.indexOf('(')));
-						if (init_imte == -1 || Math.abs(previous_time - the_time) > 100) {
-							time_drag += Math.round(previous_time - init_imte);
-							init_imte = the_time;
+						if (init_time == -1 || Math.abs(previous_time - the_time) > 100) {
+							time_drag += Math.round(previous_time - init_time);
+							init_time = the_time;
 						}
 //
 //						if (Math.round(the_time - previous_time) > 0) {
@@ -283,14 +283,14 @@ public class MainEvaluationClass {
 
 								System.out.println(tempObj.evt_datetime);
 
-								time_drag += Math.round(the_time - init_imte);
+								double clock_time  = time_drag + Math.round(the_time - init_time);
 
 								lastStep = Instant.now();	
-								System.out.println(Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
-//								Thread.sleep(1000* Math.abs(Math.round( time_drag - ( total_time/1000 ))) );
+								System.out.println(Math.abs(Math.round( clock_time - ( total_time/1000 ))) );
+								Thread.sleep(1000* Math.abs(Math.round( clock_time - ( total_time/1000 ))) );
 								
 								stats.put("counter", counter);
-								stats.put("clock_time", Math.round(time_drag));
+								stats.put("clock_time", Math.round(clock_time));
 								stats.put("date_time", (new Date()).getTime());
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
