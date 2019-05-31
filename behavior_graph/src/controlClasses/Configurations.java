@@ -219,5 +219,6 @@ public class Configurations {
 	public static final String TRANSACTION_FLUSH = "trasaction_flush";
 	public static final String DRIVER_FLUSH = "driver_flush";
 	public static final String EVAL_CLEAR_DB = "eval_clear_db";
+	public static final String COMPUTER_ID = "computer_id";
 
 }

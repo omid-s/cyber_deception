@@ -46,6 +46,7 @@ public class MainClass {
 				ShadowInserter = false;
 		int compression = -1;
 		String fileAdr = "", output_file = "";
+		String computerID = "1";
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
@@ -54,6 +55,9 @@ public class MainClass {
 			}
 			if (pick.startsWith("\"outpath") || pick.startsWith("outpath")) {
 				output_file = pick.split("=")[1].replace("\"", "");
+			}
+			if (pick.startsWith("cid=")) {
+				computerID = pick.split("=")[1];
 			}
 			if (pick.startsWith("pid")) {
 				pid = pick.split("=")[1];
@@ -110,6 +114,7 @@ public class MainClass {
 		Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
 		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
+		Configurations.getInstance().setSetting(Configurations.COMPUTER_ID, computerID);
 
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
@@ -183,7 +188,6 @@ public class MainClass {
 						if (ShowGraph) {
 							ClearHelper.AddRowToGraph(theGraph, tempObj);
 						}
-
 					} else {
 						break;
 					}
@@ -238,6 +242,8 @@ public class MainClass {
 							multipleRecords = "";
 							continue;
 						}
+
+						tempObj.Computer_id = Configurations.getInstance().getSetting(Configurations.COMPUTER_ID);
 
 						multipleRecords = "";
 
@@ -315,7 +321,6 @@ public class MainClass {
 			output_file_writer.flush();
 			output_file_writer.close();
 		}
-
 
 		theGraph = null;
 		ClearHelper.release_maps();
