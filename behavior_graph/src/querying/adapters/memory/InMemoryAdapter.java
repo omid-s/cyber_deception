@@ -498,5 +498,11 @@ public class InMemoryAdapter extends BaseAdapter {
 		tosMap.remove(item.id.toLowerCase());
 		tosMap.remove(item.id.toLowerCase());
 		theGraph.removeVertex(item);
+
+		if (item.Type == ResourceType.Process) {
+			ProcessMap.remove(item.id.toLowerCase());
+		} else {
+			FDMap.remove(item.Title.toLowerCase());
+		}
 	}
 }
