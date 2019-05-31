@@ -252,16 +252,14 @@ public class MainClass {
 						if (SaveToDB)
 							objectDAL.Insert(tempObj);
 
-						if (SaveToGraph)
+						if (SaveToGraph) {
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
-
+						}
 						if (ShowVerbose) {
 							VerboseHelper.AddRowToGraph(theGraph, tempObj);
-
 						}
 						if (ShowGraph) {
 							ClearHelper.AddRowToGraph(theGraph, tempObj);
-
 						}
 
 						if (counter % 10000 == 0) {
