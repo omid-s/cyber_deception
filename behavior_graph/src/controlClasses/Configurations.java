@@ -218,5 +218,6 @@ public class Configurations {
 	public static final String COMPRESSSION_LEVEL = "compression_level";
 	public static final String TRANSACTION_FLUSH = "trasaction_flush";
 	public static final String DRIVER_FLUSH = "driver_flush";
+	public static final String EVAL_CLEAR_DB = "eval_clear_db";
 
 }

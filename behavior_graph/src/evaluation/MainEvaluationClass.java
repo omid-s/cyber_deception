@@ -69,7 +69,7 @@ public class MainEvaluationClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, ShadowInserter = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, ShadowInserter = false , ClearDB=false;
 		String fileAdr = "", output_file = "";
 
 		int compression = -1;
@@ -124,9 +124,12 @@ public class MainEvaluationClass {
 				compression = 2;
 			if (pick.equals("c3"))
 				compression = 3;
+			if(pick.equals("clr"))
+				ClearDB= true;
 
 			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
+			Configurations.getInstance().setSetting(Configurations.EVAL_CLEAR_DB, String.valueOf(ClearDB));
 
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"

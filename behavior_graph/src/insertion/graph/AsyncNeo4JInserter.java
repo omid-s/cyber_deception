@@ -58,8 +58,9 @@ public class AsyncNeo4JInserter implements Runnable {
 						counter = 0;
 						counter2++;
 
-						// ## clean the database out
-						if (counter2 == 10) {
+//						// ## clean the database out if parameter is set
+						if (counter2 == 10 && Boolean
+								.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
 							counter2 = 0;
 							try (Session session = driver.session()) {
 								session.writeTransaction(new TransactionWork<Integer>() {
