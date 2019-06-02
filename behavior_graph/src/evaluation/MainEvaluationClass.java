@@ -13,7 +13,9 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
+import insertion.ShadowInserter;
 import insertion.graph.ShadowNeo4JInserter;
+import insertion.pg.ShadowPGInserter;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
@@ -69,10 +71,11 @@ public class MainEvaluationClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, ShadowInserter = false,
-				ClearDB = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false,  
+				ClearDB = false,ShadowInsertion = false;
 		String fileAdr = "", output_file = "";
-
+		String computerID = "1";
+		String backEnd = "pg";
 		int compression = -1;
 
 		for (String pick : args) {
@@ -88,7 +91,12 @@ public class MainEvaluationClass {
 				pid = pick.split("=")[1];
 				System.out.println("pid = " + pid);
 			}
-
+			if (pick.startsWith("cid=")) {
+				computerID = pick.split("=")[1];
+			}
+			if (pick.startsWith("be=")) {
+				backEnd = pick.split("=")[1];
+			}
 			if (pick.equals("gv")) {
 				ShowVerbose = true;
 				// ShowGraph = true;
@@ -116,7 +124,7 @@ public class MainEvaluationClass {
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
 			if (pick.equals("si") || pick.equals("shadow_insert"))
-				ShadowInserter = true;
+				ShadowInsertion = true;
 			if (pick.equals("c0"))
 				compression = 0;
 			if (pick.equals("c1"))
@@ -129,9 +137,18 @@ public class MainEvaluationClass {
 				ClearDB = true;
 
 			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
-			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
+			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInsertion));
 			Configurations.getInstance().setSetting(Configurations.EVAL_CLEAR_DB, String.valueOf(ClearDB));
+			Configurations.getInstance().setSetting(Configurations.COMPUTER_ID, computerID);
 
+			if(ShadowInsertion) {
+				if( backEnd.equals("neo4j")) {
+					ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
+				}
+				else {
+					ShadowInserter.theInserter = ShadowPGInserter.getInstance();
+				}
+			}
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"

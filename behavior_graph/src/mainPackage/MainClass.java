@@ -49,7 +49,8 @@ public class MainClass {
 		int compression = -1;
 		String fileAdr = "", output_file = "";
 		String computerID = "1";
-		String backEnd = "neo4j";
+		String backEnd = "pg";
+		
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
@@ -125,10 +126,10 @@ public class MainClass {
 
 		if(ShadowInsertion) {
 			if( backEnd.equals("neo4j")) {
-				ShadowInserter.theInserter = ShadowPGInserter.getInstance();
+				ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
 			}
 			else {
-				ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
+				ShadowInserter.theInserter = ShadowPGInserter.getInstance();
 			}
 		}
 		
