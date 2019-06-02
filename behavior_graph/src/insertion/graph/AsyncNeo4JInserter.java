@@ -11,12 +11,13 @@ import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.TransactionWork;
 
 import controlClasses.Configurations;
+import insertion.IAsyncInserter;
 
 /**
  * @author omid
  *
  */
-public class AsyncNeo4JInserter implements Runnable {
+public class AsyncNeo4JInserter implements IAsyncInserter, Runnable {
 
 	private ShadowDBInserter __theBuffer;
 
@@ -89,7 +90,7 @@ public class AsyncNeo4JInserter implements Runnable {
 										// if the tracation flush is meet, create a new trasaction
 										if (transactionFlush >= 0 && counter % transactionFlush == 0)
 											break;
-									} else {  
+									} else {
 										try {
 											Thread.sleep(100);
 										} catch (Exception ex) {
@@ -119,7 +120,11 @@ public class AsyncNeo4JInserter implements Runnable {
 		}
 	}
 
-	private void reloadConnection(boolean byForce) {
+	/**
+	 * reloads the connection to the database
+	 */
+	@Override
+	public void reloadConnection(boolean byForce) {
 		try {
 			if (driver == null || byForce)
 				driver = GraphDatabase.driver(
