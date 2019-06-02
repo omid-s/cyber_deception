@@ -35,8 +35,7 @@ public class ShadowPGInserter extends ShadowInserter {
 		inserterThread.start();
 
 	}
-	
-	
+
 	/**
 	 * returns the first query to be processed
 	 * 
@@ -49,26 +48,16 @@ public class ShadowPGInserter extends ShadowInserter {
 			return (String) ret;
 		else if (ret instanceof AccessCall) {
 			AccessCall edge = (AccessCall) ret;
-			String temp = "";
 
-			temp += "\r\n" + String.format(" merge ( f:%s ) ", edge.From.toN4JObjectString());
-			temp += "\r\n" + String.format(" merge ( t:%s ) ", edge.To.toN4JObjectString());
-			temp += "\r\n" + String.format(" merge (f)-[:%s]->(t) ", edge.toN4JObjectString());
-
-			temp += ";";
-			
-			//remove the item from indexer list
+			// remove the item from indexer list
 			theIndexer.remove(edge.sequenceNumber);
-			
-			return temp;
+
+			return edge.toPGInsertString();
 		} else if (ret instanceof ResourceItem) {
 			ResourceItem node = (ResourceItem) ret;
-			String temp = "";
 
-			temp += "\r\n" + String.format(" merge ( f:%s ) ", node.toN4JObjectString());
+			return node.toPGInsertString();
 
-			temp += ";";
-			return temp;
 		}
 		return "";
 	}
