@@ -38,6 +38,21 @@ public class ResourceItem {
 				Type.toString(), String.valueOf(computer_id)).replace("\\", "");
 	}
 
+	public String toPGInsertString() {
+		return String.format("INSERT Into resources (id,title,path,number,description,type,computer_id) values ('%s','%s','%s','%s','%s','%s','%s');"
+				
+				,
+				Type.toString(),
+				Type == ResourceType.File ? getID() : String.valueOf(id), 
+						String.valueOf(Title),
+				String.valueOf(Path),
+				Type == ResourceType.Process ? String.valueOf(Number) : "", 
+						"", // String.valueOf(Description),
+				Type.toString(), 
+				String.valueOf(computer_id)
+				).replace("\\", "");
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub

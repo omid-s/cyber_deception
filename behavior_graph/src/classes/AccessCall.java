@@ -48,6 +48,28 @@ public class AccessCall extends Object {
 		).replace("\\", "");
 
 	}
+	
+	/***
+	 * returns the object as a sql insert query
+	 * @return
+	 */
+	public String toPGInsertString() {
+		return String.format(
+				" INSERT into accesscalls (command,date,description,args,info,user_id,user_name,computer_id,from_id,to_id) values "
+				+ "('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');",
+				String.valueOf(Command),
+				String.valueOf(Command),
+				String.valueOf(DateTime),
+				"", // String.valueOf(Description),
+				"", // String.valueOf(args),
+				String.valueOf(Info), 
+				String.valueOf(user_id), 
+				String.valueOf(user_name), 
+				String.valueOf(computer_id),
+				From.id,
+				To.id
+		).replace("\\", "");
+	}
 
 	@Override
 	public boolean equals(Object obj) {
