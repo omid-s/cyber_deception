@@ -19,6 +19,8 @@ public class ShadowInserter {
 	protected ConcurrentHashMap<Long, Integer> theIndexer;
 	protected Thread inserterThread;
 
+	public static ShadowInserter theInserter;
+	
 	/**
 	 * 
 	 */

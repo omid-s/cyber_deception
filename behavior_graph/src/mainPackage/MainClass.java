@@ -21,7 +21,9 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
+import insertion.ShadowInserter;
 import insertion.graph.ShadowDBInserter;
+import insertion.pg.ShadowPGInserter;
 import querying.QueryInterpreter;
 import querying.QueryProcessor;
 import querying.adapters.BaseAdapter;
@@ -43,21 +45,26 @@ public class MainClass {
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
 				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false,
-				ShadowInserter = false;
+				ShadowInsertion = false;
 		int compression = -1;
 		String fileAdr = "", output_file = "";
 		String computerID = "1";
+		String backEnd = "neo4j";
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
 			if (pick.startsWith("\"path") || pick.startsWith("path")) {
 				fileAdr = pick.split("=")[1].replace("\"", "");
 			}
+
 			if (pick.startsWith("\"outpath") || pick.startsWith("outpath")) {
 				output_file = pick.split("=")[1].replace("\"", "");
 			}
 			if (pick.startsWith("cid=")) {
 				computerID = pick.split("=")[1];
+			}
+			if (pick.startsWith("be=")) {
+				backEnd = pick.split("=")[1];
 			}
 			if (pick.startsWith("pid")) {
 				pid = pick.split("=")[1];
@@ -93,7 +100,7 @@ public class MainClass {
 			if (pick.equals("lg") || pick.equals("legacy_mode"))
 				LegacyMode = true;
 			if (pick.equals("si") || pick.equals("shadow_insert"))
-				ShadowInserter = true;
+				ShadowInsertion = true;
 			if (pick.equals("c0"))
 				compression = 0;
 			if (pick.equals("c1"))
@@ -113,9 +120,18 @@ public class MainClass {
 
 		Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
-		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInserter));
+		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInsertion));
 		Configurations.getInstance().setSetting(Configurations.COMPUTER_ID, computerID);
 
+		if(ShadowInsertion) {
+			if( backEnd.equals("neo4j")) {
+				ShadowInserter.theInserter = ShadowPGInserter.getInstance();
+			}
+			else {
+				ShadowInserter.theInserter = ShadowDBInserter.getInstance();
+			}
+		}
+		
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
 					"to save formated output the outoutfuile has to be supplied! use outpath= key to set the path");
