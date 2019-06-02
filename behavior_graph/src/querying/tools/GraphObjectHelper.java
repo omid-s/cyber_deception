@@ -18,6 +18,7 @@ import classes.SysdigRecordObjectGraph;
 import controlClasses.Configurations;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import insertion.ShadowInserter;
 import insertion.graph.ShadowDBInserter;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
@@ -105,7 +106,7 @@ public class GraphObjectHelper {
 			theGraph.addVertex(tempItem);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertNode(tempItem);
+				ShadowInserter.theInserter.insertNode(tempItem);
 			}
 
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
@@ -143,7 +144,7 @@ public class GraphObjectHelper {
 			theGraph.addVertex(tempItem);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertNode(tempItem);
+				ShadowInserter.theInserter.insertNode(tempItem);
 			}
 
 			resourcesMap.get(ResourceType.Thread).put(pick.getTID(), TheThread);
@@ -167,7 +168,7 @@ public class GraphObjectHelper {
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertEdge(tempCallItem);
+				ShadowInserter.theInserter.insertEdge(tempCallItem);
 			}
 
 			EdgeMap.put(TheProc.getHashID() + TheThread.id + "spawn", tempCallItem);
@@ -199,7 +200,7 @@ public class GraphObjectHelper {
 			theGraph.addVertex(tempItem);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertNode(tempItem);
+				ShadowInserter.theInserter.insertNode(tempItem);
 			}
 
 			resourcesMap.get(ResourceType.EXEUnit).put(pick.getUBSIID(), TheUBSI);
@@ -223,7 +224,7 @@ public class GraphObjectHelper {
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertEdge(tempCallItem);
+				ShadowInserter.theInserter.insertEdge(tempCallItem);
 			}
 
 			EdgeMap.put(TheThread.id + TheUBSI.id + "started", tempCallItem);
@@ -269,7 +270,7 @@ public class GraphObjectHelper {
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertEdge(tempCallItem);
+				ShadowInserter.theInserter.insertEdge(tempCallItem);
 			}
 
 			EdgeMap.put(parentP.getID() + tp.getID() + tempCallItem.Command, tempCallItem);
@@ -329,7 +330,7 @@ public class GraphObjectHelper {
 			theGraph.addVertex(tempItem);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-				ShadowDBInserter.getInstance().insertNode(tempItem);
+				ShadowInserter.theInserter.insertNode(tempItem);
 			}
 
 			resourcesMap.get(ItemType).put(pick.getFD_ID(), tempItem);
@@ -362,7 +363,7 @@ public class GraphObjectHelper {
 
 				if (shouldUpdate
 						&& Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-					ShadowDBInserter.getInstance().setEdgeForUpdate(t);
+					ShadowInserter.theInserter.setEdgeForUpdate(t);
 				}
 
 				theGraph.addVertex(t.From);
@@ -391,7 +392,7 @@ public class GraphObjectHelper {
 //
 
 				if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
-					ShadowDBInserter.getInstance().insertEdge(theCall);
+					ShadowInserter.theInserter.insertEdge(theCall);
 				}
 
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
