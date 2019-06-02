@@ -26,18 +26,18 @@ import querying.tools.GraphObjectHelper;
  * @author omid
  *
  */
-public class ShadowDBInserter extends ShadowInserter {
+public class ShadowNeo4JInserter extends ShadowInserter {
 
-	private static ShadowDBInserter __Instance = null; // holds the singleton instance of shadow inserter
+	private static ShadowNeo4JInserter __Instance = null; // holds the singleton instance of shadow inserter
 
 	/**
 	 * returns the singleton inserter object.
 	 * 
 	 * @return the inserter object
 	 */
-	public static ShadowDBInserter getInstance() {
+	public static ShadowNeo4JInserter getInstance() {
 		if (__Instance == null)
-			__Instance = new ShadowDBInserter();
+			__Instance = new ShadowNeo4JInserter();
 
 		return __Instance;
 	}
@@ -45,7 +45,7 @@ public class ShadowDBInserter extends ShadowInserter {
 	/**
 	 * creates an instance of the shadow inserter object
 	 */
-	private ShadowDBInserter() {
+	private ShadowNeo4JInserter() {
 		super();
 		
 		inserterThread = new Thread(new AsyncNeo4JInserter(this));

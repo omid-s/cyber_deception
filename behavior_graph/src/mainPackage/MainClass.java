@@ -22,7 +22,7 @@ import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
 import insertion.ShadowInserter;
-import insertion.graph.ShadowDBInserter;
+import insertion.graph.ShadowNeo4JInserter;
 import insertion.pg.ShadowPGInserter;
 import querying.QueryInterpreter;
 import querying.QueryProcessor;
@@ -128,7 +128,7 @@ public class MainClass {
 				ShadowInserter.theInserter = ShadowPGInserter.getInstance();
 			}
 			else {
-				ShadowInserter.theInserter = ShadowDBInserter.getInstance();
+				ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
 			}
 		}
 		

@@ -13,7 +13,7 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
-import insertion.graph.ShadowDBInserter;
+import insertion.graph.ShadowNeo4JInserter;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
@@ -314,7 +314,7 @@ public class MainEvaluationClass {
 								stats.put("ft_" + "edge", 0l);
 								stats.put("ft_" + "vertex", 0l);
 								stats.put("mem_used", runtime.totalMemory() - runtime.freeMemory());
-								stats.put("buffer_size", ShadowDBInserter.getInstance().getQueLenght());
+								stats.put("buffer_size", ShadowNeo4JInserter.getInstance().getQueLenght());
 
 								String row = "";
 								for (int i = 0; i < keys.length; i++) {
@@ -355,7 +355,7 @@ public class MainEvaluationClass {
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
-		ShadowDBInserter.getInstance().getWorkerThread().wait();
+		ShadowNeo4JInserter.getInstance().getWorkerThread().wait();
 
 	}
 

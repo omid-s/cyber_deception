@@ -19,7 +19,7 @@ import controlClasses.Configurations;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import insertion.ShadowInserter;
-import insertion.graph.ShadowDBInserter;
+import insertion.graph.ShadowNeo4JInserter;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
 

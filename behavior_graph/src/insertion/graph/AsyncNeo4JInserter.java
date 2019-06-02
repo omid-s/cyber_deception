@@ -19,12 +19,12 @@ import insertion.IAsyncInserter;
  */
 public class AsyncNeo4JInserter implements IAsyncInserter, Runnable {
 
-	private ShadowDBInserter __theBuffer;
+	private ShadowNeo4JInserter __theBuffer;
 
 	/**
 	 * creates an instance
 	 */
-	public AsyncNeo4JInserter(ShadowDBInserter theBuffer) {
+	public AsyncNeo4JInserter(ShadowNeo4JInserter theBuffer) {
 		this.__theBuffer = theBuffer;
 	}
 
