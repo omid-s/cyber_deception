@@ -18,19 +18,16 @@ public class ShadowInserter {
 	protected ConcurrentLinkedQueue<AccessCall> theEdgeUpdateQue;
 	protected ConcurrentHashMap<Long, Integer> theIndexer;
 	protected Thread inserterThread;
-	
+
 	/**
 	 * 
 	 */
 	public ShadowInserter() {
-		// TODO Auto-generated constructor stub
 		theObjectQue = new ConcurrentLinkedQueue<Object>();
 		theEdgeUpdateQue = new ConcurrentLinkedQueue<AccessCall>();
 
 		theIndexer = new ConcurrentHashMap<Long, Integer>();
 
-//		inserterThread = new Thread(new AsyncNeo4JInserter(this));
-//		inserterThread.start();
 	}
 	
 	
@@ -52,7 +49,6 @@ public class ShadowInserter {
 			theIndexer.put(edge.sequenceNumber, 1);
 			theObjectQue.add(edge);
 		}
-
 	}
 
 	/**
@@ -95,6 +91,10 @@ public class ShadowInserter {
 		return theObjectQue.size() + theEdgeUpdateQue.size();
 	}
 
+	/**
+	 * returns the working thread inserting the objects
+	 * @return
+	 */
 	public Thread getWorkerThread() {
 		return this.inserterThread;
 	}

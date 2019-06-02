@@ -29,8 +29,6 @@ import querying.tools.GraphObjectHelper;
 public class ShadowDBInserter extends ShadowInserter {
 
 	private static ShadowDBInserter __Instance = null; // holds the singleton instance of shadow inserter
-	
-	private Thread inserterThread;
 
 	/**
 	 * returns the singleton inserter object.
@@ -54,8 +52,6 @@ public class ShadowDBInserter extends ShadowInserter {
 		inserterThread.start();
 		
 	}
-
-	
 
 	/**
 	 * returns the first query to be processed
