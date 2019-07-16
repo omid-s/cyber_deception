@@ -25,6 +25,11 @@ public class AccessCall extends Object {
 		return this.From == tmp.From && this.To == tmp.To && this.Command.equals(tmp.Command);
 	}
 
+	public String getID() {
+		return this.From.getHashID() + "||" + this.To.getHashID()+ "||" + this.Command + "||"+ this.DateTime;
+	}
+	
+	
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub

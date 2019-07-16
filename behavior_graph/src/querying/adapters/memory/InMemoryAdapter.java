@@ -97,10 +97,12 @@ public class InMemoryAdapter extends BaseAdapter {
 	}
 
 	public void addAccessCall(AccessCall inp) {
-//		if (E.containsKey(inp.id))
-//			return;
-//		// add to access calls
-//		E.put(inp.id, inp);
+
+		// skip if the edge is already in the graph
+		if (E.containsKey(inp.getID()))
+			return;
+		// add to access calls
+		E.put(inp.getID(), inp);
 
 		// add the vertices of the end to the structure for the random access
 		if (!fromsMap.containsKey(inp.From.id.toLowerCase())) {

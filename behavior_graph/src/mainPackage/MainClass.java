@@ -282,31 +282,31 @@ public class MainClass {
 
 						if (counter % 10000 == 0) {
 
-							if (MemQuery) {
-								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
-								for (ResourceItem pick : theGraph.getVertices()) {
-									mem.addResourceItem(pick);
-								}
-								for (AccessCall pick : theGraph.getEdges()) {
-									mem.addAccessCall(pick);
-								}
-							}
+//							if (MemQuery) {
+//								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+//								for (ResourceItem pick : theGraph.getVertices()) {
+//									mem.addResourceItem(pick);
+//								}
+//								for (AccessCall pick : theGraph.getEdges()) {
+//									mem.addAccessCall(pick);
+//								}
+//							}
 
 //							System.out.println(counter + "(Q :" + ShadowDBInserter.getInstance().getQueLenght() + ")");
 
 							if (counter % 500000 == 0) {
-								System.out.println(String.format("\nA:remaining mem: %f - e:%d n:%d ",
-										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
-										theGraph.getEdgeCount(), theGraph.getVertexCount()));
+//								System.out.println(String.format("\nA:remaining mem: %f - e:%d n:%d ",
+//										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
+//										theGraph.getEdgeCount(), theGraph.getVertexCount()));
+//
+//								while (runtime.freeMemory() <= runtime.totalMemory() * 0.20) {
+//									System.out.print("+");
+//									// memory is too full, purge some records out then flush GC
+//									InMemoryAdapter.getSignleton().purge(2000, theGraph);
+//									System.gc();
+//								}
 
-								while (runtime.freeMemory() <= runtime.totalMemory() * 0.20) {
-									System.out.print("+");
-									// memory is too full, purge some records out then flush GC
-									InMemoryAdapter.getSignleton().purge(2000, theGraph);
-									System.gc();
-								}
-
-								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+								if (true) {//runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
 									cleaner_ctr++;
 									System.out.print("*");
 									Thread t1 = new Thread(new Runnable() {
@@ -318,16 +318,16 @@ public class MainClass {
 									t1.start();
 
 								}
-								System.out.println(String.format("\nB:remaining mem: %f - e:%d n:%d ",
-										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
-										theGraph.getEdgeCount(), theGraph.getVertexCount()));
+//								System.out.println(String.format("\nB:remaining mem: %f - e:%d n:%d ",
+//										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
+//										theGraph.getEdgeCount(), theGraph.getVertexCount()));
 
 							}
 						}
 
 					} catch (Exception ex) {
 						ColorHelpers.PrintRed("\nError Happened: " + ex.getMessage() + "\n");
-
+throw ex;
 					}
 
 				}

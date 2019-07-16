@@ -309,8 +309,8 @@ public class MainEvaluationClass {
 								lastStep = Instant.now();
 								System.out.println(Math.abs(Math.round(clock_time - (total_time / 1000))));
 								
-								if (Math.round(clock_time - (total_time / 1000)) > 0)
-									Thread.sleep(1000 * Math.round(clock_time - (total_time / 1000)));
+//								if (Math.round(clock_time - (total_time / 1000)) > 0)
+//									Thread.sleep(1000 * Math.round(clock_time - (total_time / 1000)));
 
 								stats.put("counter", counter);
 								stats.put("clock_time", Math.round(clock_time));
@@ -372,7 +372,8 @@ public class MainEvaluationClass {
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
-		ShadowNeo4JInserter.getInstance().getWorkerThread().wait();
+		System.exit(0);
+//		ShadowNeo4JInserter.getInstance().getWorkerThread().wait();
 
 	}
 

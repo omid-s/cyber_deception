@@ -20,6 +20,7 @@ import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import insertion.ShadowInserter;
 import insertion.graph.ShadowNeo4JInserter;
+import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
 
@@ -105,6 +106,8 @@ public class GraphObjectHelper {
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
 
+			InMemoryAdapter.getSignleton().addResourceItem(tempItem);
+			
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
 				ShadowInserter.theInserter.insertNode(tempItem);
 			}
@@ -121,7 +124,7 @@ public class GraphObjectHelper {
 		}
 
 		theGraph.addVertex(TheProc);
-
+		InMemoryAdapter.getSignleton().addResourceItem(TheProc);
 		// is thread new?
 		if (!resourcesMap.containsKey(ResourceType.Thread)) {
 			resourcesMap.put(ResourceType.Thread, new HashMap<String, ResourceItem>());
@@ -175,7 +178,12 @@ public class GraphObjectHelper {
 		} else {
 			AccessCall t = EdgeMap.get(TheProc.getHashID() + TheThread.id + "spawn");
 			theGraph.addVertex(t.From);
+			 
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
 		}
 
 		// is UBSI unit new?
@@ -198,7 +206,8 @@ public class GraphObjectHelper {
 
 			TheUBSI = tempItem;
 			theGraph.addVertex(tempItem);
-
+			InMemoryAdapter.getSignleton().addResourceItem(tempItem);
+			
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
 				ShadowInserter.theInserter.insertNode(tempItem);
 			}
@@ -222,7 +231,11 @@ public class GraphObjectHelper {
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
-
+			
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.To);
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.From);
+			InMemoryAdapter.getSignleton().addAccessCall(tempCallItem);
+			
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
 				ShadowInserter.theInserter.insertEdge(tempCallItem);
 			}
@@ -231,7 +244,12 @@ public class GraphObjectHelper {
 		} else {
 			AccessCall t = EdgeMap.get(TheThread.id + TheUBSI.id + "started");
 			theGraph.addVertex(t.From);
+			
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
 		}
 
 		ResourceItem parentP = null;
@@ -250,7 +268,8 @@ public class GraphObjectHelper {
 		}
 
 		theGraph.addVertex(parentP);
-
+		InMemoryAdapter.getSignleton().addResourceItem(parentP);
+		
 		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
 
 		ResourceItem tp = TheProc;
@@ -269,6 +288,10 @@ public class GraphObjectHelper {
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
 
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.To);
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.From);
+			InMemoryAdapter.getSignleton().addAccessCall(tempCallItem);
+			
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
 				ShadowInserter.theInserter.insertEdge(tempCallItem);
 			}
@@ -277,7 +300,12 @@ public class GraphObjectHelper {
 		} else {
 			AccessCall t = EdgeMap.get(parentP.getID() + tp.getID() + "exec");
 			theGraph.addVertex(t.From);
+			 
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
 		}
 
 		ResourceType ItemType = ResourceType.File;
@@ -328,6 +356,7 @@ public class GraphObjectHelper {
 			// tempItem.Description = pick.fd_
 
 			theGraph.addVertex(tempItem);
+			InMemoryAdapter.getSignleton().addResourceItem(tempItem);
 
 			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
 				ShadowInserter.theInserter.insertNode(tempItem);
@@ -368,8 +397,14 @@ public class GraphObjectHelper {
 
 				theGraph.addVertex(t.From);
 				theGraph.addVertex(t.To);
+				
+				InMemoryAdapter.getSignleton().addResourceItem(t.From);
+				InMemoryAdapter.getSignleton().addResourceItem(t.To);
+				
 				theGraph.addEdge(t, t.From, t.To);
-
+				InMemoryAdapter.getSignleton().addResourceItem(t.To);
+				InMemoryAdapter.getSignleton().addResourceItem(t.From);
+				InMemoryAdapter.getSignleton().addAccessCall(t);
 				int a = 12;
 			} else {
 				// create the edge between resources of start and end
@@ -388,7 +423,12 @@ public class GraphObjectHelper {
 				theCall.computer_id = pick.Computer_id;
 				theGraph.addVertex(theCall.From);
 				theGraph.addVertex(theCall.To);
+				
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.From);
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.To);
+				
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
+				InMemoryAdapter.getSignleton().addAccessCall(theCall);
 //
 
 				if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
@@ -447,11 +487,18 @@ public class GraphObjectHelper {
 				pick.getExec().From = parentP;
 				pick.getExec().To = TheProc;
 				theGraph.addEdge(pick.getExec(), parentP, TheProc);
+				InMemoryAdapter.getSignleton().addAccessCall(pick.getExec());
+				
 				EdgeMap.put(parentP.getID() + TheProc.getID() + pick.getExec().Command, pick.getExec());
 			} else {
 				AccessCall t = EdgeMap.get(parentP.getID() + TheProc.getID() + "exec");
 				theGraph.addVertex(t.From);
 				theGraph.addEdge(t, t.From, t.To);
+				
+				InMemoryAdapter.getSignleton().addAccessCall(t);
+				InMemoryAdapter.getSignleton().addResourceItem(t.From);
+				InMemoryAdapter.getSignleton().addResourceItem(t.To);
+				
 			}
 		}
 
@@ -501,6 +548,11 @@ public class GraphObjectHelper {
 				theGraph.addVertex(theCall.To);
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 
+				
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.From);
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.To);
+				InMemoryAdapter.getSignleton().addAccessCall(theCall);
+				
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}
@@ -560,6 +612,11 @@ public class GraphObjectHelper {
 			theGraph.addVertex(t.From);
 			theGraph.addVertex(t.To);
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
+			
 
 		} else {
 			// create the edge between resources of start and end
@@ -571,6 +628,11 @@ public class GraphObjectHelper {
 			theGraph.addVertex(theCall.To);
 			theGraph.addEdge(theCall, theCall.From, theCall.To);
 
+			InMemoryAdapter.getSignleton().addResourceItem(theCall.To);
+			InMemoryAdapter.getSignleton().addResourceItem(theCall.From);
+			InMemoryAdapter.getSignleton().addAccessCall(theCall);
+			
+			
 			EdgeMap.put(theCall.From.getHashID() + theCall.To.getHashID() + theCall.Command, theCall);
 
 		}

@@ -7,11 +7,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import classes.AccessCall;
+import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import controlClasses.Configurations;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
+import edu.uci.ics.jung.graph.Graph;
 import readers.SysdigObjectDAL;
 
 /**
@@ -50,16 +53,17 @@ public class testMain {
 //			System.out.println(temp.toString());
 //		}
 //		
-		String Fields = "";
-		
-		for ( String x : Configurations.getShortFieldList() ) {
-			if (Fields.length() > 0)
-				Fields+= ",";
-		
-			Fields+=x;
-		}
-		
-		System.out.println( Fields );
+//		String Fields = "";
+//		
+//		for ( String x : Configurations.getShortFieldList() ) {
+//			if (Fields.length() > 0)
+//				Fields+= ",";
+//		
+//			Fields+=x;
+//		}
+//		
+//		System.out.println( Fields );
+//		Graph<ResourceItem, AccessCall> theGraph 
 		
 	}
 }
