@@ -316,7 +316,6 @@ public class MainClass {
 										}
 									});
 									t1.start();
-
 								}
 //								System.out.println(String.format("\nB:remaining mem: %f - e:%d n:%d ",
 //										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,

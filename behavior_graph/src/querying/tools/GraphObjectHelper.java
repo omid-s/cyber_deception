@@ -397,11 +397,8 @@ public class GraphObjectHelper {
 
 				theGraph.addVertex(t.From);
 				theGraph.addVertex(t.To);
-				
-				InMemoryAdapter.getSignleton().addResourceItem(t.From);
-				InMemoryAdapter.getSignleton().addResourceItem(t.To);
-				
-				theGraph.addEdge(t, t.From, t.To);
+					theGraph.addEdge(t, t.From, t.To);
+					
 				InMemoryAdapter.getSignleton().addResourceItem(t.To);
 				InMemoryAdapter.getSignleton().addResourceItem(t.From);
 				InMemoryAdapter.getSignleton().addAccessCall(t);
