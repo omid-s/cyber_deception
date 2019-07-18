@@ -77,6 +77,7 @@ public class QueryProcessor implements Runnable {
 
 		Scanner reader = new Scanner(System.in);
 		long num_vertices = 0;
+		int  asyncID = 0 ;  
 		while (true) {
 
 			try {
@@ -123,6 +124,16 @@ public class QueryProcessor implements Runnable {
 
 				try {
 
+					if(command.startsWith("+")) {
+						
+						command = command.substring(1);
+						
+						AsyncQueryRunner asqr= new AsyncQueryRunner(asyncID++, command,true); 
+						Thread T  =new Thread(asqr);
+						T.start();
+						continue;
+					}
+					
 					ParsedQuery query = null;
 					try {
 						query = QueryInterpreter.interpret(command, theLocalGraph);
