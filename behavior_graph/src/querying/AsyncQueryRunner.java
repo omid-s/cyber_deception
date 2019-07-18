@@ -23,6 +23,7 @@ public class AsyncQueryRunner implements Runnable {
 	private String command;
 	private boolean stoped = false;
 	private boolean showWindow = false;
+	private boolean describe = false;
 
 	/**
 	 * 
@@ -37,6 +38,13 @@ public class AsyncQueryRunner implements Runnable {
 		this.ID = ID;
 		this.command = command;
 		this.showWindow = showWindow;
+	}
+
+	public AsyncQueryRunner(int ID, String command, boolean showWindow, boolean describe) {
+		this.ID = ID;
+		this.command = command;
+		this.showWindow = showWindow;
+		this.describe = describe;
 	}
 
 	public void stop() {
@@ -66,6 +74,7 @@ public class AsyncQueryRunner implements Runnable {
 
 					if (showWindow) {
 						theGraphWindow = new GraphPanel(theLocalGraph);
+						theGraphWindow.setPrint(false);
 						if (frame1.isVisible()) {
 							frame1.setVisible(false);
 							frame1.dispose();

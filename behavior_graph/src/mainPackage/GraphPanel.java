@@ -89,7 +89,7 @@ import helpers.GraphVisualsHelper;
  * 
  * @author Tom Nelson
  * 
- * This code has been modified by Omid Setayeshfar
+ *         This code has been modified by Omid Setayeshfar
  * 
  */
 public class GraphPanel extends JPanel {
@@ -98,6 +98,12 @@ public class GraphPanel extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = -6077157664507049647L;
+
+	private boolean doPrint = true;
+
+	public void setPrint(boolean print) {
+		this.doPrint = print;
+	}
 
 	/**
 	 * the graph
@@ -161,7 +167,7 @@ public class GraphPanel extends JPanel {
 		// create a from to hold the graph
 		panel = new GraphZoomScrollPane(vv);
 
-		Container content = this; 
+		Container content = this;
 
 		final DefaultModalGraphMouse<ResourceItem, AccessCall> graphMouse = new DefaultModalGraphMouse<ResourceItem, AccessCall>();
 		vv.setGraphMouse(graphMouse);
@@ -200,9 +206,10 @@ public class GraphPanel extends JPanel {
 		// create a simple graph for the demo
 		graph = inp;
 
-		System.out.println("Number of Edges: " + graph.getEdgeCount());
-		System.out.println("Number of Vertices: " + graph.getVertices().size());
-
+		if (doPrint) {
+			System.out.println("Number of Edges: " + graph.getEdgeCount());
+			System.out.println("Number of Vertices: " + graph.getVertices().size());
+		}
 		Layout<ResourceItem, AccessCall> layout = new FRLayout<ResourceItem, AccessCall>(graph);
 		java.awt.Toolkit tk = java.awt.Toolkit.getDefaultToolkit();
 		vv = new VisualizationViewer<ResourceItem, AccessCall>(layout,
