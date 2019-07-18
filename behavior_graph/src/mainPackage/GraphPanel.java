@@ -200,13 +200,17 @@ public class GraphPanel extends JPanel {
 
 	}
 
-	@SuppressWarnings("serial")
 	public GraphPanel(Graph<ResourceItem, AccessCall> inp) {
+		this(inp, true);
+	}
+
+	@SuppressWarnings("serial")
+	public GraphPanel(Graph<ResourceItem, AccessCall> inp, boolean print ) {
 
 		// create a simple graph for the demo
 		graph = inp;
 
-		if (doPrint) {
+		if (print) {
 			System.out.println("Number of Edges: " + graph.getEdgeCount());
 			System.out.println("Number of Vertices: " + graph.getVertices().size());
 		}

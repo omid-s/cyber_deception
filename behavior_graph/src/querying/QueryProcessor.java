@@ -5,6 +5,7 @@ package querying;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Scanner;
 import javax.swing.JFrame;
 import classes.AccessCall;
@@ -22,6 +23,7 @@ import querying.adapters.memory.InMemoryAdapter;
 import querying.adapters.simpleNeo4J.SimpleNeo4JAdapter;
 import querying.adapters.simplePG.SimplePGAdapter;
 import querying.parsing.ParsedQuery;
+import java.util.*;
 
 /**
  * @author omid
@@ -71,13 +73,15 @@ public class QueryProcessor implements Runnable {
 
 		Graph<ResourceItem, AccessCall> theLocalGraph = null;
 
+		Map<Integer, Thread> theThreadMap = new HashMap<Integer, Thread>();
+
 		/// setup GUI window
 		GraphPanel theGraphWindow = null;
 		JFrame frame1 = new JFrame();
 
 		Scanner reader = new Scanner(System.in);
 		long num_vertices = 0;
-		int  asyncID = 0 ;  
+		Integer asyncID = 0;
 		while (true) {
 
 			try {
@@ -124,16 +128,25 @@ public class QueryProcessor implements Runnable {
 
 				try {
 
-					if(command.startsWith("+")) {
-						
+					if (command.startsWith("+")) {
+
 						command = command.substring(1);
+
 						
-						AsyncQueryRunner asqr= new AsyncQueryRunner(asyncID++, command,true); 
-						Thread T  =new Thread(asqr);
+						AsyncQueryRunner asqr = new AsyncQueryRunner(asyncID, command, true);
+
+						Thread T = new Thread(asqr);
+						theThreadMap.put(asyncID, T);
+						System.out.println("Async query started with id :  " + asyncID);
+						asyncID += 1;
+
 						T.start();
 						continue;
+					} else if (command.startsWith("-")) {
+						Integer theID = Integer.parseInt(command.split(" ")[1]);
+						theThreadMap.get(theID).stop();
+						continue;
 					}
-					
 					ParsedQuery query = null;
 					try {
 						query = QueryInterpreter.interpret(command, theLocalGraph);

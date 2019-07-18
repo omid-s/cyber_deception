@@ -50,7 +50,7 @@ public class MainClass {
 		String fileAdr = "", output_file = "";
 		String computerID = "1";
 		String backEnd = "pg";
-		
+
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
@@ -124,15 +124,14 @@ public class MainClass {
 		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInsertion));
 		Configurations.getInstance().setSetting(Configurations.COMPUTER_ID, computerID);
 
-		if(ShadowInsertion) {
-			if( backEnd.equals("neo4j")) {
+		if (ShadowInsertion) {
+			if (backEnd.equals("neo4j")) {
 				ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
-			}
-			else {
+			} else {
 				ShadowInserter.theInserter = ShadowPGInserter.getInstance();
 			}
 		}
-		
+
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
 					"to save formated output the outoutfuile has to be supplied! use outpath= key to set the path");
@@ -306,9 +305,9 @@ public class MainClass {
 //									System.gc();
 //								}
 
-								if (true) {//runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+								if (true) {// runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
 									cleaner_ctr++;
-									System.out.print("*");
+//									System.out.print("*");
 									Thread t1 = new Thread(new Runnable() {
 										@Override
 										public void run() {
@@ -326,7 +325,7 @@ public class MainClass {
 
 					} catch (Exception ex) {
 						ColorHelpers.PrintRed("\nError Happened: " + ex.getMessage() + "\n");
-throw ex;
+						throw ex;
 					}
 
 				}

@@ -73,7 +73,7 @@ public class AsyncQueryRunner implements Runnable {
 				if (theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount() > graphItemsCount) {
 
 					if (showWindow) {
-						theGraphWindow = new GraphPanel(theLocalGraph);
+						theGraphWindow = new GraphPanel(theLocalGraph, false);
 						theGraphWindow.setPrint(false);
 						if (frame1.isVisible()) {
 							frame1.setVisible(false);
@@ -92,7 +92,7 @@ public class AsyncQueryRunner implements Runnable {
 					}
 					graphItemsCount = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
 				}
-				Thread.sleep(1000);
+				Thread.sleep(2000);
 			}
 
 		} catch (Exception ex) {
