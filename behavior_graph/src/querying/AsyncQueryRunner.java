@@ -64,7 +64,7 @@ public class AsyncQueryRunner implements Runnable {
 
 		int graphItemsCount = 0;
 		GraphPanel theGraphWindow = null;
-		JFrame frame1 = new JFrame();
+		JFrame frame1 = null;// new JFrame();
 		try {
 			ParsedQuery query = QueryInterpreter.interpret(command, theLocalGraph);
 			while (!stoped) {
@@ -73,22 +73,28 @@ public class AsyncQueryRunner implements Runnable {
 				if (theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount() > graphItemsCount) {
 
 					if (showWindow) {
+						GraphPanel oldPanel = theGraphWindow;
 						theGraphWindow = new GraphPanel(theLocalGraph, false);
 						theGraphWindow.setPrint(false);
-						if (frame1.isVisible()) {
-							frame1.setVisible(false);
-							frame1.dispose();
-						}
 
-						frame1 = new JFrame();
-						frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-						frame1.setSize(400, 400);
 
-						theGraphWindow.vv.repaint();
-						frame1.add(theGraphWindow);
+						if (frame1 == null) {
+							frame1 = new JFrame();
+							frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+							frame1.setSize(400, 400);
+
+							frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
+							frame1.setTitle("Autiomated Query ID:" + this.ID);
 						frame1.setVisible(true);
-						frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
-						frame1.setTitle("Autiomated Query ID:" + this.ID);
+						}
+						if (oldPanel != null)
+							frame1.remove(oldPanel);
+						
+						frame1.add(theGraphWindow);
+						theGraphWindow.vv.repaint();
+						frame1.repaint();	
+						frame1.pack();
+
 					}
 					graphItemsCount = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
 				}
