@@ -309,13 +309,15 @@ public class GraphObjectHelper {
 		}
 
 		ResourceType ItemType = ResourceType.File;
-		switch (pick.fd_typechar.toLowerCase()) {
+		switch (pick.fd_typechar.toLowerCase().trim()) {
 		case "f":
 			ItemType = ResourceType.File;
 			break;
 		case "4":
+		case "ipv4":
 			ItemType = ResourceType.NetworkIPV4;
 			break;
+		case "ipv6":
 		case "6":
 			ItemType = ResourceType.NetworkIPV6;
 			break;
@@ -343,8 +345,20 @@ public class GraphObjectHelper {
 			resourcesMap.put(ItemType, new HashMap<String, ResourceItem>());
 		}
 
+		
+		// to handle system calls like chmod 
+//		if(!pick.fd_num.equals("<NA>") ) {
+//			pick.fd_name= pick.fd_num;
+//			
+//			pick.fd_directory = pick.fd_name;
+////			ItemType= ResourceType.File;
+//		}
+//		else {
+//			pick.fd_num ="1" ;
+//		}
+		
 		// is there an fd resource ?
-		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID())) {
+		if (!pick.fd_num.equals( "<NA>") && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID())) {
 			ResourceItem tempItem = new ResourceItem();
 
 			tempItem.Type = ItemType;

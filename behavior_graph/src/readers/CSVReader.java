@@ -17,7 +17,7 @@ public class CSVReader extends SysdigObjectDAL {
 
 	String fields_list[] = { "evt_datetime", "evt_type", "thread_tid", "proc_name", "proc_args", "proc_cwd",
 			"proc_cmdline", "proc_pname", "proc_pid", "proc_ppid", "fd_cip", "fd_cport", "fd_directory", "fd_filename",
-			"fd_ip", "fd_name", "fd_num", "fd_type", "fd_typechar", "user_name", "user_uid", "evt_num", "evt_args",
+			"fd_ip","fd_port", "fd_name", "fd_num", "fd_type", "fd_typechar", "user_name", "user_uid", "evt_num", "evt_args",
 			"user_shell", "ubsi_unit_id" };
 
 	public CSVReader() throws NoSuchFieldException, SecurityException {
@@ -68,7 +68,7 @@ public class CSVReader extends SysdigObjectDAL {
 				ClassFields[i].set(ret, tokens[index].trim());
 		}
 
-		if (ret.proc_name != null && ret.proc_name.trim().isEmpty()) {
+		if (ret.proc_name != null && !ret.proc_name.trim().isEmpty()) {
 			pid_to_pname.put(ret.proc_pid, ret.proc_name);
 		}
 
@@ -76,6 +76,11 @@ public class CSVReader extends SysdigObjectDAL {
 			ret.evt_type = ret.evt_type.substring(0, ret.evt_type.indexOf('('));
 
 		ret.fd_typechar = getFDTypeChar(ret.fd_type);
+		
+		if( ret.fd_type.toLowerCase().trim().equals("ipv4") ) {
+			ret.fd_name= ret.fd_ip + ":" + ret.fd_port;
+		}
+		
 		if (ret.fd_name == null || ret.fd_name.isEmpty())
 			ret.fd_name = "<NA>";
 		if (ret.fd_num == null || ret.fd_num.isEmpty())
@@ -89,6 +94,8 @@ public class CSVReader extends SysdigObjectDAL {
 			} else
 				ret.proc_pname = "<NA>";
 
+		
+		
 		return ret;
 	}
 
