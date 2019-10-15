@@ -1,6 +1,8 @@
 # Behavior Graph 
 
-This tool shows a graph of activities. 
+This tool shows a graph of activities. This repository is part of our implementatin of this paper: 
+https://arxiv.org/abs/1909.00902
+
 
 ## Install 
 sysdig is required for running this tool to install sysdig : 
