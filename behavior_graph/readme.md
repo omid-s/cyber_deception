@@ -51,6 +51,10 @@ arguments :
 	* rspg:  to select simple postgress query adapter
 	* short: to enable short format logs being read from input 
 	* rsn4j: to choose neo4j query adapter 
+	* c0 : no compression 
+	* c1 : level one compression, same edge will keep the time stamps
+	* c2 : level two compression, same edge will only keep the first and last time stamps
+	* c3 : level three compression, only the first time stamp of an edge is kept
 	
 ## Query model 
 

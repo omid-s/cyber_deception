@@ -1,5 +1,6 @@
 package evaluation;
 
+import controlClasses.Configurations;
 import controlClasses.RecordInterpretorFactory;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.DataBaseLayer;
@@ -12,6 +13,9 @@ import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
 import helpers.DescribeFactory;
+import insertion.ShadowInserter;
+import insertion.graph.ShadowNeo4JInserter;
+import insertion.pg.ShadowPGInserter;
 import querying.QueryInterpreter;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
@@ -58,7 +62,7 @@ import classes.SysdigRecordObject;
 public class MainEvaluationClass {
 	private static final boolean IsVerbose = false;
 
-	private static final long REPORT_ROW_COUNT = 10000000;
+	private static final long REPORT_ROW_COUNT = 100000;
 
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
@@ -67,8 +71,13 @@ public class MainEvaluationClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false,  
+				ClearDB = false,ShadowInsertion = false;
 		String fileAdr = "", output_file = "";
+		String computerID = "1";
+		String backEnd = "pg";
+		int compression = -1;
+
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
@@ -82,7 +91,12 @@ public class MainEvaluationClass {
 				pid = pick.split("=")[1];
 				System.out.println("pid = " + pid);
 			}
-
+			if (pick.startsWith("cid=")) {
+				computerID = pick.split("=")[1];
+			}
+			if (pick.startsWith("be=")) {
+				backEnd = pick.split("=")[1];
+			}
 			if (pick.equals("gv")) {
 				ShowVerbose = true;
 				// ShowGraph = true;
@@ -109,7 +123,32 @@ public class MainEvaluationClass {
 				SimpleNeo4JQuery = true;
 			if (pick.equals("sj") || pick.equals("save_json"))
 				SaveJSON = true;
+			if (pick.equals("si") || pick.equals("shadow_insert"))
+				ShadowInsertion = true;
+			if (pick.equals("c0"))
+				compression = 0;
+			if (pick.equals("c1"))
+				compression = 1;
+			if (pick.equals("c2"))
+				compression = 2;
+			if (pick.equals("c3"))
+				compression = 3;
+			if (pick.equals("clr"))
+				ClearDB = true;
 
+			Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
+			Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInsertion));
+			Configurations.getInstance().setSetting(Configurations.EVAL_CLEAR_DB, String.valueOf(ClearDB));
+			Configurations.getInstance().setSetting(Configurations.COMPUTER_ID, computerID);
+
+			if(ShadowInsertion) {
+				if( backEnd.equals("neo4j")) {
+					ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
+				}
+				else {
+					ShadowInserter.theInserter = ShadowPGInserter.getInstance();
+				}
+			}
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
 						+ "smsql: save to my sql \r\n" + "sneo4j: save to neo4 j data base"
@@ -148,8 +187,9 @@ public class MainEvaluationClass {
 		else if (SimpleNeo4JQuery)
 			queryMachine = SimpleNeo4JAdapter.getSignleton();
 
-		String[] keys = { "counter", "date_time", "last_rows_time", "total_time", "select_time", "select_edge",
-				"select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex" };
+		String[] keys = { "counter", "clock_time", "date_time", "last_rows_time", "total_time", "select_time",
+				"select_edge", "select_vertex", "bt_time", "bt_edge", "bt_vertex", "ft_time", "ft_edge", "ft_vertex",
+				"mem_used", "buffer_size" };
 
 		String row1 = "";
 		for (int i = 0; i < keys.length; i++) {
@@ -162,6 +202,11 @@ public class MainEvaluationClass {
 
 		Instant start2 = Instant.now();
 		Instant lastStep = Instant.now();
+		Runtime runtime = Runtime.getRuntime();
+		double init_time = -1;
+		double previous_time = 0;
+		double time_drag = 0;
+		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
 		if (ReadFromFile) {
 			try {
 				System.out.println("in read File");
@@ -189,12 +234,6 @@ public class MainEvaluationClass {
 							multipleRecords += test.nextLine();
 							tempObj = objectDAL.GetObjectFromTextLine(multipleRecords);
 
-							if (SaveFormated)
-								stats_file.write(tempObj.toString() + "\n");
-							if (SaveJSON)
-								stats_file.write(tempObj.toJSONString() + ",");
-							if (SaveToDB)
-								objectDAL.Insert(tempObj);
 							if (theL > 1)
 								System.out.println("---------------------------------------------");
 						} catch (LowFieldNumberException ex) {
@@ -207,13 +246,51 @@ public class MainEvaluationClass {
 
 						multipleRecords = "";
 
-						counter++;
+						double the_time = Double
+								.parseDouble(tempObj.evt_datetime.substring(0, tempObj.evt_datetime.indexOf('(')));
+						if (init_time == -1 || Math.abs(previous_time - the_time) > 100) {
+							time_drag += Math.round(previous_time - init_time);
+							init_time = the_time;
+						}
+//
+//						if (Math.round(the_time - previous_time) > 0) {
+//							Thread.sleep(Math.round(the_time-previous_time));	
+//						}
 
+						previous_time = the_time;
+
+						counter++;
+						if (SaveFormated)
+							stats_file.write(tempObj.toString() + "\n");
+						if (SaveJSON)
+							stats_file.write(tempObj.toJSONString() + ",");
 						if (SaveToDB)
 							objectDAL.Insert(tempObj);
-
+						if (ShowGraph) {
+							ClearHelper.AddRowToGraph(theGraph, tempObj);
+						}
 						if (SaveToGraph)
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
+
+						if (counter % 100000 == 0) {
+//							System.out.println(counter);
+
+							if (counter % 5000000 == 0) {
+
+								if (runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+
+									System.out.print("#");
+									Thread t1 = new Thread(new Runnable() {
+										@Override
+										public void run() {
+											System.gc();
+										}
+									});
+									t1.start();
+
+								}
+							}
+						}
 
 						if (counter % (REPORT_ROW_COUNT / 10) == 0) {
 							System.out.print("*");
@@ -225,14 +302,36 @@ public class MainEvaluationClass {
 								Long last_rows_time = Duration.between(lastStep, temp_end).toMillis();
 								total_time += last_rows_time;
 
+								System.out.println(tempObj.evt_datetime);
+
+								double clock_time = time_drag + Math.round(the_time - init_time);
+
+								lastStep = Instant.now();
+								System.out.println(Math.abs(Math.round(clock_time - (total_time / 1000))));
+								
+//								if (Math.round(clock_time - (total_time / 1000)) > 0)
+//									Thread.sleep(1000 * Math.round(clock_time - (total_time / 1000)));
+
 								stats.put("counter", counter);
+								stats.put("clock_time", Math.round(clock_time));
 								stats.put("date_time", (new Date()).getTime());
 								stats.put("last_rows_time", last_rows_time);
 								stats.put("total_time", total_time);
 
-								runQuery("select * from file where name has .txt ", queryMachine, stats, "select_");
-								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
-								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
+//								runQuery("select * from file where name has iou897iou ", queryMachine, stats, "select_");
+//								runQuery("select * from file where name has iou897iou ", queryMachine, stats, "bt_");
+//								runQuery("select * from file where name has iou897iou ", queryMachine, stats, "ft_");
+//								runQuery("back select * from * where name has .txt", queryMachine, stats, "bt_");
+//								runQuery("forward select * from * where name has gmain ", queryMachine, stats, "ft_");
+
+								stats.put("bt_" + "time", 0l);
+								stats.put("bt_" + "edge", 0l);
+								stats.put("bt_" + "vertex", 0l);
+								stats.put("ft_" + "time", 0l);
+								stats.put("ft_" + "edge", 0l);
+								stats.put("ft_" + "vertex", 0l);
+								stats.put("mem_used", runtime.totalMemory() - runtime.freeMemory());
+								stats.put("buffer_size", ShadowNeo4JInserter.getInstance().getQueLenght());
 
 								String row = "";
 								for (int i = 0; i < keys.length; i++) {
@@ -240,7 +339,7 @@ public class MainEvaluationClass {
 								}
 								stats_file.write(row + "\n");
 								stats_file.flush();
-								lastStep = Instant.now();
+								// lastStep = Instant.now();
 							}
 						}
 
@@ -258,7 +357,7 @@ public class MainEvaluationClass {
 		}
 		objectDAL.flushRows();
 		GraphActionFactory.flushRows();
-		
+
 		Instant end2 = Instant.now();
 
 		ColorHelpers.PrintBlue("in : " + Duration.between(start2, end2).toMillis() + "  Milli Seconds \n");
@@ -273,6 +372,8 @@ public class MainEvaluationClass {
 		GraphActionFactory.closeConnections();
 		// System.out.print("\033[H\033[2J");
 		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
+		System.exit(0);
+//		ShadowNeo4JInserter.getInstance().getWorkerThread().wait();
 
 	}
 

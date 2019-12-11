@@ -15,8 +15,12 @@ import classes.ResourceItem;
 import classes.ResourceType;
 import classes.SysdigRecordObject;
 import classes.SysdigRecordObjectGraph;
+import controlClasses.Configurations;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import insertion.ShadowInserter;
+import insertion.graph.ShadowNeo4JInserter;
+import querying.adapters.memory.InMemoryAdapter;
 import querying.parsing.ParsedQuery;
 import readers.SysdigObjectDAL;
 
@@ -82,7 +86,7 @@ public class GraphObjectHelper {
 		ResourceItem FromItem = null;
 		ResourceItem ToItem = null;
 		ResourceItem TheProc = null;
-		
+
 		// is process new ?
 		if (!resourcesMap.containsKey(ResourceType.Process)) {
 			resourcesMap.put(ResourceType.Process, new HashMap<String, ResourceItem>());
@@ -97,9 +101,16 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getProcPID();
 			tempItem.Title = pick.proc_name;
 			tempItem.Description = pick.proc_args;
+			tempItem.computer_id = pick.Computer_id;
 
 			TheProc = tempItem;
 			theGraph.addVertex(tempItem);
+
+			InMemoryAdapter.getSignleton().addResourceItem(tempItem);
+			
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertNode(tempItem);
+			}
 
 			resourcesMap.get(ResourceType.Process).put(pick.getProcPID(), TheProc);
 		} else {
@@ -113,7 +124,7 @@ public class GraphObjectHelper {
 		}
 
 		theGraph.addVertex(TheProc);
-
+		InMemoryAdapter.getSignleton().addResourceItem(TheProc);
 		// is thread new?
 		if (!resourcesMap.containsKey(ResourceType.Thread)) {
 			resourcesMap.put(ResourceType.Thread, new HashMap<String, ResourceItem>());
@@ -130,9 +141,14 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getTID();
 			tempItem.Title = "-";
 			tempItem.Description = "-";
+			tempItem.computer_id = pick.Computer_id;
 
 			TheThread = tempItem;
 			theGraph.addVertex(tempItem);
+
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertNode(tempItem);
+			}
 
 			resourcesMap.get(ResourceType.Thread).put(pick.getTID(), TheThread);
 		} else {
@@ -149,15 +165,25 @@ public class GraphObjectHelper {
 			tempCallItem.Command = "spawn";
 			tempCallItem.user_id = pick.user_uid;
 			tempCallItem.user_name = pick.user_name;
-
+			tempCallItem.computer_id = pick.Computer_id;
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertEdge(tempCallItem);
+			}
+
 			EdgeMap.put(TheProc.getHashID() + TheThread.id + "spawn", tempCallItem);
 		} else {
 			AccessCall t = EdgeMap.get(TheProc.getHashID() + TheThread.id + "spawn");
 			theGraph.addVertex(t.From);
+			 
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
 		}
 
 		// is UBSI unit new?
@@ -176,9 +202,15 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getUBSIID();
 			tempItem.Title = "-";
 			tempItem.Description = "-";
+			tempItem.computer_id = pick.Computer_id;
 
 			TheUBSI = tempItem;
 			theGraph.addVertex(tempItem);
+			InMemoryAdapter.getSignleton().addResourceItem(tempItem);
+			
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertNode(tempItem);
+			}
 
 			resourcesMap.get(ResourceType.EXEUnit).put(pick.getUBSIID(), TheUBSI);
 		} else {
@@ -195,15 +227,29 @@ public class GraphObjectHelper {
 			tempCallItem.Command = "started";
 			tempCallItem.user_id = pick.user_uid;
 			tempCallItem.user_name = pick.user_name;
-
+			tempCallItem.computer_id = pick.Computer_id;
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.To);
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.From);
+			InMemoryAdapter.getSignleton().addAccessCall(tempCallItem);
+			
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertEdge(tempCallItem);
+			}
+
 			EdgeMap.put(TheThread.id + TheUBSI.id + "started", tempCallItem);
 		} else {
 			AccessCall t = EdgeMap.get(TheThread.id + TheUBSI.id + "started");
 			theGraph.addVertex(t.From);
+			
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
 		}
 
 		ResourceItem parentP = null;
@@ -218,11 +264,12 @@ public class GraphObjectHelper {
 			parentP.id = pick.getParentProcID();
 			parentP.Title = pick.proc_pname;
 			parentP.Description = "";
-
+			parentP.computer_id = pick.Computer_id;
 		}
 
 		theGraph.addVertex(parentP);
-
+		InMemoryAdapter.getSignleton().addResourceItem(parentP);
+		
 		resourcesMap.get(ResourceType.Process).put(parentP.id, parentP);
 
 		ResourceItem tp = TheProc;
@@ -236,25 +283,41 @@ public class GraphObjectHelper {
 			tempCallItem.Command = "exec";
 			tempCallItem.user_id = pick.user_uid;
 			tempCallItem.user_name = pick.user_name;
-
+			tempCallItem.computer_id = pick.Computer_id;
 			tempCallItem.sequenceNumber = sequenceCounter++;
 
 			theGraph.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
+
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.To);
+			InMemoryAdapter.getSignleton().addResourceItem(tempCallItem.From);
+			InMemoryAdapter.getSignleton().addAccessCall(tempCallItem);
+			
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertEdge(tempCallItem);
+			}
+
 			EdgeMap.put(parentP.getID() + tp.getID() + tempCallItem.Command, tempCallItem);
 		} else {
 			AccessCall t = EdgeMap.get(parentP.getID() + tp.getID() + "exec");
 			theGraph.addVertex(t.From);
+			 
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
 		}
 
 		ResourceType ItemType = ResourceType.File;
-		switch (pick.fd_typechar.toLowerCase()) {
+		switch (pick.fd_typechar.toLowerCase().trim()) {
 		case "f":
 			ItemType = ResourceType.File;
 			break;
 		case "4":
+		case "ipv4":
 			ItemType = ResourceType.NetworkIPV4;
 			break;
+		case "ipv6":
 		case "6":
 			ItemType = ResourceType.NetworkIPV6;
 			break;
@@ -282,8 +345,20 @@ public class GraphObjectHelper {
 			resourcesMap.put(ItemType, new HashMap<String, ResourceItem>());
 		}
 
+		
+		// to handle system calls like chmod 
+//		if(!pick.fd_num.equals("<NA>") ) {
+//			pick.fd_name= pick.fd_num;
+//			
+//			pick.fd_directory = pick.fd_name;
+////			ItemType= ResourceType.File;
+//		}
+//		else {
+//			pick.fd_num ="1" ;
+//		}
+		
 		// is there an fd resource ?
-		if (pick.fd_num != "<NA>" && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID())) {
+		if (!pick.fd_num.equals( "<NA>") && !resourcesMap.get(ItemType).containsKey(pick.getFD_ID())) {
 			ResourceItem tempItem = new ResourceItem();
 
 			tempItem.Type = ItemType;
@@ -291,9 +366,16 @@ public class GraphObjectHelper {
 			tempItem.id = pick.getFD_ID();
 			tempItem.Path = pick.fd_directory;
 			tempItem.Title = pick.fd_name;
+			tempItem.computer_id = pick.Computer_id;
 			// tempItem.Description = pick.fd_
 
 			theGraph.addVertex(tempItem);
+			InMemoryAdapter.getSignleton().addResourceItem(tempItem);
+
+			if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+				ShadowInserter.theInserter.insertNode(tempItem);
+			}
+
 			resourcesMap.get(ItemType).put(pick.getFD_ID(), tempItem);
 			ToItem = tempItem;
 		}
@@ -314,16 +396,26 @@ public class GraphObjectHelper {
 			 * verbose flag is set, create a new edge anyways, other wise check if it exists
 			 * raise the occirance factor otherwisde insert it
 			 */
-			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID() + pick.evt_type))
-			{
+			if (!isInVerboseMode && EdgeMap.containsKey(FF.getID() + TT.getID() + pick.evt_type)) {
 
 				AccessCall t = EdgeMap.get(FF.getID() + TT.getID() + pick.evt_type);
 				t.OccuranceFactor++;
+				sequenceCounter++;
+				boolean shouldUpdate = t.addTime(sequenceCounter,
+						Integer.parseInt(Configurations.getInstance().getSetting(Configurations.COMPRESSSION_LEVEL)));
+
+				if (shouldUpdate
+						&& Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+					ShadowInserter.theInserter.setEdgeForUpdate(t);
+				}
 
 				theGraph.addVertex(t.From);
 				theGraph.addVertex(t.To);
-				theGraph.addEdge(t, t.From, t.To);
-
+					theGraph.addEdge(t, t.From, t.To);
+					
+				InMemoryAdapter.getSignleton().addResourceItem(t.To);
+				InMemoryAdapter.getSignleton().addResourceItem(t.From);
+				InMemoryAdapter.getSignleton().addAccessCall(t);
 				int a = 12;
 			} else {
 				// create the edge between resources of start and end
@@ -337,11 +429,23 @@ public class GraphObjectHelper {
 				theCall.user_id = pick.user_uid;
 				theCall.user_name = pick.user_name;
 				theCall.sequenceNumber = sequenceCounter++;
-
+				theCall.addTime(sequenceCounter,
+						Integer.parseInt(Configurations.getInstance().getSetting(Configurations.COMPRESSSION_LEVEL)));
+				theCall.computer_id = pick.Computer_id;
 				theGraph.addVertex(theCall.From);
 				theGraph.addVertex(theCall.To);
+				
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.From);
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.To);
+				
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
+				InMemoryAdapter.getSignleton().addAccessCall(theCall);
 //
+
+				if (Boolean.valueOf(Configurations.getInstance().getSetting(Configurations.SHADOW_INSERTER))) {
+					ShadowInserter.theInserter.insertEdge(theCall);
+				}
+
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}
@@ -394,11 +498,18 @@ public class GraphObjectHelper {
 				pick.getExec().From = parentP;
 				pick.getExec().To = TheProc;
 				theGraph.addEdge(pick.getExec(), parentP, TheProc);
+				InMemoryAdapter.getSignleton().addAccessCall(pick.getExec());
+				
 				EdgeMap.put(parentP.getID() + TheProc.getID() + pick.getExec().Command, pick.getExec());
 			} else {
 				AccessCall t = EdgeMap.get(parentP.getID() + TheProc.getID() + "exec");
 				theGraph.addVertex(t.From);
 				theGraph.addEdge(t, t.From, t.To);
+				
+				InMemoryAdapter.getSignleton().addAccessCall(t);
+				InMemoryAdapter.getSignleton().addResourceItem(t.From);
+				InMemoryAdapter.getSignleton().addResourceItem(t.To);
+				
 			}
 		}
 
@@ -448,6 +559,11 @@ public class GraphObjectHelper {
 				theGraph.addVertex(theCall.To);
 				theGraph.addEdge(theCall, theCall.From, theCall.To);
 
+				
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.From);
+				InMemoryAdapter.getSignleton().addResourceItem(theCall.To);
+				InMemoryAdapter.getSignleton().addAccessCall(theCall);
+				
 				EdgeMap.put(theCall.From.getID() + theCall.To.getID() + theCall.Command, theCall);
 
 			}
@@ -455,13 +571,13 @@ public class GraphObjectHelper {
 
 	}
 
-	
 	/**
-	 * adds the input triple to the graph 
-	 * @param theGraph the grapoh to add nodes to 
-	 * @param From  starting node
-	 * @param To ending node
-	 * @param call the edge between them 
+	 * adds the input triple to the graph
+	 * 
+	 * @param theGraph the grapoh to add nodes to
+	 * @param From     starting node
+	 * @param To       ending node
+	 * @param call     the edge between them
 	 */
 	public void AddRowToGraph(Graph<ResourceItem, AccessCall> theGraph, ResourceItem From, ResourceItem To,
 			AccessCall call) {
@@ -507,6 +623,11 @@ public class GraphObjectHelper {
 			theGraph.addVertex(t.From);
 			theGraph.addVertex(t.To);
 			theGraph.addEdge(t, t.From, t.To);
+			
+			InMemoryAdapter.getSignleton().addResourceItem(t.To);
+			InMemoryAdapter.getSignleton().addResourceItem(t.From);
+			InMemoryAdapter.getSignleton().addAccessCall(t);
+			
 
 		} else {
 			// create the edge between resources of start and end
@@ -518,6 +639,11 @@ public class GraphObjectHelper {
 			theGraph.addVertex(theCall.To);
 			theGraph.addEdge(theCall, theCall.From, theCall.To);
 
+			InMemoryAdapter.getSignleton().addResourceItem(theCall.To);
+			InMemoryAdapter.getSignleton().addResourceItem(theCall.From);
+			InMemoryAdapter.getSignleton().addAccessCall(theCall);
+			
+			
 			EdgeMap.put(theCall.From.getHashID() + theCall.To.getHashID() + theCall.Command, theCall);
 
 		}
@@ -652,6 +778,7 @@ public class GraphObjectHelper {
 		tempItem.id = pick.getProcPID();
 		tempItem.Title = pick.proc_name;
 		tempItem.Description = pick.proc_args;
+		tempItem.computer_id = pick.Computer_id;
 
 		ResourceItem TheProc = tempItem;
 //		ret.addVertex(tempItem);
@@ -661,7 +788,7 @@ public class GraphObjectHelper {
 		parentP.id = pick.getParentProcID();
 		parentP.Title = pick.proc_pname;
 		parentP.Type = ResourceType.Process;
-
+		parentP.computer_id = pick.Computer_id;
 //		ret.addVertex(parentP);
 
 		// add the call between process and process parent
@@ -671,7 +798,7 @@ public class GraphObjectHelper {
 		tempCallItem.Command = "exec";
 		tempCallItem.user_id = pick.user_uid;
 		tempCallItem.user_name = pick.user_name;
-
+		tempCallItem.computer_id = pick.Computer_id;
 		tempCallItem.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 		ResourceItem TheThread = new ResourceItem();
@@ -681,7 +808,7 @@ public class GraphObjectHelper {
 		TheThread.id = pick.getTID();
 		TheThread.Title = "-";
 		TheThread.Description = "-";
-
+		TheThread.computer_id = pick.Computer_id;
 		ResourceItem TheUBSI = new ResourceItem();
 
 		TheUBSI.Type = ResourceType.EXEUnit;
@@ -689,14 +816,14 @@ public class GraphObjectHelper {
 		TheUBSI.id = pick.getUBSIID();
 		TheUBSI.Title = "-";
 		TheUBSI.Description = "-";
-
+		TheUBSI.computer_id = pick.Computer_id;
 		AccessCall TheSpawn = new AccessCall();
 		TheSpawn.From = TheProc;
 		TheSpawn.To = TheThread;
 		TheSpawn.Command = "spawn";
 		TheSpawn.user_id = pick.user_uid;
 		TheSpawn.user_name = pick.user_name;
-
+		TheSpawn.computer_id = pick.Computer_id;
 		TheSpawn.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 		AccessCall TheUBSIStart = new AccessCall();
@@ -705,7 +832,7 @@ public class GraphObjectHelper {
 		TheUBSIStart.Command = "started";
 		TheUBSIStart.user_id = pick.user_uid;
 		TheUBSIStart.user_name = pick.user_name;
-
+		TheUBSIStart.computer_id = pick.Computer_id;
 		TheUBSIStart.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
 
 //		ret.addEdge(tempCallItem, tempCallItem.From, tempCallItem.To);
@@ -753,7 +880,7 @@ public class GraphObjectHelper {
 			ToItem.id = pick.getFD_ID();
 			ToItem.Path = pick.fd_directory;
 			ToItem.Title = pick.fd_name;
-
+			ToItem.computer_id = pick.Computer_id;
 //			ret.addVertex(ToItem);
 
 			// add the edge connecting the FD and the process
@@ -767,7 +894,7 @@ public class GraphObjectHelper {
 			theCall.user_id = pick.user_uid;
 			theCall.user_name = pick.user_name;
 			theCall.sequenceNumber = pick.evt_num != null ? Long.valueOf(pick.evt_num) : 0;
-
+			theCall.computer_id = pick.Computer_id;
 //			ret.addEdge(theCall, theCall.From, theCall.To);
 
 		}

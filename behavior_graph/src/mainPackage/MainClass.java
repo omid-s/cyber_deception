@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.SysdigRecordObject;
+import controlClasses.Configurations;
 import controlClasses.RuntimeVariables;
 import dataBaseStuff.GraphDBDal;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
@@ -19,9 +20,12 @@ import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
 import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
-import helpers.Configurations;
 import helpers.DescribeFactory;
+import insertion.ShadowInserter;
+import insertion.graph.ShadowNeo4JInserter;
+import insertion.pg.ShadowPGInserter;
 import querying.QueryInterpreter;
+import querying.QueryProcessor;
 import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.adapters.simpleNeo4J.SimpleNeo4JAdapter;
@@ -32,8 +36,7 @@ import readers.CSVReader;
 import readers.SysdigObjectDAL;
 
 public class MainClass {
-	
-	
+
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
@@ -41,16 +44,28 @@ public class MainClass {
 
 		boolean SaveToDB = false, SaveToGraph = false, ShowVerbose = false, ShowGraph = false, Neo4JVerbose = false,
 				InShortFormat = false, SaveFormated = false, MemQuery = false, SimplePGQuery = false,
-				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false;
+				ReadStream = false, SimpleNeo4JQuery = false, ReadCSV = false, SaveJSON = false, LegacyMode = false,
+				ShadowInsertion = false;
+		int compression = -1;
 		String fileAdr = "", output_file = "";
+		String computerID = "1";
+		String backEnd = "pg";
+
 		for (String pick : args) {
 			if (pick.equals("file"))
 				ReadFromFile = true;
 			if (pick.startsWith("\"path") || pick.startsWith("path")) {
 				fileAdr = pick.split("=")[1].replace("\"", "");
 			}
+
 			if (pick.startsWith("\"outpath") || pick.startsWith("outpath")) {
 				output_file = pick.split("=")[1].replace("\"", "");
+			}
+			if (pick.startsWith("cid=")) {
+				computerID = pick.split("=")[1];
+			}
+			if (pick.startsWith("be=")) {
+				backEnd = pick.split("=")[1];
 			}
 			if (pick.startsWith("pid")) {
 				pid = pick.split("=")[1];
@@ -85,6 +100,16 @@ public class MainClass {
 				SaveJSON = true;
 			if (pick.equals("lg") || pick.equals("legacy_mode"))
 				LegacyMode = true;
+			if (pick.equals("si") || pick.equals("shadow_insert"))
+				ShadowInsertion = true;
+			if (pick.equals("c0"))
+				compression = 0;
+			if (pick.equals("c1"))
+				compression = 1;
+			if (pick.equals("c2"))
+				compression = 2;
+			if (pick.equals("c3"))
+				compression = 3;
 
 			if (pick.equals("-h")) {
 				System.out.println(" gv: Show Graph in verbose mode \r\n " + " g : show graph in minimized mode \r\n"
@@ -94,7 +119,18 @@ public class MainClass {
 			}
 		}
 
+		Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
+		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInsertion));
+		Configurations.getInstance().setSetting(Configurations.COMPUTER_ID, computerID);
+
+		if (ShadowInsertion) {
+			if (backEnd.equals("neo4j")) {
+				ShadowInserter.theInserter = ShadowNeo4JInserter.getInstance();
+			} else {
+				ShadowInserter.theInserter = ShadowPGInserter.getInstance();
+			}
+		}
 
 		if (SaveFormated && output_file.isEmpty()) {
 			ColorHelpers.PrintRed(
@@ -125,6 +161,13 @@ public class MainClass {
 		if (SaveFormated || SaveJSON) {
 			output_file_writer = new FileWriter(new File(output_file));
 		}
+		Long num_edges = (long) theGraph.getEdgeCount();
+		Long num_vertex = (long) theGraph.getVertexCount();
+		QueryProcessor q_processor = new QueryProcessor(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges,
+				num_vertex, theGraph, ShowGraph, ShowVerbose, fileAdr, GraphActionFactory);
+
+		Thread queryThread = new Thread(q_processor);
+		queryThread.start();
 
 		if (ReadStream)
 			while (true) {
@@ -161,7 +204,6 @@ public class MainClass {
 						if (ShowGraph) {
 							ClearHelper.AddRowToGraph(theGraph, tempObj);
 						}
-
 					} else {
 						break;
 					}
@@ -178,10 +220,13 @@ public class MainClass {
 					System.out.println("Error");
 				}
 			}
-// if json is desired, create the array
-//		if (SaveJSON)
-//			output_file_writer.write("[\n");
+		// if json is desired, create the array
+		// if (SaveJSON)
+		// output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
+		Runtime runtime = Runtime.getRuntime();
+		int cleaner_ctr = 0;
+
 		if (ReadFromFile) {
 			try {
 				System.out.println("in read File");
@@ -214,6 +259,9 @@ public class MainClass {
 							continue;
 						}
 
+						// set computer id
+						tempObj.Computer_id = Configurations.getInstance().getSetting(Configurations.COMPUTER_ID);
+
 						multipleRecords = "";
 
 						counter++;
@@ -221,34 +269,63 @@ public class MainClass {
 						if (SaveToDB)
 							objectDAL.Insert(tempObj);
 
-						if (SaveToGraph)
+						if (SaveToGraph) {
 							GraphActionFactory.Save(tempObj, Neo4JVerbose);
-
+						}
 						if (ShowVerbose) {
 							VerboseHelper.AddRowToGraph(theGraph, tempObj);
-
 						}
 						if (ShowGraph) {
 							ClearHelper.AddRowToGraph(theGraph, tempObj);
-
 						}
 
-						Thread t1 = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								System.gc();
+						if (counter % 10000 == 0) {
+
+//							if (MemQuery) {
+//								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
+//								for (ResourceItem pick : theGraph.getVertices()) {
+//									mem.addResourceItem(pick);
+//								}
+//								for (AccessCall pick : theGraph.getEdges()) {
+//									mem.addAccessCall(pick);
+//								}
+//							}
+
+//							System.out.println(counter + "(Q :" + ShadowDBInserter.getInstance().getQueLenght() + ")");
+
+							if (counter % 500000 == 0) {
+//								System.out.println(String.format("\nA:remaining mem: %f - e:%d n:%d ",
+//										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
+//										theGraph.getEdgeCount(), theGraph.getVertexCount()));
+//
+//								while (runtime.freeMemory() <= runtime.totalMemory() * 0.20) {
+//									System.out.print("+");
+//									// memory is too full, purge some records out then flush GC
+//									InMemoryAdapter.getSignleton().purge(2000, theGraph);
+//									System.gc();
+//								}
+
+								if (true) {// runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+									cleaner_ctr++;
+//									System.out.print("*");
+									Thread t1 = new Thread(new Runnable() {
+										@Override
+										public void run() {
+											System.gc();
+										}
+									});
+									t1.start();
+								}
+//								System.out.println(String.format("\nB:remaining mem: %f - e:%d n:%d ",
+//										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
+//										theGraph.getEdgeCount(), theGraph.getVertexCount()));
+
 							}
-						});
-
-						if (counter % 1000 == 0) {
-							System.out.println(counter);
-
-							if (counter % 50000 == 0)
-								t1.start();
 						}
 
 					} catch (Exception ex) {
-						System.out.println(ex.getMessage());
+						ColorHelpers.PrintRed("\nError Happened: " + ex.getMessage() + "\n");
+						throw ex;
 					}
 
 				}
@@ -257,7 +334,6 @@ public class MainClass {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-
 		}
 		objectDAL.flushRows();
 
@@ -268,23 +344,11 @@ public class MainClass {
 		if (output_file_writer != null) {
 			// is json is desired, close the array
 			if (SaveJSON)
-//				output_file_writer.write("\n]");
+				// output_file_writer.write("\n]");
 				output_file_writer.write("\n");
 			output_file_writer.flush();
 			output_file_writer.close();
 		}
-
-		if (MemQuery) {
-			InMemoryAdapter mem = InMemoryAdapter.getSignleton();
-			for (ResourceItem pick : theGraph.getVertices()) {
-				mem.addResourceItem(pick);
-			}
-			for (AccessCall pick : theGraph.getEdges()) {
-				mem.addAccessCall(pick);
-			}
-		}
-		int num_edges = theGraph.getEdgeCount();
-		int num_vertex = theGraph.getVertexCount();
 
 		theGraph = null;
 		ClearHelper.release_maps();
@@ -292,139 +356,9 @@ public class MainClass {
 
 		VerboseHelper = null;
 		ClearHelper = null;
-
+		System.out.println("Cleaner was run :" + cleaner_ctr);
 		System.gc();
 
-		command_loop(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges, num_vertex, theGraph, ShowGraph, ShowVerbose, fileAdr, GraphActionFactory);
-		
 	}
 
-	/**
-	 * Runs the main command entry loop 
-	 * @param MemQuery
-	 * @param SimplePGQuery
-	 * @param SimpleNeo4JQuery
-	 * @param num_edges
-	 * @param num_vertex
-	 * @param theGraph
-	 * @param ShowGraph
-	 * @param ShowVerbose
-	 * @param fileAdr
-	 * @param GraphActionFactory
-	 */
-	private static void command_loop(boolean MemQuery,boolean SimplePGQuery, boolean SimpleNeo4JQuery,int num_edges, int num_vertex,Graph<ResourceItem, AccessCall> theGraph,
-			boolean ShowGraph, boolean ShowVerbose, String fileAdr, GraphDBDal GraphActionFactory ) {
-		BaseAdapter queryMachine = null;
-
-		/// set the query adapter
-		if (MemQuery)
-			queryMachine = InMemoryAdapter.getSignleton();
-		else if (SimplePGQuery)
-			queryMachine = SimplePGAdapter.getSignleton();
-		else if (SimpleNeo4JQuery)
-			queryMachine = SimpleNeo4JAdapter.getSignleton();
-
-		/// setup GUI window
-		GraphPanel theGraphWindow = null;
-		JFrame frame1 = new JFrame();
-
-		Scanner reader = new Scanner(System.in);
-		while (true) {
-			try {
-				ColorHelpers.PrintBlue("$$>>");
-				String command = reader.nextLine();
-				if (command.equalsIgnoreCase("exit") || command.equalsIgnoreCase("quit"))
-					break;
-
-				else if (command.trim().equalsIgnoreCase("info")) {
-					ColorHelpers.PrintGreen(
-							String.format("Total Edges : %d \n Total Vertices : %d \r\n", num_edges, num_vertex));
-					continue;
-				} else if (command.trim().toLowerCase().startsWith("set ")) { // process
-																				// runtime
-																				// variablse
-																				// settings
-
-					RuntimeVariables.getInstance().setValue(command.trim().split(" ")[1], command.trim().split(" ")[2]);
-					continue;
-				} else if (command.trim().toLowerCase().startsWith("get ")) {// process
-																				// runtime
-																				// variablse
-																				// settings
-					ColorHelpers
-							.PrintGreen(RuntimeVariables.getInstance().getValue(command.trim().split(" ")[1]) + "\r\n");
-					continue;
-				} else if (command.trim().toLowerCase().startsWith("describe")) {
-
-					boolean isAggregated = !(command.contains(" verbose"));
-					boolean hasPath = command.indexOf("path=") > 0;
-					boolean hasSort = command.indexOf("orderby=") > 0;
-					String thePath = hasPath ? command.substring(command.indexOf("path=") + "path=".length()) : null;
-					String SortBy = hasSort ? command.substring(command.indexOf("orderby=") + "orderby=".length(),
-							command.indexOf(" ", command.indexOf("orderby=")) > 0
-									? command.indexOf(" ", command.indexOf("orderby="))
-									: command.length())
-							: null;
-
-					DescribeFactory.doDescribe(thePath, isAggregated, SortBy);
-					continue;
-				}
-
-				Instant start = Instant.now();
-
-				try {
-
-					ParsedQuery query = null;
-					try {
-						query = QueryInterpreter.interpret(command, theGraph);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-
-					theGraph = queryMachine.runQuery(query);
-				} catch (Exception ex) {
-					ColorHelpers.PrintRed("Error evaluating the query! please check the query and run again.\n");
-					continue;
-				}
-
-				Instant end = Instant.now();
-
-				
-
-				ColorHelpers.PrintBlue("in : " + Duration.between(start, end).toMillis() + "  Milli Seconds \n");
-
-				theGraphWindow = new GraphPanel(theGraph);
-				if (frame1.isVisible()) {
-					frame1.setVisible(false);
-					frame1.dispose();
-				}
-
-				frame1 = new JFrame();
-				frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				frame1.setSize(400, 400);
-				if (ShowGraph || ShowVerbose) {
-					theGraphWindow.vv.repaint();
-					frame1.add(theGraphWindow);
-					frame1.setVisible(true);
-					frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
-					frame1.setTitle(fileAdr );
-				}
-
-				System.out.flush();
-				System.gc();
-
-			} catch (VariableNoitFoundException ex) {
-				ColorHelpers.PrintRed(ex.getMessage());
-			} catch (Exception ex) {
-				throw (ex);
-				// ColorHelpers.PrintRed("query Problem!please try agin...
-				// \r\n");
-			}
-		}
-		GraphActionFactory.closeConnections();
-		// System.out.print("\033[H\033[2J");
-		ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
-	}
-
-	
 }
