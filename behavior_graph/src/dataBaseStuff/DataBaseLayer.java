@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import helpers.Configurations;
+import controlClasses.Configurations;
 
 public class DataBaseLayer {
 

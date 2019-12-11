@@ -16,15 +16,15 @@ import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Transaction;
 
 import classes.*;
+import controlClasses.Configurations;
 import edu.uci.ics.jung.graph.Graph;
-import helpers.Configurations;
 import querying.tools.GraphObjectHelper;
 
 public class GraphDBDal {
 
 	public GraphDBDal() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		// to do : inittaite
-		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+//		Class.forName("org.neo4j.jdbc.Driver").newInstance();
 	}
 
 	/**

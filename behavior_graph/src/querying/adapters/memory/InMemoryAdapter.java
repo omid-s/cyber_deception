@@ -6,6 +6,8 @@ package querying.adapters.memory;
 import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 import javax.security.auth.x500.X500Principal;
@@ -30,17 +32,19 @@ public class InMemoryAdapter extends BaseAdapter {
 
 	private static InMemoryAdapter bmem = null;
 
-	private Map<String, ResourceItem> V = new HashMap<String, ResourceItem>();
-	private Map<String, AccessCall> E = new HashMap<String, AccessCall>();
+	private Map<String, ResourceItem> V = new ConcurrentHashMap<String, ResourceItem>();
+	private Map<String, AccessCall> E = new ConcurrentHashMap<String, AccessCall>();
 
-	private Map<String, ArrayList<AccessCall>> fromsMap = new HashMap<String, ArrayList<AccessCall>>();
-	private Map<String, ArrayList<AccessCall>> tosMap = new HashMap<String, ArrayList<AccessCall>>();
+	private Map<String, ConcurrentLinkedQueue<AccessCall>> fromsMap = new ConcurrentHashMap<String, ConcurrentLinkedQueue<AccessCall>>();
+	private Map<String, ConcurrentLinkedQueue<AccessCall>> tosMap = new ConcurrentHashMap<String, ConcurrentLinkedQueue<AccessCall>>();
 
-	private Map<String, ArrayList<AccessCall>> fromAndTosMap = new HashMap<String, ArrayList<AccessCall>>();
+	private Map<String, ConcurrentLinkedQueue<AccessCall>> fromAndTosMap = new ConcurrentHashMap<String, ConcurrentLinkedQueue<AccessCall>>();
 
-	private Map<String, ResourceItem> ProcessMap = new HashMap<String, ResourceItem>();
+	private Map<String, ResourceItem> ProcessMap = new ConcurrentHashMap<String, ResourceItem>();
 //	private Map<String, ArrayList<ResourceItem>> idMap = new HashMap<String, ArrayList<ResourceItem>>();
-	private Map<String, ArrayList<ResourceItem>> FDMap = new HashMap<String, ArrayList<ResourceItem>>();
+	private Map<String, ConcurrentLinkedQueue<ResourceItem>> FDMap = new ConcurrentHashMap<String, ConcurrentLinkedQueue<ResourceItem>>();
+
+	private ConcurrentLinkedQueue<ResourceItem> theNodeQueue = new ConcurrentLinkedQueue<ResourceItem>();
 
 	public static InMemoryAdapter getSignleton() {
 		if (bmem == null) {
@@ -59,21 +63,18 @@ public class InMemoryAdapter extends BaseAdapter {
 		FDMap.clear();
 	}
 
-	public boolean hasAccessCall(String key) {
-		return E.containsKey(key);
-	}
-
-	public boolean hasResourceItem(String Key) {
-		return V.containsKey(Key);
-	}
-
 	public void addResourceItem(ResourceItem inp) {
+		if (V.containsKey(inp.id.toLowerCase()))
+			return;
+
 		V.put(inp.id.toLowerCase(), inp);
+		theNodeQueue.add(inp);
+
 		if (inp.Type == ResourceType.Process) {
 			ProcessMap.put(inp.id.toLowerCase(), inp);
 
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
-				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
+				FDMap.put(inp.Title.toLowerCase(), new ConcurrentLinkedQueue<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 		}
 //		if (inp.Type == ResourceType.Thread) {
@@ -86,7 +87,7 @@ public class InMemoryAdapter extends BaseAdapter {
 
 			inp.Title = String.valueOf(inp.Title);
 			if (!FDMap.containsKey(inp.Title.toLowerCase()))
-				FDMap.put(inp.Title.toLowerCase(), new ArrayList<ResourceItem>());
+				FDMap.put(inp.Title.toLowerCase(), new ConcurrentLinkedQueue<ResourceItem>());
 			FDMap.get(inp.Title.toLowerCase()).add(inp);
 
 //			if (!idMap.containsKey(inp.Number.toLowerCase()))
@@ -96,17 +97,21 @@ public class InMemoryAdapter extends BaseAdapter {
 	}
 
 	public void addAccessCall(AccessCall inp) {
+
+		// skip if the edge is already in the graph
+		if (E.containsKey(inp.getID()))
+			return;
 		// add to access calls
-		E.put(inp.id, inp);
+		E.put(inp.getID(), inp);
 
 		// add the vertices of the end to the structure for the random access
 		if (!fromsMap.containsKey(inp.From.id.toLowerCase())) {
-			fromsMap.put(inp.From.id.toLowerCase(), new ArrayList<AccessCall>());
+			fromsMap.put(inp.From.id.toLowerCase(), new ConcurrentLinkedQueue<AccessCall>());
 		}
 		fromsMap.get(inp.From.id.toLowerCase()).add(inp);
 
 		if (!tosMap.containsKey(inp.To.id.toLowerCase()))
-			tosMap.put(inp.To.id.toLowerCase(), new ArrayList<AccessCall>());
+			tosMap.put(inp.To.id.toLowerCase(), new ConcurrentLinkedQueue<AccessCall>());
 		tosMap.get(inp.To.id.toLowerCase()).add(inp);
 
 //		String keys = inp.From.id.toLowerCase() + "||" + inp.To.id.toLowerCase();
@@ -116,8 +121,8 @@ public class InMemoryAdapter extends BaseAdapter {
 
 	}
 
-	public ArrayList<AccessCall> getEdgesByVertice(ResourceItem key) {
-		ArrayList<AccessCall> ret = new ArrayList<AccessCall>();
+	public ConcurrentLinkedQueue<AccessCall> getEdgesByVertice(ResourceItem key) {
+		ConcurrentLinkedQueue<AccessCall> ret = new ConcurrentLinkedQueue<AccessCall>();
 		ret.addAll(fromsMap.get(key.id));
 		ret.addAll(tosMap.get(key.id));
 
@@ -141,8 +146,8 @@ public class InMemoryAdapter extends BaseAdapter {
 	}
 
 	/// query by type and return the vertices
-	public ArrayList<ResourceItem> getResourceItemsByType(ArrayList<ResourceType> types) {
-		ArrayList<ResourceItem> ret = new ArrayList<ResourceItem>();
+	public ConcurrentLinkedQueue<ResourceItem> getResourceItemsByType(ArrayList<ResourceType> types) {
+		ConcurrentLinkedQueue<ResourceItem> ret = new ConcurrentLinkedQueue<ResourceItem>();
 
 		for (ResourceItem pick : V.values()) {
 			if (types.contains(pick.Type))
@@ -469,5 +474,37 @@ public class InMemoryAdapter extends BaseAdapter {
 		types.add("execve");
 		types.add("binder");
 		return !types.contains(inp);
+	}
+
+	/**
+	 * removes the first count items from the nodes
+	 * 
+	 * @param count number of items to be removed
+	 */
+	public void purge(int count, Graph<ResourceItem, AccessCall> theGraph) {
+		for (int i = 0; i < count && !theNodeQueue.isEmpty(); i++) {
+			ResourceItem pick = theNodeQueue.poll();
+			purge(pick, theGraph);
+		}
+	}
+
+	/**
+	 * removes the given resource item along with all it's edges from the underlying
+	 * memory object as well as the memory
+	 * 
+	 * @param item     the item to be removed
+	 * @param theGraph the graph object to be changed
+	 */
+	public void purge(ResourceItem item, Graph<ResourceItem, AccessCall> theGraph) {
+		V.remove(item.id.toLowerCase());
+		tosMap.remove(item.id.toLowerCase());
+		tosMap.remove(item.id.toLowerCase());
+		theGraph.removeVertex(item);
+
+		if (item.Type == ResourceType.Process) {
+			ProcessMap.remove(item.id.toLowerCase());
+		} else {
+			FDMap.remove(item.Title.toLowerCase());
+		}
 	}
 }
