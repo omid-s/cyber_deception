@@ -1,18 +1,12 @@
 package evaluation;
 
 import controlClasses.Configurations;
-import controlClasses.RecordInterpretorFactory;
-import controlClasses.RuntimeVariables;
-import dataBaseStuff.DataBaseLayer;
 import dataBaseStuff.GraphDBDal;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
 import exceptions.HighFieldNumberException;
 import exceptions.LowFieldNumberException;
-import exceptions.VariableNoitFoundException;
 import helpers.ColorHelpers;
-import helpers.DescribeFactory;
 import insertion.ShadowInserter;
 import insertion.graph.ShadowNeo4JInserter;
 import insertion.pg.ShadowPGInserter;
@@ -21,42 +15,22 @@ import querying.adapters.BaseAdapter;
 import querying.adapters.memory.InMemoryAdapter;
 import querying.adapters.simpleNeo4J.SimpleNeo4JAdapter;
 import querying.adapters.simplePG.SimplePGAdapter;
-import querying.parsing.Criteria;
 import querying.parsing.ParsedQuery;
 import querying.tools.GraphObjectHelper;
 import readers.CSVReader;
 import readers.SysdigObjectDAL;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Properties;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
-import org.jfree.ui.RefineryUtilities;
-
 import classes.AccessCall;
 import classes.ResourceItem;
-import classes.ResourceType;
 import classes.SysdigRecordObject;
 
 public class MainEvaluationClass {
