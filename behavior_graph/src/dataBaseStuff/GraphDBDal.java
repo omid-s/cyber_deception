@@ -1,22 +1,35 @@
 package dataBaseStuff;
 
+import java.sql.Connection;
+
 //import org.neo4j.jdbc.*;
 
-import java.sql.*;
+//import java.sql.*;
+import java.sql.Statement;
+import java.util.ArrayList;
 
+import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.Transaction;
 
 import classes.*;
-import helpers.Configurations;
+import controlClasses.Configurations;
+import edu.uci.ics.jung.graph.Graph;
+import querying.tools.GraphObjectHelper;
 
 public class GraphDBDal {
 
-	public GraphDBDal() throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException {
+	public GraphDBDal() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		// to do : inittaite
-		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+//		Class.forName("org.neo4j.jdbc.Driver").newInstance();
 	}
 
+	/**
+	 * closes the connections to the database
+	 */
 	public void closeConnections() {
 		try {
 			if (TheStateMent != null)
@@ -31,78 +44,108 @@ public class GraphDBDal {
 
 	private static Connection TheConnection;
 	private static Statement TheStateMent;
+	private Driver driver = null;
+	ArrayList<String> Queries = new ArrayList<String>();
 
+	/**
+	 * adds the given record to be inserted to the database
+	 * @param inp the record to be inserted
+	 * @param SaveVerbose if the record is being inserted in the verbose mode
+	 */
 	public void Save(SysdigRecordObject inp, boolean SaveVerbose) {
 
+		SysdigRecordObjectGraph tempGraph = GraphObjectHelper.getGraphFromRecord(inp);
+
 		String temp = "";
-		temp += "\n\r"
-				+ String.format(
-						"merge ( newProc:Process{name:\"%1s\",pid:%2s} ) ",
-						inp.proc_name, inp.proc_pid);
-		if (!inp.proc_ppid.toLowerCase().equals("<na>")
-				|| inp.evt_type.toLowerCase().equals("fork")) {
-			// add the parent proec
-			temp += "\n\r"
-					+ String.format(
-							"merge ( parentProc:Process{name:\"%1s\",pid:%2s} ) ",
-							inp.proc_pname, inp.proc_ppid);
-			temp += "\n\r"
-					+ String.format(
-							"merge (parentProc)<-[:IsChildOf]-(newProc) ",
-							inp.proc_pname, inp.proc_ppid);
 
-		}
-		if (!inp.fd_num.toLowerCase().equals("<na>")) {
+		temp += "\r\n" + String.format(" merge ( newProc:%s ) ", tempGraph.getProc().toN4JObjectString());
+		temp += "\r\n" + String.format(" merge ( parentProc:%s ) ", tempGraph.getParentProc().toN4JObjectString());
+		temp += "\r\n"
+				+ String.format(" merge (parentProc)-[:%s]->(newProc) ", tempGraph.getExec().toN4JObjectString());
+		if (tempGraph.getItem() != null) {
+
+			temp += "\r\n" + String.format(" merge ( thread:%s ) ", tempGraph.getThread().toN4JObjectString());
+			temp += "\r\n" + String.format(" merge ( ubsi:%s ) ", tempGraph.getUBSIUnit().toN4JObjectString());
+
 			temp += "\r\n"
-					+ String.format(
-							" merge  (resource:Resource{ type:\"%1s\", number:%2s, name:\"%3s\", fileName:\"%4s\",port:\"%5s\"  } )",
-							inp.fd_type, inp.fd_num, inp.fd_name,
-							inp.fd_filename, inp.fd_port);
-			if (SaveVerbose)
-				temp += "\r\n"
-						+ String.format(
-								" create (newProc) -[call:%1s{time:\"%2s\",info:\"%3s\", args:\"%4s\",rawtimens:\"%5s\" }]-> (resource)",
-								inp.evt_type, inp.evt_time, "-", "-",
-								inp.evt_rawtime_ns);
-			else
-				temp += "\r\n"
-						+ String.format(
-								" merge (newProc) -[call:%1s]-> (resource) on create set call.time=\"%2s\",call.info=\"%3s\", call.args=\"%4s\",call.rawtimens=\"%5s\" ",
-								inp.evt_type, inp.evt_time, "-", "-",
-								inp.evt_rawtime_ns);
+					+ String.format(" merge (newProc)-[:%s]->(thread) ", tempGraph.getSpawn().toN4JObjectString());
+			temp += "\r\n"
+					+ String.format(" merge (thread)-[:%s]->(ubsi) ", tempGraph.getUbsi_start().toN4JObjectString());
 
+			temp += "\r\n" + String.format(" merge ( item:%s ) ", tempGraph.getItem().toN4JObjectString());
+			temp += "\r\n" + String.format(" merge (ubsi)-[:%s]->(item) ", tempGraph.getSyscall().toN4JObjectString());
 		}
-		// find the type
+
 		temp += ";";
-		// System.out.println(temp);
+
+		Queries.add(temp);
+
+		if (Queries.size() % 1000 == 0)
+			flushRows();
+
+	}
+
+	/**
+	 * flushes the rows into the database
+	 * this is done on a fixed record count interval
+	 */
+	public void flushRows() {
+
 		try {
 
-			// Connect
-			if (TheConnection == null) {
-				TheConnection = DriverManager.getConnection(
-					 	String.format("jdbc:neo4j:bolt://%s/",  Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER) ), 
-					 	Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME) , 
-						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)  
-						 
-						);
-				TheStateMent = TheConnection.createStatement();
-			}
-			// Querying
-			// try (Statement stmt = TheConnection.createStatement()) {
-			// ResultSet rs = stmt.executeQuery(temp);
-			TheStateMent.executeQuery(temp);
-			/*
-			 * while (rs.next()) { System.out.println(rs.getString("ID")); }
-			 */
-			// } catch (Exception exx) {
-			// exx.printStackTrace();
-			// } finally {
-			// con.close();
+			
+//			try {
+//				if (TheConnection == null) {
+//					TheConnection = java.sql.DriverManager.getConnection(
+//							String.format("jdbc:neo4j:bolt://%s/",
+//									Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//							Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//							Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//					);
+//					TheStateMent = TheConnection.createStatement();
+//				}
+//				for (String temp : Queries)
+//					TheStateMent.executeUpdate(temp);
+////				System.out.print(";");
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//			}
 
-			// }
+			
+			
+			// Connect
+//			if (TheConnection == null) {
+//				TheConnection = DriverManager.getConnection(
+//						String.format("jdbc:neo4j:bolt://%s/",
+//								Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+//						Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+//
+//				);
+//				TheStateMent = TheConnection.createStatement();
+//			}
+			
+			 
+			if (driver == null)
+				driver = GraphDatabase.driver(
+						"bolt://" + Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER),
+						AuthTokens.basic(Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+								Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)));
+			Session session = driver.session();
+
+			Transaction trnx = session.beginTransaction();
+			for (String pick : Queries) {
+				trnx.run(pick);
+			}
+			
+			trnx.success();
+			trnx.close();
+
+			Queries.clear();
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
 	}
 }

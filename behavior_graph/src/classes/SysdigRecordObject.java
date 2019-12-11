@@ -1,5 +1,8 @@
 package classes;
 
+import java.lang.reflect.Field;
+import java.util.StringJoiner;
+
 import controlClasses.RuntimeVariables;
 
 public class SysdigRecordObject {
@@ -86,23 +89,60 @@ public class SysdigRecordObject {
 	public String syslog_severity_str;
 	public String syslog_severity;
 	public String syslog_message;
+	public String ubsi_unit_id;
+	public String ubsi_thread_id;
+	public String Computer_id;
 	// public String arg1;
 	// public String arg2;
 	// public String returnValue;
 
 	public String getProcPID() {
-		return proc_pid + "|" + proc_name;
+		return Computer_id + "|" + proc_pid + "|" + proc_name;
 	}
 
 	public String getParentProcID() {
-		return proc_ppid + "|" + proc_pname;
+		return Computer_id + "|" + proc_ppid + "|" + proc_pname;
+	}
+
+	public String getTID() {
+		return getProcPID() + "|" + thread_tid;
+	}
+
+	public String getUBSIID() {
+		if (ubsi_unit_id != null)
+			return getTID() + "|" + ubsi_unit_id;
+		else
+			return getTID() + "|0";
 	}
 
 	public String getFD_ID() {
 		if (RuntimeVariables.getInstance().getIgnoreFDNumber())
-			return String.valueOf( this.fd_name );
+			return Computer_id + "|" + String.valueOf(this.fd_name);
 		else
-			return fd_num + "|" + fd_name;
+			return Computer_id + "|" + fd_num + "|" + fd_name;
+	}
+
+	/**
+	 * returns the json representation of the object
+	 * 
+	 * @return the json string of the object
+	 * @throws IllegalArgumentException if internal issue has been seen
+	 * @throws IllegalAccessException   if an internal issue has happened
+	 */
+	public String toJSONString() throws IllegalArgumentException, IllegalAccessException {
+
+		Class c = this.getClass();
+
+		StringJoiner jsonObject = new StringJoiner(",");
+		for (Field field : c.getDeclaredFields()) {
+			field.setAccessible(true);
+			String name = field.getName();
+			String value = String.valueOf(field.get(this));
+			jsonObject.add(String.format(" \"%s\": \"%s\"", name, value.replace("\"", "\'")));
+		}
+
+		return "{" + jsonObject.toString() + "}";
+
 	}
 
 	@Override
@@ -143,8 +183,9 @@ public class SysdigRecordObject {
 				+ "\", user_shell=\"" + user_shell + "\", group_gid=\"" + group_gid.trim() + "\", group_name=\""
 				+ group_name.trim() + "\", syslog_facility_str=\"" + syslog_facility_str.trim()
 				+ "\", syslog_facility=\"" + syslog_facility.trim() + "\", syslog_severity_str=\""
-				+ syslog_severity_str.trim() + "\", syslog_severity=\"" + syslog_severity.trim()
-				+ "\", syslog_message=\"" + syslog_message.trim().replace("\n", " ");
+				+ syslog_severity_str.trim() + "\", syslog_severity=\"" + syslog_severity.trim() + "\", ubsi_unit_id="
+				+ ubsi_unit_id + " , ubsi_thread_id=" + ubsi_thread_id + "\", syslog_message=\""
+				+ syslog_message.trim().replace("\n", " ");
 	}
 
 }

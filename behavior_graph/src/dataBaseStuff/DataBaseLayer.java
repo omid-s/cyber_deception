@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import helpers.Configurations;
+import controlClasses.Configurations;
 
 public class DataBaseLayer {
 
@@ -59,30 +59,30 @@ public class DataBaseLayer {
 		}
 	}
 
-	// private final String ensureDBSql = +
-	// "CREATE TABLE `AccessCalls` (\n" + " `db_id` int(11) NOT NULL
-	// AUTO_INCREMENT,\n"
-	// + " `id` varchar(500) DEFAULT NULL,\n" + " `FromID` varchar(500) DEFAULT
-	// NULL,\n"
-	// + " `ToID` varchar(500) DEFAULT NULL,\n" + " `DateTime` varchar(45)
-	// DEFAULT NULL,\n"
-	// + " `Command` varchar(45) DEFAULT NULL,\n" + " `Description` varchar(500)
-	// DEFAULT NULL,\n"
-	// + " `args` varchar(500) DEFAULT NULL,\n" + " `Info` varchar(500) DEFAULT
-	// NULL,\n"
-	// + " `OccuranceFactor` int(11) DEFAULT NULL,\n" + " PRIMARY KEY
-	// (`db_id`)\n"
-	// + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;\n" + "\n" + "CREATE TABLE
-	// `ResourceItems` (\n"
-	// + " `db_id` int(11) NOT NULL AUTO_INCREMENT,\n" + " `id` varchar(500)
-	// DEFAULT NULL,\n"
-	// + " `Title` varchar(500) DEFAULT NULL,\n" + " `Path` varchar(5000)
-	// DEFAULT NULL,\n"
-	// + " `Number` varchar(45) DEFAULT NULL,\n" + " `Description` varchar(3000)
-	// DEFAULT NULL,\n"
-	// + " `Type` varchar(50) DEFAULT NULL,\n" + " PRIMARY KEY (`db_id`)\n"
-	// + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
-	//
-	;
+	private static Connection _underlyingNeo4jConenction;
+
+	/**
+	 * returns a connection of neo4j type
+	 * @return
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 */
+	public static Connection getNeo4JConnection()
+			throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+		Class.forName("org.neo4j.jdbc.Driver").newInstance();
+		if (_underlyingNeo4jConenction == null) {
+			_underlyingNeo4jConenction = DriverManager.getConnection(
+					String.format("jdbc:neo4j:bolt://%s/",
+							Configurations.getInstance().getSetting(Configurations.NEO4J_SERVER)),
+					Configurations.getInstance().getSetting(Configurations.NEO4J_USERNAME),
+					Configurations.getInstance().getSetting(Configurations.NEO4J_PASSWORD)
+
+			);
+
+		}
+		return _underlyingNeo4jConenction;
+	}
 
 }

@@ -32,6 +32,8 @@ public class RuntimeVariables {
 			fieldsMap.put("forward_depth", this.getClass().getDeclaredField("forwardDepth"));
 			fieldsMap.put("back_depth", this.getClass().getDeclaredField("backDepth"));
 			fieldsMap.put("ignore_fd_num", this.getClass().getDeclaredField("ignoreFDNumber"));
+			fieldsMap.put("auto_merge", this.getClass().getDeclaredField("automaticMerge"));
+			fieldsMap.put("print_query", this.getClass().getDeclaredField("print_query"));
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -41,6 +43,8 @@ public class RuntimeVariables {
 		forwardDepth = Integer.MAX_VALUE;
 		backDepth = Integer.MAX_VALUE;
 		ignoreFDNumber = true;
+		automaticMerge = false;
+		print_query=false;
 	}
 
 	private Map<String, Field> fieldsMap;
@@ -57,6 +61,29 @@ public class RuntimeVariables {
 			instance = new RuntimeVariables();
 		}
 		return instance;
+	}
+
+	
+	private Boolean automaticMerge; 
+	
+	
+	/**
+	 * gets the query modules to automatically merge the outcome form queries. 
+	 * this will add edges between the query results if any relationship exists. 
+	 *  
+	 * @return true is results fo multiple querioes should be merged, falase otherwise 
+	 */
+	public boolean isAutomaticMerge() {
+		return automaticMerge;
+	}
+
+	/**
+	 *  * gets the query modules to automatically merge the outcome form queries. 
+	 * this will add edges between the query results if any relationship exists.
+	 * @param automaticMerge true is merging of results is desired, false otherwise 
+	 */
+	public void setAutomaticMerge(boolean automaticMerge) {
+		this.automaticMerge = automaticMerge;
 	}
 
 	// the depth to which a forward query will enumerate
@@ -126,6 +153,21 @@ public class RuntimeVariables {
 	 */
 	public Boolean getIgnoreFDNumber() {
 		return this.ignoreFDNumber;
+	}
+
+	/**
+	 * shows wheter the query being run on database should be printed
+	 */
+	private Boolean print_query ; 
+	
+	
+	
+	public Boolean getPrint_query() {
+		return print_query;
+	}
+
+	public void setPrint_query(Boolean print_query) {
+		this.print_query = print_query;
 	}
 
 	/**

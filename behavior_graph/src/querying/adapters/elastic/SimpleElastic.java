@@ -1,16 +1,11 @@
-/**
- * 
- */
-package querying.adapters.simplePG;
+package querying.adapters.elastic;
 
+ 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
-import org.apache.commons.collections15.iterators.ArrayListIterator;
-
 import classes.AccessCall;
 import classes.ResourceItem;
 import classes.ResourceType;
@@ -40,11 +35,11 @@ import readers.SysdigObjectDAL;
  *         tabular data base
  *
  */
-public class SimplePGAdapter extends BaseAdapter {
+public class SimpleElastic extends BaseAdapter {
 
-	private static SimplePGAdapter _instance = null;
+	private static SimpleElastic _instance = null;
 
-	private SimplePGAdapter() {
+	private SimpleElastic() {
 		graphHelper = new GraphObjectHelper(false, "");
 	}
 
@@ -53,10 +48,10 @@ public class SimplePGAdapter extends BaseAdapter {
 	 * 
 	 * @return
 	 */
-	public static SimplePGAdapter getSignleton() {
+	public static SimpleElastic getSignleton() {
 
 		if (_instance == null)
-			_instance = new SimplePGAdapter();
+			_instance = new SimpleElastic();
 
 		return _instance;
 	}
