@@ -63,38 +63,17 @@ public class AsyncQueryRunner implements Runnable {
 		Graph<ResourceItem, AccessCall> theLocalGraph = null;
 
 		int graphItemsCount = 0;
-		GraphPanel theGraphWindow = null;
-		JFrame frame1 = null;// new JFrame();
-		try {
+			try {
 			ParsedQuery query = QueryInterpreter.interpret(command, theLocalGraph);
+			GraphPanel oldPanel = null;
+			
 			while (!stoped) {
 
 				theLocalGraph = queryMachine.runQuery(query);
 				if (theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount() > graphItemsCount) {
 
 					if (showWindow) {
-						GraphPanel oldPanel = theGraphWindow;
-						theGraphWindow = new GraphPanel(theLocalGraph, false);
-						theGraphWindow.setPrint(false);
-
-
-						if (frame1 == null) {
-							frame1 = new JFrame();
-							frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-							frame1.setSize(400, 400);
-
-							frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
-							frame1.setTitle("Autiomated Query ID:" + this.ID);
-						frame1.setVisible(true);
-						}
-						if (oldPanel != null)
-							frame1.remove(oldPanel);
-						
-						frame1.add(theGraphWindow);
-						theGraphWindow.vv.repaint();
-						frame1.repaint();	
-						frame1.pack();
-
+						oldPanel = this.pop_up_window(theLocalGraph, oldPanel);
 					}
 					graphItemsCount = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
 				}
@@ -104,8 +83,36 @@ public class AsyncQueryRunner implements Runnable {
 		} catch (Exception ex) {
 
 		}
-		// TODO Auto-generated method stub
+	}
+	
+//	TODO : create a method to pop up a window or set AI variables 
+	
+	private GraphPanel pop_up_window(Graph<ResourceItem, AccessCall> theLocalGraph, GraphPanel oldPanel) {
+		GraphPanel theGraphWindow = null;
+		JFrame frame1 = null;// new JFrame();
 
+		theGraphWindow = new GraphPanel(theLocalGraph, false);
+		theGraphWindow.setPrint(false);
+
+
+		if (frame1 == null) {
+			frame1 = new JFrame();
+			frame1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			frame1.setSize(400, 400);
+
+			frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			frame1.setTitle("Autiomated Query ID:" + this.ID);
+		frame1.setVisible(true);
+		}
+		if (oldPanel != null)
+			frame1.remove(oldPanel);
+		
+		frame1.add(theGraphWindow);
+		theGraphWindow.vv.repaint();
+		frame1.repaint();	
+		frame1.pack();
+
+		return theGraphWindow;
 	}
 
 }
