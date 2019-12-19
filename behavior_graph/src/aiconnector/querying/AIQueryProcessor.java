@@ -7,7 +7,6 @@ package aiconnector.querying;
 
 import classes.AccessCall;
 import classes.ResourceItem;
-import dataBaseStuff.GraphDBDal;
 import edu.uci.ics.jung.graph.Graph;
 import helpers.ColorHelpers;
 import querying.AsyncQueryRunner;
@@ -19,17 +18,13 @@ public class AIQueryProcessor implements Runnable {
 	Graph<ResourceItem, AccessCall> theGraph;
 	boolean ShowGraph;
 	boolean ShowVerbose;
-	String fileAdr;
-	GraphDBDal GraphActionFactory;
 
 	public AIQueryProcessor(boolean MemQuery, Long num_edges,
-			Long num_vertex, Graph<ResourceItem, AccessCall> theGraph, String fileAdr, GraphDBDal GraphActionFactory) {
+			Long num_vertex, Graph<ResourceItem, AccessCall> theGraph) {
 		
 		this.num_edges = num_edges;
 		this.num_vertex = num_vertex;
 		this.theGraph = theGraph;
-		this.fileAdr = fileAdr;
-		this.GraphActionFactory = GraphActionFactory;
 	}
 
 	public AIQueryProcessor() {
