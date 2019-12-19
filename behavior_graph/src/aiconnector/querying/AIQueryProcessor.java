@@ -62,8 +62,6 @@ public class AIQueryProcessor implements Runnable {
 				}
 
 			}
-
-			ColorHelpers.PrintGreen("\nGood Luck from SSFC Lab @UGA Team!\r\n");
 		}
 
 	}

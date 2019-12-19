@@ -25,13 +25,15 @@ import querying.QueryProcessor;
 import querying.tools.GraphObjectHelper;
 import readers.CSVReader;
 import readers.SysdigObjectDAL;
+import aiconnector.querying.*;
+import querying.adapters.memory.InMemoryAdapter;
 
 public class AIConnectorMain {
 
 	public AIConnectorMain() {
-		// 
+		//
 	}
-	
+
 	public static void main(String args[]) throws Exception {
 		Graph<ResourceItem, AccessCall> theGraph = new DirectedOrderedSparseMultigraph<ResourceItem, AccessCall>();
 		boolean ReadFromFile = false;
@@ -114,6 +116,8 @@ public class AIConnectorMain {
 			}
 		}
 
+		ReadStream = !ReadFromFile;
+
 		Configurations.getInstance().setSetting(Configurations.COMPRESSSION_LEVEL, String.valueOf(compression));
 		Configurations.getInstance().setSetting(Configurations.LEGACY_MODE, String.valueOf(LegacyMode));
 		Configurations.getInstance().setSetting(Configurations.SHADOW_INSERTER, String.valueOf(ShadowInsertion));
@@ -139,18 +143,12 @@ public class AIConnectorMain {
 		else
 			objectDAL = new SysdigObjectDAL(InShortFormat);
 
-		InputStreamReader isReader = new InputStreamReader(System.in);
-		BufferedReader bufReader = new BufferedReader(isReader);
-
 		GraphDBDal GraphActionFactory = new GraphDBDal();
 
 		GraphObjectHelper VerboseHelper = new GraphObjectHelper(true, pid);
 		GraphObjectHelper ClearHelper = new GraphObjectHelper(false, pid);
 
 		int counter = 0;
-		int inError = 0;
-		long counterr = 0;
-		int skipped = 0;
 
 		FileWriter output_file_writer = null;
 		if (SaveFormated || SaveJSON) {
@@ -158,123 +156,69 @@ public class AIConnectorMain {
 		}
 		Long num_edges = (long) theGraph.getEdgeCount();
 		Long num_vertex = (long) theGraph.getVertexCount();
-		QueryProcessor q_processor = new QueryProcessor(MemQuery, SimplePGQuery, SimpleNeo4JQuery, num_edges,
-				num_vertex, theGraph, ShowGraph, ShowVerbose, fileAdr, GraphActionFactory);
+		AIQueryProcessor q_processor = new AIQueryProcessor(MemQuery, num_edges, num_vertex, theGraph);
 
 		Thread queryThread = new Thread(q_processor);
 		queryThread.start();
 
-		if (ReadStream)
-			while (true) {
-
-				try {
-					String inputStr = null;
-					if ((inputStr = bufReader.readLine()) != null) {
-						// System.out.print("+");
-						counterr++;
-						if (counterr == 1 || counterr == 100000)
-							System.out.println(inputStr);
-						// if(true) continue;
-						SysdigRecordObject tempObj = objectDAL.GetObjectFromTextLine(inputStr);
-
-						/// if desired write the formated file
-						if (SaveFormated)
-							output_file_writer.write(tempObj.toString() + "\n");
-
-						if (Thread.currentThread().getId() == Long.parseLong(tempObj.thread_tid)) {
-							skipped++;
-							System.out.println(".");
-							continue;
-						}
-
-						if (SaveToDB)
-							objectDAL.Insert(tempObj);
-
-						if (SaveToGraph)
-							GraphActionFactory.Save(tempObj, Neo4JVerbose);
-
-						if (ShowVerbose) {
-							VerboseHelper.AddRowToGraph(theGraph, tempObj);
-						}
-						if (ShowGraph) {
-							ClearHelper.AddRowToGraph(theGraph, tempObj);
-						}
-					} else {
-						break;
-					}
-					counter++;
-					System.out.print("\033[H\033[2J");
-					System.out.print(String.format("%c[%d;%df Total : %d", 0x1B, 15, 25, counter));
-					System.out.print(String.format("%c[%d;%df With Error : %d %d", 0x1B, 16, 25, inError,
-							Thread.currentThread().getId()));
-					System.out.flush();
-
-				} catch (NumberFormatException ex) {
-					inError++;
-				} catch (Exception e) {
-					System.out.println("Error");
-				}
-			}
-		// if json is desired, create the array
-		// if (SaveJSON)
-		// output_file_writer.write("[\n");
 		Instant start2 = Instant.now();
 		Runtime runtime = Runtime.getRuntime();
 		int cleaner_ctr = 0;
 
-		if (ReadFromFile) {
-			try {
+		try {
+			Scanner test = null;
+			if (ReadFromFile) {
+				test = new Scanner(new File(fileAdr));
 				System.out.println("in read File");
-				Scanner test = new Scanner(new File(fileAdr));
-				// int counter = 0;
-				GraphDBDal db = new GraphDBDal();
-				String multipleRecords = "";
+			} else {
+				test = new Scanner(System.in);
+				System.out.println("in read stream");
+			}
 
-				while (test.hasNextLine()) {
+			GraphDBDal db = new GraphDBDal();
+			String multipleRecords = "";
+
+			while (test.hasNextLine()) {
+				try {
+
+					SysdigRecordObject tempObj;
 					try {
-						SysdigRecordObject tempObj;
-						try {
-							int theL = multipleRecords.length();
+						int theL = multipleRecords.length();
 
-							multipleRecords += test.nextLine();
-							tempObj = objectDAL.GetObjectFromTextLine(multipleRecords);
+						multipleRecords += test.nextLine();
+						tempObj = objectDAL.GetObjectFromTextLine(multipleRecords);
 
-							if (SaveFormated)
-								output_file_writer.write(tempObj.toString() + "\n");
-							if (SaveJSON)
-								output_file_writer
-										.write("{\"index\":{\"_index\":\"test\"}}\n" + tempObj.toJSONString() + "\n");
-							if (theL > 1)
-								System.out.println("---------------------------------------------");
-						} catch (LowFieldNumberException ex) {
-							System.out.println(multipleRecords);
-							continue;
-						} catch (HighFieldNumberException ex) {
-							multipleRecords = "";
-							continue;
-						}
-
-						// set computer id
-						tempObj.Computer_id = Configurations.getInstance().getSetting(Configurations.COMPUTER_ID);
-
+						if (theL > 1)
+							System.out.println("---------------------------------------------");
+					} catch (LowFieldNumberException ex) {
+						System.out.println(multipleRecords);
+						continue;
+					} catch (HighFieldNumberException ex) {
 						multipleRecords = "";
+						continue;
+					}
 
-						counter++;
+					// set computer id
+					tempObj.Computer_id = Configurations.getInstance().getSetting(Configurations.COMPUTER_ID);
 
-						if (SaveToDB)
-							objectDAL.Insert(tempObj);
+					multipleRecords = "";
 
-						if (SaveToGraph) {
-							GraphActionFactory.Save(tempObj, Neo4JVerbose);
-						}
-						if (ShowVerbose) {
-							VerboseHelper.AddRowToGraph(theGraph, tempObj);
-						}
-						if (ShowGraph) {
-							ClearHelper.AddRowToGraph(theGraph, tempObj);
-						}
+					counter++;
 
-						if (counter % 10000 == 0) {
+					if (SaveToDB)
+						objectDAL.Insert(tempObj);
+
+					if (SaveToGraph) {
+						GraphActionFactory.Save(tempObj, Neo4JVerbose);
+					}
+					if (ShowVerbose) {
+						VerboseHelper.AddRowToGraph(theGraph, tempObj);
+					}
+					if (ShowGraph) {
+						ClearHelper.AddRowToGraph(theGraph, tempObj);
+					}
+
+					if (counter % 10000 == 0) {
 
 //							if (MemQuery) {
 //								InMemoryAdapter mem = InMemoryAdapter.getSignleton();
@@ -288,48 +232,43 @@ public class AIConnectorMain {
 
 //							System.out.println(counter + "(Q :" + ShadowDBInserter.getInstance().getQueLenght() + ")");
 
-							if (counter % 500000 == 0) {
-//								System.out.println(String.format("\nA:remaining mem: %f - e:%d n:%d ",
-//										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
-//										theGraph.getEdgeCount(), theGraph.getVertexCount()));
-//
-//								while (runtime.freeMemory() <= runtime.totalMemory() * 0.20) {
-//									System.out.print("+");
-//									// memory is too full, purge some records out then flush GC
-//									InMemoryAdapter.getSignleton().purge(2000, theGraph);
-//									System.gc();
+						if (counter % 500000 == 0) {
+
+							while (runtime.freeMemory() <= runtime.totalMemory() * 0.20) {
+								System.out.print("+");
+								// memory is too full, purge some records out then flush GC
+								InMemoryAdapter.getSignleton().purge(2000, theGraph);
+								System.gc();
+							}
+
+//								if (true) {
+//									// runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
+//									cleaner_ctr++;
+////									System.out.print("*");
+//									Thread t1 = new Thread(new Runnable() {
+//										@Override
+//										public void run() {
+//											System.gc();
+//										}
+//									});
+//									t1.start();
 //								}
 
-								if (true) {// runtime.freeMemory() <= runtime.totalMemory() * 0.30) {
-									cleaner_ctr++;
-//									System.out.print("*");
-									Thread t1 = new Thread(new Runnable() {
-										@Override
-										public void run() {
-											System.gc();
-										}
-									});
-									t1.start();
-								}
-//								System.out.println(String.format("\nB:remaining mem: %f - e:%d n:%d ",
-//										((runtime.freeMemory() * 1.0) / runtime.totalMemory()) * 100,
-//										theGraph.getEdgeCount(), theGraph.getVertexCount()));
-
-							}
 						}
-
-					} catch (Exception ex) {
-						ColorHelpers.PrintRed("\nError Happened: " + ex.getMessage() + "\n");
-						throw ex;
 					}
 
+				} catch (Exception ex) {
+					ColorHelpers.PrintRed("\nError Happened: " + ex.getMessage() + "\n");
+					throw ex;
 				}
-				test.close();
-				db.closeConnections();
-			} catch (Exception ex) {
-				ex.printStackTrace();
+
 			}
+			test.close();
+			db.closeConnections();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
+
 		objectDAL.flushRows();
 
 		Instant end2 = Instant.now();
@@ -356,7 +295,4 @@ public class AIConnectorMain {
 
 	}
 
-
 }
-
-
