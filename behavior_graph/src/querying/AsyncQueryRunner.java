@@ -5,6 +5,7 @@ package querying;
 
 import javax.swing.JFrame;
 
+import aiconnector.AIConnectorMemory;
 import classes.AccessCall;
 import classes.ResourceItem;
 import edu.uci.ics.jung.graph.Graph;
@@ -24,6 +25,7 @@ public class AsyncQueryRunner implements Runnable {
 	private boolean stoped = false;
 	private boolean showWindow = false;
 	private boolean describe = false;
+	private boolean set_AIConector = false;
 
 	/**
 	 * 
@@ -34,17 +36,38 @@ public class AsyncQueryRunner implements Runnable {
 		showWindow = false;
 	}
 
+	/**
+	 * creates an instance of the asynx query runner
+	 * @param ID query ID
+	 * @param command command to run
+	 * @param showWindow wether to show a window with the updated graph when change happens 
+	 */
 	public AsyncQueryRunner(int ID, String command, boolean showWindow) {
 		this.ID = ID;
 		this.command = command;
 		this.showWindow = showWindow;
 	}
 
+	/**
+	 * creates an instance of the asynx query runner
+	 * @param ID query ID
+	 * @param command command to run
+	 * @param showWindow wether to show a window with the updated graph when change happens 
+	 * @param describe
+	 */
 	public AsyncQueryRunner(int ID, String command, boolean showWindow, boolean describe) {
 		this.ID = ID;
 		this.command = command;
 		this.showWindow = showWindow;
 		this.describe = describe;
+	}
+
+	/**
+	 * sets weather the changes should be set to the AI connector module
+	 * @param value
+	 */
+	public void setAIConnector(boolean value) {
+		this.set_AIConector = value;
 	}
 
 	public void stop() {
@@ -63,10 +86,10 @@ public class AsyncQueryRunner implements Runnable {
 		Graph<ResourceItem, AccessCall> theLocalGraph = null;
 
 		int graphItemsCount = 0;
-			try {
+		try {
 			ParsedQuery query = QueryInterpreter.interpret(command, theLocalGraph);
 			GraphPanel oldPanel = null;
-			
+
 			while (!stoped) {
 
 				theLocalGraph = queryMachine.runQuery(query);
@@ -74,6 +97,8 @@ public class AsyncQueryRunner implements Runnable {
 
 					if (showWindow) {
 						oldPanel = this.pop_up_window(theLocalGraph, oldPanel);
+					} else {
+						this.set_AI_conenctor_observation();
 					}
 					graphItemsCount = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
 				}
@@ -84,16 +109,13 @@ public class AsyncQueryRunner implements Runnable {
 
 		}
 	}
-	
-//	TODO : create a method to pop up a window or set AI variables 
-	
+
 	private GraphPanel pop_up_window(Graph<ResourceItem, AccessCall> theLocalGraph, GraphPanel oldPanel) {
 		GraphPanel theGraphWindow = null;
 		JFrame frame1 = null;// new JFrame();
 
 		theGraphWindow = new GraphPanel(theLocalGraph, false);
 		theGraphWindow.setPrint(false);
-
 
 		if (frame1 == null) {
 			frame1 = new JFrame();
@@ -102,17 +124,22 @@ public class AsyncQueryRunner implements Runnable {
 
 			frame1.setExtendedState(JFrame.MAXIMIZED_BOTH);
 			frame1.setTitle("Autiomated Query ID:" + this.ID);
-		frame1.setVisible(true);
+			frame1.setVisible(true);
 		}
 		if (oldPanel != null)
 			frame1.remove(oldPanel);
-		
+
 		frame1.add(theGraphWindow);
 		theGraphWindow.vv.repaint();
-		frame1.repaint();	
+		frame1.repaint();
 		frame1.pack();
 
 		return theGraphWindow;
+	}
+
+	private void set_AI_conenctor_observation() {
+		AIConnectorMemory aim = AIConnectorMemory.getInstance();
+		aim.setStateForObservation(this.ID, true);
 	}
 
 }
