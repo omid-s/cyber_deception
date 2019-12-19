@@ -5,6 +5,8 @@
  */
 package aiconnector.querying;
 
+import org.junit.experimental.theories.Theories;
+
 import classes.AccessCall;
 import classes.ResourceItem;
 import edu.uci.ics.jung.graph.Graph;
@@ -36,21 +38,22 @@ public class AIQueryProcessor implements Runnable {
 
 		Integer asyncID = 0;
 
-		String[] commands = { "back select * from * where name has nano", "back select * from * where name has uname" };
+		String[] commands = { "back select * from * where name has .txt ", "back select * from * where name has uname ", "back select * from * where name has groups ",  "back select * from * where name has .log "  };
 
 		for (String command : commands) {
 			{
 
 				try {
 
-					AsyncQueryRunner asqr = new AsyncQueryRunner(asyncID, command, true);
+					AsyncQueryRunner asqr = new AsyncQueryRunner(asyncID, command, false);
 					asqr.setAIConnector(true);
 
 					Thread T = new Thread(asqr);
-					System.out.println("Async query started with id :  " + asyncID);
+					T.start();
+					System.out.println("Async query started with id :  " + asyncID + " -- "+ command);
 					asyncID += 1;
 
-					T.start();
+					Thread.sleep(1300);
 
 				} catch (Exception ex) {
 

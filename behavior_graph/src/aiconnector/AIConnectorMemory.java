@@ -44,6 +44,7 @@ public class AIConnectorMemory {
 	 */
 	public void setStateForObservation(int observationID, boolean state) {
 		this.states_map.put(observationID, state);
+		System.out.println( String.format( "%d --> %d", observationID, state? 1 : 0 ));
 	}
 	
 	/***

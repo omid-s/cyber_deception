@@ -38,9 +38,11 @@ public class AsyncQueryRunner implements Runnable {
 
 	/**
 	 * creates an instance of the asynx query runner
-	 * @param ID query ID
-	 * @param command command to run
-	 * @param showWindow wether to show a window with the updated graph when change happens 
+	 * 
+	 * @param ID         query ID
+	 * @param command    command to run
+	 * @param showWindow wether to show a window with the updated graph when change
+	 *                   happens
 	 */
 	public AsyncQueryRunner(int ID, String command, boolean showWindow) {
 		this.ID = ID;
@@ -50,9 +52,11 @@ public class AsyncQueryRunner implements Runnable {
 
 	/**
 	 * creates an instance of the asynx query runner
-	 * @param ID query ID
-	 * @param command command to run
-	 * @param showWindow wether to show a window with the updated graph when change happens 
+	 * 
+	 * @param ID         query ID
+	 * @param command    command to run
+	 * @param showWindow wether to show a window with the updated graph when change
+	 *                   happens
 	 * @param describe
 	 */
 	public AsyncQueryRunner(int ID, String command, boolean showWindow, boolean describe) {
@@ -64,6 +68,7 @@ public class AsyncQueryRunner implements Runnable {
 
 	/**
 	 * sets weather the changes should be set to the AI connector module
+	 * 
 	 * @param value
 	 */
 	public void setAIConnector(boolean value) {
@@ -93,11 +98,14 @@ public class AsyncQueryRunner implements Runnable {
 			while (!stoped) {
 
 				theLocalGraph = queryMachine.runQuery(query);
-				if (theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount() > graphItemsCount) {
+				int count = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
+				if (count > graphItemsCount) {
 
 					if (showWindow) {
 						oldPanel = this.pop_up_window(theLocalGraph, oldPanel);
-					} else {
+					}
+
+					if (set_AIConector) {
 						this.set_AI_conenctor_observation();
 					}
 					graphItemsCount = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
@@ -106,7 +114,7 @@ public class AsyncQueryRunner implements Runnable {
 			}
 
 		} catch (Exception ex) {
-
+			ex.printStackTrace();
 		}
 	}
 
@@ -138,6 +146,7 @@ public class AsyncQueryRunner implements Runnable {
 	}
 
 	private void set_AI_conenctor_observation() {
+		System.out.print(this.command);
 		AIConnectorMemory aim = AIConnectorMemory.getInstance();
 		aim.setStateForObservation(this.ID, true);
 	}
