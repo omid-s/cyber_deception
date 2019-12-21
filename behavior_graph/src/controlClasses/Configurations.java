@@ -23,12 +23,16 @@ public class Configurations {
 
 	private HashMap<String, String> settings;
 
+	private HashMap<Integer, String> queries;
+
 	/***
 	 * initialize the object with either default values or the settings read form
 	 * file
 	 */
 	private Configurations() {
 		settings = new HashMap<String, String>();
+
+		queries = new HashMap<Integer, String>();
 
 		File configFile = new File(fileName);
 
@@ -42,7 +46,10 @@ public class Configurations {
 												// with a # )
 						continue;
 
-					settings.put(line.split("=")[0], line.substring(line.indexOf("=") + 1));
+					if (line.split("=")[0].equals("query")) // process the AI connector query lines separetly
+						this.parse_query_line(line);
+					else
+						settings.put(line.split("=")[0], line.substring(line.indexOf("=") + 1));
 				}
 				reader.close();
 			} catch (Exception x) {
@@ -58,6 +65,18 @@ public class Configurations {
 				helpers.ColorHelpers.PrintRed("Error creating config file!");
 			}
 		}
+	}
+
+	/**
+	 * Parses the query lines for the AI connector module
+	 * 
+	 * @param line
+	 */
+	private void parse_query_line(String line) {
+		Integer key = Integer.parseInt(line.split("=")[1]);
+		String query = line.split("=")[2]+ " ";
+
+		this.queries.put(key, query);
 	}
 
 	/**
@@ -220,5 +239,9 @@ public class Configurations {
 	public static final String DRIVER_FLUSH = "driver_flush";
 	public static final String EVAL_CLEAR_DB = "eval_clear_db";
 	public static final String COMPUTER_ID = "computer_id";
+
+	// AI conector settings -- these settings do not go in the default config file
+	public static final String AI_CONNECTOR_IP = "ai_connector_ip";
+	public static final String AI_CONNECTOR_PORT = "ai_connector_port";
 
 }
