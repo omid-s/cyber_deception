@@ -5,14 +5,16 @@
  */
 package aiconnector.querying;
 
+import java.util.HashMap;
+
 import org.junit.experimental.theories.Theories;
 
 import classes.AccessCall;
 import classes.ResourceItem;
+import controlClasses.Configurations;
 import edu.uci.ics.jung.graph.Graph;
 import helpers.ColorHelpers;
 import querying.AsyncQueryRunner;
-
 
 public class AIQueryProcessor implements Runnable {
 
@@ -21,9 +23,9 @@ public class AIQueryProcessor implements Runnable {
 	boolean ShowGraph;
 	boolean ShowVerbose;
 
-	public AIQueryProcessor(boolean MemQuery, Long num_edges,
-			Long num_vertex, Graph<ResourceItem, AccessCall> theGraph) {
-		
+	public AIQueryProcessor(boolean MemQuery, Long num_edges, Long num_vertex,
+			Graph<ResourceItem, AccessCall> theGraph) {
+
 		this.num_edges = num_edges;
 		this.num_vertex = num_vertex;
 		this.theGraph = theGraph;
@@ -36,22 +38,20 @@ public class AIQueryProcessor implements Runnable {
 	@Override
 	public void run() {
 
-		Integer asyncID = 0;
+		HashMap<Integer, String> queries = Configurations.getInstance().getQueries();
 
-		String[] commands = { "back select * from * where name has .txt ", "back select * from * where name has uname ", "back select * from * where name has groups ",  "back select * from * where name has .log "  };
-
-		for (String command : commands) {
+		for (Integer query_id : queries.keySet()) {
 			{
+				String command = queries.get(query_id);
 
 				try {
 
-					AsyncQueryRunner asqr = new AsyncQueryRunner(asyncID, command, false);
+					AsyncQueryRunner asqr = new AsyncQueryRunner(query_id, command, false);
 					asqr.setAIConnector(true);
 
 					Thread T = new Thread(asqr);
 					T.start();
-					System.out.println("Async query started with id :  " + asyncID + " -- "+ command);
-					asyncID += 1;
+					System.out.println("Async query started with id :  " + query_id + " -- " + command);
 
 					Thread.sleep(1300);
 
