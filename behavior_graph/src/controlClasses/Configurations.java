@@ -74,14 +74,23 @@ public class Configurations {
 	 */
 	private void parse_query_line(String line) {
 		Integer key = Integer.parseInt(line.split("=")[1]);
-		String query = line.split("=")[2]+ " ";
+		String query = line.split("=")[2] + " ";
 
 		this.queries.put(key, query);
 	}
 
 	/**
-	 * Stores settings into the settign file This can be called when program is
-	 * runnig to set values for program settings
+	 * returns the queries read from the config file
+	 * 
+	 * @return
+	 */
+	public HashMap<Integer, String> getQueries() {
+		return this.queries;
+	}
+
+	/**
+	 * Stores settings into the setting file This can be called when program is
+	 * running to set values for program settings
 	 * 
 	 * @throws IOException
 	 */
