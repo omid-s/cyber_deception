@@ -25,6 +25,7 @@ import querying.QueryProcessor;
 import querying.tools.GraphObjectHelper;
 import readers.CSVReader;
 import readers.SysdigObjectDAL;
+import aiconnector.AIConnectorGraalfAgent;
 import aiconnector.querying.*;
 import querying.adapters.memory.InMemoryAdapter;
 
@@ -161,6 +162,11 @@ public class AIConnectorMain {
 		Thread queryThread = new Thread(q_processor);
 		queryThread.start();
 
+		
+		AIConnectorGraalfAgent agent = new AIConnectorGraalfAgent();
+		Thread agent_thread = new Thread(agent);
+		agent_thread.start();
+		
 		Instant start2 = Instant.now();
 		Runtime runtime = Runtime.getRuntime();
 		int cleaner_ctr = 0;

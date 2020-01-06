@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import org.junit.experimental.theories.Theories;
 
+import aiconnector.AIConnectorMemory;
 import classes.AccessCall;
 import classes.ResourceItem;
 import controlClasses.Configurations;
@@ -46,6 +47,7 @@ public class AIQueryProcessor implements Runnable {
 
 				try {
 
+					AIConnectorMemory.getInstance().setStateForObservation(query_id,false);
 					AsyncQueryRunner asqr = new AsyncQueryRunner(query_id, command + " ", false);
 					asqr.setAIConnector(true);
 
