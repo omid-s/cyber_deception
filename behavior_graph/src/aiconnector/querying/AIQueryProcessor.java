@@ -46,7 +46,7 @@ public class AIQueryProcessor implements Runnable {
 
 				try {
 
-					AsyncQueryRunner asqr = new AsyncQueryRunner(query_id, command, false);
+					AsyncQueryRunner asqr = new AsyncQueryRunner(query_id, command + " ", false);
 					asqr.setAIConnector(true);
 
 					Thread T = new Thread(asqr);

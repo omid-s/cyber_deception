@@ -96,9 +96,9 @@ public class AsyncQueryRunner implements Runnable {
 			GraphPanel oldPanel = null;
 
 			while (!stoped) {
-
 				theLocalGraph = queryMachine.runQuery(query);
 				int count = theLocalGraph.getEdgeCount() + theLocalGraph.getVertexCount();
+
 				if (count > graphItemsCount) {
 
 					if (showWindow) {
