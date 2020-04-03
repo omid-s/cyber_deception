@@ -6,6 +6,7 @@ import java.net.*;
 import org.junit.experimental.theories.Theories;
 
 import java.io.*;
+import querying.adapters.memory.InMemoryAdapter;
 
 public class AIConnectorGraalfAgent implements Runnable {
 
@@ -25,13 +26,18 @@ public class AIConnectorGraalfAgent implements Runnable {
 			PrintWriter the_printer = new PrintWriter(the_socket.getOutputStream(), true);
 			Thread.sleep(12000);
 			String last_str = "";
+			String null_observation = AIConnectorMemory.getInstance().getObservationString();
+			the_printer.println(null_observation);
 			while (true) {
 				String str_to_Send = AIConnectorMemory.getInstance().getObservationString();
-				if (str_to_Send.equals(last_str))
+				if ( str_to_Send.equals(null_observation))
+					//if (str_to_Send.equals(last_str) || str_to_Send.equals(null_observation))
 					continue;
 
 				the_printer.println(str_to_Send);
 				last_str = str_to_Send;
+				//InMemoryAdapter.getSignleton().ClearAll();
+				AIConnectorMemory.getInstance().resetObservations();
 				Thread.sleep(2000);
 			}
 
